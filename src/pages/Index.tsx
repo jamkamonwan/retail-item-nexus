@@ -1,7 +1,7 @@
-import { NPDForm } from '@/components/npd/NPDForm';
+import { WorkflowApp } from '@/components/npd/WorkflowApp';
 
 const Index = () => {
-  return <NPDForm />;
+  return <WorkflowApp />;
 };
 
 export default Index;

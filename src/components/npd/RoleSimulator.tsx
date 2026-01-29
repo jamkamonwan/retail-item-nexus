@@ -31,97 +31,48 @@ const EXTERNAL_ROLES: UserType[] = ['supplier'];
 const INTERNAL_ROLES: UserType[] = ['buyer', 'commercial', 'finance', 'scm', 'im', 'dc_income'];
 
 export function RoleSimulator({ selectedRole, onRoleChange }: RoleSimulatorProps) {
-  const isExternal = selectedRole === 'supplier';
   const currentUserType = selectedRole ? USER_TYPES[selectedRole] : null;
 
   return (
-    <div className="p-4 rounded-xl border border-border bg-card">
-      <div className="flex items-center gap-3 mb-3">
-        <div className="p-2 rounded-full bg-muted">
-          <Shield className="w-4 h-4 text-muted-foreground" />
-        </div>
-        <div className="text-sm text-muted-foreground">
-          Role detected by system
-        </div>
-      </div>
-
-      {selectedRole && currentUserType ? (
-        <div className={cn(
-          'flex items-center gap-3 p-4 rounded-lg border-2 mb-3',
-          isExternal
-            ? 'border-accent bg-accent/5'
-            : 'border-primary bg-primary/5'
-        )}>
-          <div className={cn(
-            'p-2.5 rounded-full',
-            isExternal
-              ? 'bg-accent text-accent-foreground'
-              : 'bg-primary text-primary-foreground'
-          )}>
-            {USER_TYPE_ICONS[selectedRole]}
-          </div>
-          <div className="flex-1">
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm" className="h-8 gap-2">
+          {selectedRole && USER_TYPE_ICONS[selectedRole]}
+          <span className="font-medium">
+            {currentUserType?.label || 'Select Role'}
+          </span>
+          <ChevronDown className="w-3 h-3" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel className="text-xs text-muted-foreground">External</DropdownMenuLabel>
+        {EXTERNAL_ROLES.map((role) => (
+          <DropdownMenuItem
+            key={role}
+            onClick={() => onRoleChange(role)}
+            className={cn(selectedRole === role && 'bg-accent/10')}
+          >
             <div className="flex items-center gap-2">
-              <p className="font-semibold text-foreground">
-                {currentUserType.label}
-              </p>
-              <Badge variant={isExternal ? "secondary" : "default"} className="text-xs">
-                {isExternal ? 'External' : 'Internal'}
-              </Badge>
+              {USER_TYPE_ICONS[role]}
+              <span>{USER_TYPES[role].label}</span>
             </div>
-            <p className="text-sm text-muted-foreground">
-              {currentUserType.description}
-            </p>
-          </div>
-        </div>
-      ) : (
-        <div className="p-4 rounded-lg border-2 border-dashed border-muted mb-3">
-          <p className="text-sm text-muted-foreground text-center">
-            Select a role to simulate
-          </p>
-        </div>
-      )}
-
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-muted-foreground italic">Demo Mode:</span>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8 text-xs">
-              Simulate Role
-              <ChevronDown className="w-3 h-3 ml-1" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56">
-            <DropdownMenuLabel className="text-xs text-muted-foreground">External</DropdownMenuLabel>
-            {EXTERNAL_ROLES.map((role) => (
-              <DropdownMenuItem
-                key={role}
-                onClick={() => onRoleChange(role)}
-                className={cn(selectedRole === role && 'bg-accent/10')}
-              >
-                <div className="flex items-center gap-2">
-                  {USER_TYPE_ICONS[role]}
-                  <span>{USER_TYPES[role].label}</span>
-                </div>
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
-            <DropdownMenuLabel className="text-xs text-muted-foreground">Internal</DropdownMenuLabel>
-            {INTERNAL_ROLES.map((role) => (
-              <DropdownMenuItem
-                key={role}
-                onClick={() => onRoleChange(role)}
-                className={cn(selectedRole === role && 'bg-primary/10')}
-              >
-                <div className="flex items-center gap-2">
-                  {USER_TYPE_ICONS[role]}
-                  <span>{USER_TYPES[role].label}</span>
-                </div>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </div>
+          </DropdownMenuItem>
+        ))}
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel className="text-xs text-muted-foreground">Internal</DropdownMenuLabel>
+        {INTERNAL_ROLES.map((role) => (
+          <DropdownMenuItem
+            key={role}
+            onClick={() => onRoleChange(role)}
+            className={cn(selectedRole === role && 'bg-primary/10')}
+          >
+            <div className="flex items-center gap-2">
+              {USER_TYPE_ICONS[role]}
+              <span>{USER_TYPES[role].label}</span>
+            </div>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
