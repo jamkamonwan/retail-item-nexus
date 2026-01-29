@@ -1,16 +1,16 @@
 import { useState, useMemo } from 'react';
 import { Division, UserType, FormSection, FORM_SECTIONS, DIVISIONS, ChannelType } from '@/types/npd';
-import { getFieldsForContext, getFieldsBySection } from '@/data/npd-fields';
+import { getFieldsForContext } from '@/data/npd-fields';
 import { DivisionSelector } from './DivisionSelector';
-import { UserTypeSelector } from './UserTypeSelector';
+import { RoleSimulator } from './RoleSimulator';
 import { ProgressStepper } from './ProgressStepper';
 import { FormSectionComponent } from './FormSection';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, ArrowRight, Save, Send, FileDown, RotateCcw, Globe, Monitor } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Save, Send, FileDown, RotateCcw, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 
 // Form steps
 const FORM_STEPS: FormSection[] = [
@@ -28,7 +28,8 @@ export function NPDForm() {
   const [setupComplete, setSetupComplete] = useState(false);
   const [selectedDivision, setSelectedDivision] = useState<Division | null>(null);
   const [selectedUserType, setSelectedUserType] = useState<UserType | null>(null);
-  const [channel, setChannel] = useState<ChannelType>('both');
+  // Channel defaults to 'both' since items can be sold online and offline
+  const channel: ChannelType = 'both';
 
   // Form State
   const [currentStep, setCurrentStep] = useState(0);
@@ -144,7 +145,6 @@ export function NPDForm() {
     setSetupComplete(false);
     setSelectedDivision(null);
     setSelectedUserType(null);
-    setChannel('both');
     handleReset();
   };
 
@@ -187,7 +187,7 @@ export function NPDForm() {
             </CardContent>
           </Card>
 
-          {/* Step 2: User Type Selection */}
+          {/* Step 2: Role Detection (Simulated) */}
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -197,55 +197,30 @@ export function NPDForm() {
                 )}>
                   2
                 </span>
-                Select Your Role
+                Your Role
               </CardTitle>
               <CardDescription>
-                เลือกบทบาทของท่านในการกรอกข้อมูล
+                ระบบจะตรวจสอบบทบาทของท่านโดยอัตโนมัติ
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <UserTypeSelector
-                selected={selectedUserType}
-                onSelect={setSelectedUserType}
-                isExternal={selectedUserType === 'supplier'}
+              <RoleSimulator
+                selectedRole={selectedUserType}
+                onRoleChange={setSelectedUserType}
               />
             </CardContent>
           </Card>
 
-          {/* Step 3: Channel Selection */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <span className={cn(
-                  'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold',
-                  selectedUserType ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                )}>
-                  3
-                </span>
-                Select Channel
-              </CardTitle>
-              <CardDescription>
-                เลือกช่องทางการขาย
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs value={channel} onValueChange={(v) => setChannel(v as ChannelType)} className="w-full">
-                <TabsList className="grid w-full grid-cols-3 bg-muted">
-                  <TabsTrigger value="online" className="flex items-center gap-2 data-[state=active]:bg-card">
-                    <Globe className="w-4 h-4" />
-                    Online
-                  </TabsTrigger>
-                  <TabsTrigger value="offline" className="flex items-center gap-2 data-[state=active]:bg-card">
-                    <Monitor className="w-4 h-4" />
-                    Offline
-                  </TabsTrigger>
-                  <TabsTrigger value="both" className="flex items-center gap-2 data-[state=active]:bg-card">
-                    Both
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </CardContent>
-          </Card>
+          {/* Channel Info Banner */}
+          <div className="mb-8 p-4 rounded-xl border border-border bg-muted/30 flex items-start gap-3">
+            <Info className="w-5 h-5 text-muted-foreground mt-0.5" />
+            <div>
+              <p className="font-medium text-foreground">Channel: Online & Offline</p>
+              <p className="text-sm text-muted-foreground">
+                สินค้าจะถูกจำหน่ายทั้งช่องทางออนไลน์และออฟไลน์ ข้อมูลที่ต้องกรอกจะครอบคลุมทั้งสองช่องทาง
+              </p>
+            </div>
+          </div>
 
           {/* Start Button */}
           <div className="flex justify-center">
@@ -278,11 +253,11 @@ export function NPDForm() {
               </Button>
               <div className="h-6 w-px bg-border" />
               <div className="flex items-center gap-2">
-                <span className={cn('division-badge', DIVISIONS[selectedDivision!].color)}>
+                <Badge className={cn('division-badge', DIVISIONS[selectedDivision!].color)}>
                   {DIVISIONS[selectedDivision!].label}
-                </span>
+                </Badge>
                 <span className="text-sm text-muted-foreground">
-                  {selectedUserType?.toUpperCase()} • {channel.toUpperCase()}
+                  {selectedUserType?.toUpperCase()} • Online & Offline
                 </span>
               </div>
             </div>
