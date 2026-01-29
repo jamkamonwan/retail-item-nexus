@@ -1,0 +1,97 @@
+import { NPDFormField, FormSection as FormSectionType, FORM_SECTIONS } from '@/types/npd';
+import { FormField } from './FormField';
+import { cn } from '@/lib/utils';
+
+interface FormSectionProps {
+  section: FormSectionType;
+  fields: NPDFormField[];
+  values: Record<string, string | number | File | null>;
+  errors: Record<string, string>;
+  onChange: (fieldId: string, value: string | number | File | null) => void;
+}
+
+export function FormSectionComponent({ section, fields, values, errors, onChange }: FormSectionProps) {
+  const sectionInfo = FORM_SECTIONS[section];
+  
+  // Group fields by requirement
+  const mandatoryFields = fields.filter(f => f.requirement === 'mandatory');
+  const conditionalFields = fields.filter(f => f.requirement === 'conditional');
+  const optionalFields = fields.filter(f => f.requirement === 'optional');
+
+  const renderFieldGroup = (groupFields: NPDFormField[], title?: string, className?: string) => {
+    if (groupFields.length === 0) return null;
+    
+    return (
+      <div className={cn('space-y-4', className)}>
+        {title && (
+          <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+            {title}
+          </h4>
+        )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {groupFields.map((field) => (
+            <div
+              key={field.id}
+              className={cn(
+                field.inputType === 'textarea' && 'md:col-span-2',
+                field.inputType === 'file' && 'md:col-span-1'
+              )}
+            >
+              <FormField
+                field={field}
+                value={values[field.id] || null}
+                onChange={(value) => onChange(field.id, value)}
+                error={errors[field.id]}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Section Header */}
+      <div className="border-b border-border pb-4">
+        <h2 className="text-xl font-semibold text-primary">
+          {sectionInfo.title}
+        </h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          {sectionInfo.titleTh}
+        </p>
+      </div>
+
+      {/* Field Legend */}
+      <div className="flex flex-wrap gap-4 text-sm">
+        <div className="flex items-center gap-2">
+          <span className="text-destructive font-bold">*</span>
+          <span className="text-muted-foreground">Mandatory</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-warning font-bold">◇</span>
+          <span className="text-muted-foreground">Conditional</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground">○</span>
+          <span className="text-muted-foreground">Optional</span>
+        </div>
+      </div>
+
+      {/* Mandatory Fields */}
+      {renderFieldGroup(mandatoryFields, 'Required Fields', 'bg-card p-6 rounded-lg border')}
+
+      {/* Conditional Fields */}
+      {renderFieldGroup(conditionalFields, 'Conditional Fields', 'bg-warning/5 p-6 rounded-lg border border-warning/20')}
+
+      {/* Optional Fields */}
+      {renderFieldGroup(optionalFields, 'Optional Fields', 'bg-muted/30 p-6 rounded-lg border')}
+
+      {fields.length === 0 && (
+        <div className="text-center py-12 text-muted-foreground">
+          <p>No fields to display for this section based on your selection.</p>
+        </div>
+      )}
+    </div>
+  );
+}

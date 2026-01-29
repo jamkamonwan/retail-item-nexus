@@ -2,95 +2,137 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+@import '@fontsource/ibm-plex-sans/400.css';
+@import '@fontsource/ibm-plex-sans/500.css';
+@import '@fontsource/ibm-plex-sans/600.css';
+@import '@fontsource/ibm-plex-sans/700.css';
+
+/* NPD Retail Design System - Enterprise Grade */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Core Background & Text */
+    --background: 210 20% 98%;
+    --foreground: 215 25% 15%;
 
+    /* Cards & Surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 215 25% 15%;
 
+    /* Popovers */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 215 25% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary - Deep Navy Blue */
+    --primary: 213 55% 25%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary - Warm Slate */
+    --secondary: 210 14% 93%;
+    --secondary-foreground: 215 25% 25%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted - Soft backgrounds */
+    --muted: 210 14% 96%;
+    --muted-foreground: 215 14% 46%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent - Coral/Orange for CTAs */
+    --accent: 18 80% 58%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Destructive */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Success - For validation */
+    --success: 142 72% 38%;
+    --success-foreground: 0 0% 100%;
+
+    /* Warning - For optional/pending */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 10%;
+
+    /* Info */
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+
+    /* Borders & Inputs */
+    --border: 214 20% 88%;
+    --input: 214 20% 88%;
+    --ring: 213 55% 25%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Division Colors */
+    --division-df: 34 80% 50%;
+    --division-nf: 280 60% 50%;
+    --division-ff: 142 60% 45%;
+    --division-sl: 340 70% 55%;
+    --division-hl: 210 80% 50%;
+    --division-hol: 170 60% 45%;
+    --division-ph: 0 70% 50%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Sidebar */
+    --sidebar-background: 213 55% 20%;
+    --sidebar-foreground: 210 20% 95%;
+    --sidebar-primary: 18 80% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 213 55% 30%;
+    --sidebar-accent-foreground: 210 20% 95%;
+    --sidebar-border: 213 50% 25%;
+    --sidebar-ring: 18 80% 58%;
 
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Form Specific */
+    --field-mandatory: 213 55% 25%;
+    --field-optional: 215 14% 46%;
+    --field-conditional: 38 92% 50%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 215 25% 9%;
+    --foreground: 210 20% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 215 25% 12%;
+    --card-foreground: 210 20% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 215 25% 12%;
+    --popover-foreground: 210 20% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 18 80% 58%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 215 20% 18%;
+    --secondary-foreground: 210 20% 95%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 215 20% 18%;
+    --muted-foreground: 215 14% 60%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 213 55% 45%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --success: 142 60% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 80% 55%;
+    --warning-foreground: 0 0% 10%;
+
+    --info: 199 80% 55%;
+    --info-foreground: 0 0% 100%;
+
+    --border: 215 20% 22%;
+    --input: 215 20% 22%;
+    --ring: 18 80% 58%;
+
+    --sidebar-background: 215 25% 8%;
+    --sidebar-foreground: 210 20% 95%;
+    --sidebar-primary: 18 80% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 215 20% 15%;
+    --sidebar-accent-foreground: 210 20% 95%;
+    --sidebar-border: 215 20% 15%;
+    --sidebar-ring: 18 80% 58%;
   }
 }
 
@@ -99,7 +141,54 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
-  body {
-    @apply bg-background text-foreground;
+  html {
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
   }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  /* Form Field Enhancements */
+  .field-mandatory::before {
+    content: '*';
+    @apply text-destructive mr-1 font-semibold;
+  }
+
+  .field-conditional::before {
+    content: '◇';
+    @apply text-warning mr-1;
+  }
+
+  /* Section Headers */
+  .section-header {
+    @apply text-lg font-semibold text-primary border-b-2 border-primary/20 pb-2 mb-4;
+  }
+
+  /* Progress Step */
+  .progress-step {
+    @apply relative flex items-center;
+  }
+
+  .progress-step::after {
+    content: '';
+    @apply absolute top-1/2 left-full w-full h-0.5 bg-border -translate-y-1/2;
+  }
+
+  .progress-step:last-child::after {
+    @apply hidden;
+  }
+
+  /* Division Badges */
+  .division-badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .division-df { @apply bg-orange-100 text-orange-800; }
+  .division-nf { @apply bg-purple-100 text-purple-800; }
+  .division-ff { @apply bg-green-100 text-green-800; }
+  .division-sl { @apply bg-pink-100 text-pink-800; }
+  .division-hl { @apply bg-blue-100 text-blue-800; }
+  .division-hol { @apply bg-teal-100 text-teal-800; }
+  .division-ph { @apply bg-red-100 text-red-800; }
 }
