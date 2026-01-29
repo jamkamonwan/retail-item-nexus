@@ -47,6 +47,18 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
+        info: {
+          DEFAULT: "hsl(var(--info))",
+          foreground: "hsl(var(--info-foreground))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -57,6 +69,18 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        division: {
+          df: "hsl(var(--division-df))",
+          nf: "hsl(var(--division-nf))",
+          ff: "hsl(var(--division-ff))",
+          sl: "hsl(var(--division-sl))",
+          hl: "hsl(var(--division-hl))",
+          hol: "hsl(var(--division-hol))",
+          ph: "hsl(var(--division-ph))",
+        },
+      },
+      fontFamily: {
+        sans: ['IBM Plex Sans', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
         lg: "var(--radius)",
