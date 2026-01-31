@@ -25,7 +25,7 @@ const DUMMY_FIRST_NAMES = ['John', 'Jane', 'Michael', 'Sarah', 'David', 'Emma', 
 const DUMMY_LAST_NAMES = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Martinez', 'Wilson'];
 const DUMMY_ROLES = ['buyer', 'commercial', 'finance', 'scm', 'im', 'admin'];
 
-const generateDummyUser = (departments: Department[]) => {
+const generateDummyUser = () => {
   const firstName = DUMMY_FIRST_NAMES[Math.floor(Math.random() * DUMMY_FIRST_NAMES.length)];
   const lastName = DUMMY_LAST_NAMES[Math.floor(Math.random() * DUMMY_LAST_NAMES.length)];
   const role = DUMMY_ROLES[Math.floor(Math.random() * DUMMY_ROLES.length)];
@@ -36,7 +36,6 @@ const generateDummyUser = (departments: Department[]) => {
     email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}.${timestamp}@example.com`,
     userType: 'internal' as const,
     roles: [role],
-    departments: departments.length > 0 ? [departments[Math.floor(Math.random() * departments.length)].code] : [],
     supplierId: '',
   };
 };
@@ -45,7 +44,6 @@ const userSchema = z.object({
   email: z.string().email('Invalid email format'),
   userType: z.enum(['internal', 'external']),
   roles: z.array(z.string()).min(1, 'At least one role required'),
-  departments: z.array(z.string()).optional(),
   supplierId: z.string().optional(),
 });
 
@@ -55,7 +53,6 @@ interface UserFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   user?: UserProfile | null;
-  departments: Department[];
   suppliers: Supplier[];
   onSubmit: (data: CreateUserData | UpdateUserData) => Promise<void>;
 }
@@ -64,7 +61,6 @@ export function UserFormDialog({
   open,
   onOpenChange,
   user,
-  departments,
   suppliers,
   onSubmit,
 }: UserFormDialogProps) {
@@ -78,7 +74,6 @@ export function UserFormDialog({
       email: '',
       userType: 'internal',
       roles: [],
-      departments: [],
       supplierId: '',
     },
   });
@@ -92,7 +87,6 @@ export function UserFormDialog({
         email: user.email || '',
         userType: user.user_type,
         roles: user.roles,
-        departments: user.departments,
         supplierId: user.supplier?.id || '',
       });
     } else {
@@ -101,7 +95,6 @@ export function UserFormDialog({
         email: '',
         userType: 'internal',
         roles: [],
-        departments: [],
         supplierId: '',
       });
     }
@@ -116,7 +109,6 @@ export function UserFormDialog({
           fullName: values.fullName,
           userType: values.userType as UserTypeValue,
           roles: values.roles,
-          departments: values.userType === 'internal' ? values.departments : [],
           supplierId: values.userType === 'external' ? values.supplierId : undefined,
         });
       } else {
@@ -125,7 +117,6 @@ export function UserFormDialog({
           fullName: values.fullName,
           userType: values.userType as UserTypeValue,
           roles: values.roles,
-          departments: values.userType === 'internal' ? values.departments : [],
           supplierId: values.userType === 'external' ? values.supplierId : undefined,
         });
       }
@@ -143,19 +134,10 @@ export function UserFormDialog({
     form.setValue('roles', updated, { shouldValidate: true });
   };
 
-  const toggleDepartment = (deptCode: string) => {
-    const current = form.getValues('departments') || [];
-    const updated = current.includes(deptCode)
-      ? current.filter((d) => d !== deptCode)
-      : [...current, deptCode];
-    form.setValue('departments', updated);
-  };
-
   const selectedRoles = form.watch('roles');
-  const selectedDepartments = form.watch('departments') || [];
 
   const handleAutoFill = () => {
-    const dummyData = generateDummyUser(departments);
+    const dummyData = generateDummyUser();
     form.reset(dummyData);
   };
 
@@ -250,27 +232,6 @@ export function UserFormDialog({
                 <p className="text-sm text-destructive">{form.formState.errors.roles.message}</p>
               )}
             </div>
-
-            {/* Departments (for internal users) */}
-            {userType === 'internal' && (
-              <div className="space-y-2">
-                <Label>Departments</Label>
-                <div className="grid grid-cols-4 gap-2 p-3 border rounded-md bg-muted/30">
-                  {departments.map((dept) => (
-                    <div key={dept.code} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`dept-${dept.code}`}
-                        checked={selectedDepartments.includes(dept.code)}
-                        onCheckedChange={() => toggleDepartment(dept.code)}
-                      />
-                      <Label htmlFor={`dept-${dept.code}`} className="font-normal text-sm">
-                        {dept.code}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* Supplier (for external users) */}
             {userType === 'external' && (

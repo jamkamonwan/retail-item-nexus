@@ -154,7 +154,6 @@ export function UserManagement({ onBack }: UserManagementProps) {
         open={formOpen}
         onOpenChange={setFormOpen}
         user={selectedUser}
-        departments={departments}
         suppliers={suppliers}
         onSubmit={handleFormSubmit}
       />
