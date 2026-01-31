@@ -1,16 +1,20 @@
 // NPD (New Product Development) Type Definitions
-// Updated for mock-data-driven design-first development
+// Updated for Episode 1: Supplier Initial Product Registration (80 fields)
 
 // Product Divisions - Different product categories
-export type Division = 'HL' | 'DF' | 'SL' | 'FF' | 'GS' | 'HB';
+// Extended to include all retail divisions
+export type Division = 'HL' | 'HOL' | 'DF' | 'NF' | 'SL' | 'FF' | 'GS' | 'HB' | 'PH';
 
-export const DIVISIONS: Record<Division, { label: string; fullName: string; color: string }> = {
-  HL: { label: 'HL', fullName: 'Hard Lines', color: 'division-hl' },
-  DF: { label: 'DF', fullName: 'Dairy & Frozen', color: 'division-df' },
-  SL: { label: 'SL', fullName: 'Soft Lines', color: 'division-sl' },
-  FF: { label: 'FF', fullName: 'Fresh Food', color: 'division-ff' },
-  GS: { label: 'GS', fullName: 'General Store', color: 'division-gs' },
-  HB: { label: 'HB', fullName: 'Health & Beauty', color: 'division-hb' },
+export const DIVISIONS: Record<Division, { label: string; fullName: string; color: string; category: 'food' | 'non-food' | 'health' }> = {
+  HL: { label: 'HL', fullName: 'Hard Lines', color: 'division-hl', category: 'non-food' },
+  HOL: { label: 'HOL', fullName: 'Home & Living', color: 'division-hol', category: 'non-food' },
+  DF: { label: 'DF', fullName: 'Dairy & Frozen', color: 'division-df', category: 'food' },
+  NF: { label: 'NF', fullName: 'Non-Food', color: 'division-nf', category: 'non-food' },
+  SL: { label: 'SL', fullName: 'Soft Lines', color: 'division-sl', category: 'non-food' },
+  FF: { label: 'FF', fullName: 'Fresh Food', color: 'division-ff', category: 'food' },
+  GS: { label: 'GS', fullName: 'General Store', color: 'division-gs', category: 'non-food' },
+  HB: { label: 'HB', fullName: 'Health & Beauty', color: 'division-hb', category: 'health' },
+  PH: { label: 'PH', fullName: 'Pharmacy/Health', color: 'division-ph', category: 'health' },
 };
 
 // User Types - Who is using the system
@@ -34,10 +38,14 @@ export type ChannelType = 'online' | 'offline' | 'both';
 // Field Requirement Type
 export type FieldRequirement = 'mandatory' | 'optional' | 'conditional';
 
-// Field Input Type
-export type FieldInputType = 'text' | 'number' | 'dropdown' | 'date' | 'file' | 'textarea';
+// Field Input Type - Extended with date, readonly, and calculated
+export type FieldInputType = 'text' | 'number' | 'dropdown' | 'date' | 'file' | 'textarea' | 'readonly' | 'calculated';
 
-// Form Section Categories
+// ============================================================
+// Form Section Categories - Updated for Supplier Registration
+// ============================================================
+
+// Original Form Sections (for backward compatibility)
 export type FormSection = 
   | 'product_images'
   | 'basic_info'
@@ -49,6 +57,60 @@ export type FormSection =
   | 'store_allocation'
   | 'additional';
 
+// NEW: Supplier Registration Form Sections (6 sections, 80 fields)
+export type SupplierFormSection = 
+  | 'product_identification'  // 15 fields
+  | 'product_images'          // 7 fields
+  | 'basic_attributes'        // 20 fields
+  | 'compliance'              // 10 fields
+  | 'pricing'                 // 8 fields
+  | 'logistics';              // 20 fields
+
+export const SUPPLIER_FORM_SECTIONS: Record<SupplierFormSection, { 
+  title: string; 
+  titleTh: string; 
+  icon: string;
+  fieldCount: number;
+}> = {
+  product_identification: { 
+    title: 'Product Identification', 
+    titleTh: 'ข้อมูลระบุสินค้า', 
+    icon: 'package',
+    fieldCount: 15,
+  },
+  product_images: { 
+    title: 'Product Images', 
+    titleTh: 'รูปภาพสินค้า', 
+    icon: 'image',
+    fieldCount: 7,
+  },
+  basic_attributes: { 
+    title: 'Basic Attributes', 
+    titleTh: 'คุณสมบัติพื้นฐาน', 
+    icon: 'list',
+    fieldCount: 20,
+  },
+  compliance: { 
+    title: 'Compliance & Certification', 
+    titleTh: 'การรับรองและใบอนุญาต', 
+    icon: 'shield-check',
+    fieldCount: 10,
+  },
+  pricing: { 
+    title: 'Pricing Basics', 
+    titleTh: 'ราคาและต้นทุน', 
+    icon: 'dollar-sign',
+    fieldCount: 8,
+  },
+  logistics: { 
+    title: 'Logistics & Supply Chain', 
+    titleTh: 'โลจิสติกส์และซัพพลายเชน', 
+    icon: 'truck',
+    fieldCount: 20,
+  },
+};
+
+// Legacy FORM_SECTIONS for backward compatibility
 export const FORM_SECTIONS: Record<FormSection, { title: string; titleTh: string; icon: string }> = {
   product_images: { title: 'Product Images', titleTh: 'รูปภาพสินค้า', icon: 'image' },
   basic_info: { title: 'Basic Information', titleTh: 'ข้อมูลพื้นฐาน', icon: 'file-text' },
@@ -61,12 +123,12 @@ export const FORM_SECTIONS: Record<FormSection, { title: string; titleTh: string
   additional: { title: 'Additional Information', titleTh: 'ข้อมูลเพิ่มเติม', icon: 'plus-circle' },
 };
 
-// NPD Form Field Definition
+// NPD Form Field Definition - Extended for new input types
 export interface NPDFormField {
   id: string;
   name: string;
   nameTh?: string;
-  section: FormSection;
+  section: FormSection | SupplierFormSection;
   channel: ChannelType;
   requirement: FieldRequirement;
   inputType: FieldInputType;
@@ -86,7 +148,7 @@ export interface NPDFormState {
   userType: UserType | null;
   channel: ChannelType;
   formData: Record<string, string | number | File | null>;
-  completedSections: FormSection[];
+  completedSections: (FormSection | SupplierFormSection)[];
   errors: Record<string, string>;
 }
 
@@ -107,3 +169,13 @@ export const TEMPERATURE_TYPES: Record<TemperatureType, { label: string; range: 
   chill: { label: 'Chill', range: '0-4°C' },
   frozen: { label: 'Frozen', range: '-18°C or below' },
 };
+
+// Supplier Form Steps (ordered)
+export const SUPPLIER_FORM_STEPS: SupplierFormSection[] = [
+  'product_identification',
+  'product_images',
+  'basic_attributes',
+  'compliance',
+  'pricing',
+  'logistics',
+];

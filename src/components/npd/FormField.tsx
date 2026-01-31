@@ -11,12 +11,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { Upload, AlertCircle, HelpCircle, X } from 'lucide-react';
+import { Upload, AlertCircle, HelpCircle, X, Calendar, Lock, Calculator } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Button } from '@/components/ui/button';
+import { format } from 'date-fns';
 
 interface FormFieldProps {
   field: NPDFormField;
@@ -24,11 +28,14 @@ interface FormFieldProps {
   onChange: (value: string | number | File | null) => void;
   error?: string;
   disabled?: boolean;
+  calculatedValue?: number | null;
 }
 
-export function FormField({ field, value, onChange, error, disabled }: FormFieldProps) {
+export function FormField({ field, value, onChange, error, disabled, calculatedValue }: FormFieldProps) {
   const isRequired = field.requirement === 'mandatory';
   const isConditional = field.requirement === 'conditional';
+  const isReadonly = field.inputType === 'readonly';
+  const isCalculated = field.inputType === 'calculated';
   
   // File preview URL - hooks must be at top level
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -51,6 +58,62 @@ export function FormField({ field, value, onChange, error, disabled }: FormField
 
   const renderInput = () => {
     switch (field.inputType) {
+      case 'readonly':
+        return (
+          <div className="flex items-center gap-2">
+            <Input
+              type="text"
+              value={value as string || ''}
+              disabled
+              className="bg-muted/50 text-muted-foreground cursor-not-allowed"
+            />
+            <Lock className="w-4 h-4 text-muted-foreground" />
+          </div>
+        );
+
+      case 'calculated':
+        return (
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              value={calculatedValue ?? ''}
+              disabled
+              className="bg-muted/50 text-muted-foreground cursor-not-allowed"
+              placeholder="Auto-calculated"
+            />
+            <Calculator className="w-4 h-4 text-muted-foreground" />
+          </div>
+        );
+
+      case 'date':
+        const dateValue = value ? new Date(value as string) : undefined;
+        return (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  'w-full justify-start text-left font-normal bg-card',
+                  !value && 'text-muted-foreground',
+                  error && 'border-destructive'
+                )}
+                disabled={disabled}
+              >
+                <Calendar className="mr-2 h-4 w-4" />
+                {value ? format(new Date(value as string), 'PPP') : 'Select date'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0 bg-popover" align="start">
+              <CalendarComponent
+                mode="single"
+                selected={dateValue}
+                onSelect={(date) => onChange(date ? date.toISOString().split('T')[0] : null)}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        );
+
       case 'dropdown':
         return (
           <Select
@@ -61,7 +124,7 @@ export function FormField({ field, value, onChange, error, disabled }: FormField
             <SelectTrigger className={cn('w-full bg-card', error && 'border-destructive')}>
               <SelectValue placeholder={`Select ${field.name}`} />
             </SelectTrigger>
-            <SelectContent className="bg-popover border shadow-lg z-50">
+            <SelectContent className="bg-popover border shadow-lg z-50 max-h-60">
               {field.dropdownOptions?.map((option) => (
                 <SelectItem key={option} value={option} className="hover:bg-muted">
                   {option}
@@ -132,6 +195,11 @@ export function FormField({ field, value, onChange, error, disabled }: FormField
                   <span className="text-sm text-muted-foreground">
                     Click to upload or drag and drop
                   </span>
+                  {field.helpText && (
+                    <span className="block text-xs text-muted-foreground/70 mt-1">
+                      {field.helpText}
+                    </span>
+                  )}
                 </label>
               </div>
             )}
@@ -158,8 +226,12 @@ export function FormField({ field, value, onChange, error, disabled }: FormField
             onChange={(e) => onChange(e.target.value)}
             placeholder={field.placeholder}
             maxLength={field.maxLength}
-            disabled={disabled}
-            className={cn('bg-card', error && 'border-destructive')}
+            disabled={disabled || isReadonly}
+            className={cn(
+              'bg-card', 
+              error && 'border-destructive',
+              isReadonly && 'bg-muted/50 cursor-not-allowed'
+            )}
           />
         );
     }
@@ -176,7 +248,12 @@ export function FormField({ field, value, onChange, error, disabled }: FormField
             </span>
           )}
         </Label>
-        {field.helpText && (
+        {(isReadonly || isCalculated) && (
+          <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
+            {isCalculated ? 'Auto' : 'Read-only'}
+          </span>
+        )}
+        {field.helpText && field.inputType !== 'file' && (
           <Tooltip>
             <TooltipTrigger asChild>
               <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help" />
