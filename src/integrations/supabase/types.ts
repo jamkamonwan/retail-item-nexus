@@ -14,6 +14,77 @@ export type Database = {
   }
   public: {
     Tables: {
+      field_approval_config: {
+        Row: {
+          created_at: string
+          division: string | null
+          field_id: string
+          id: string
+          required_role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          division?: string | null
+          field_id: string
+          id?: string
+          required_role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          division?: string | null
+          field_id?: string
+          id?: string
+          required_role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      field_approvals: {
+        Row: {
+          approved_by: string | null
+          approver_role: Database["public"]["Enums"]["app_role"]
+          comment: string | null
+          created_at: string
+          field_id: string
+          id: string
+          status: string
+          submission_id: string
+          updated_at: string
+        }
+        Insert: {
+          approved_by?: string | null
+          approver_role: Database["public"]["Enums"]["app_role"]
+          comment?: string | null
+          created_at?: string
+          field_id: string
+          id?: string
+          status?: string
+          submission_id: string
+          updated_at?: string
+        }
+        Update: {
+          approved_by?: string | null
+          approver_role?: Database["public"]["Enums"]["app_role"]
+          comment?: string | null
+          created_at?: string
+          field_id?: string
+          id?: string
+          status?: string
+          submission_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "field_approvals_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "npd_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       npd_submissions: {
         Row: {
           approved_at: string | null
@@ -191,6 +262,7 @@ export type Database = {
         | "approved"
         | "rejected"
         | "revision_needed"
+        | "pending_secondary"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -335,6 +407,7 @@ export const Constants = {
         "approved",
         "rejected",
         "revision_needed",
+        "pending_secondary",
       ],
     },
   },
