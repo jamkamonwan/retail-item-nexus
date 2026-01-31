@@ -1,15 +1,21 @@
-import { FormSection, FORM_SECTIONS } from '@/types/npd';
+import { FormSection, SupplierFormSection, FORM_SECTIONS, SUPPLIER_FORM_SECTIONS } from '@/types/npd';
 import { cn } from '@/lib/utils';
-import { Check, Image, FileText, Settings, DollarSign, Ruler, Truck, ShieldCheck, Store, PlusCircle } from 'lucide-react';
+import { Check, Image, FileText, Settings, DollarSign, Ruler, Truck, ShieldCheck, Store, PlusCircle, Package, List } from 'lucide-react';
+
+// Combined section type for flexibility
+type AnyFormSection = FormSection | SupplierFormSection;
 
 interface ProgressStepperProps {
-  steps: FormSection[];
+  steps: AnyFormSection[];
   currentStep: number;
-  completedSteps: FormSection[];
+  completedSteps: AnyFormSection[];
   onStepClick: (stepIndex: number) => void;
+  sectionInfo?: Record<string, { title: string; titleTh: string; icon?: string; fieldCount?: number }>;
 }
 
-const SECTION_ICONS: Record<FormSection, React.ReactNode> = {
+// Combined icons for all section types
+const SECTION_ICONS: Record<string, React.ReactNode> = {
+  // Legacy sections
   product_images: <Image className="w-4 h-4" />,
   basic_info: <FileText className="w-4 h-4" />,
   specifications: <Settings className="w-4 h-4" />,
@@ -19,16 +25,34 @@ const SECTION_ICONS: Record<FormSection, React.ReactNode> = {
   compliance: <ShieldCheck className="w-4 h-4" />,
   store_allocation: <Store className="w-4 h-4" />,
   additional: <PlusCircle className="w-4 h-4" />,
+  // New supplier sections
+  product_identification: <Package className="w-4 h-4" />,
+  basic_attributes: <List className="w-4 h-4" />,
 };
 
-export function ProgressStepper({ steps, currentStep, completedSteps, onStepClick }: ProgressStepperProps) {
+export function ProgressStepper({ steps, currentStep, completedSteps, onStepClick, sectionInfo }: ProgressStepperProps) {
+  // Use provided sectionInfo or fall back to defaults
+  const getSectionInfo = (step: AnyFormSection) => {
+    if (sectionInfo && sectionInfo[step]) {
+      return sectionInfo[step];
+    }
+    // Fall back to legacy FORM_SECTIONS or SUPPLIER_FORM_SECTIONS
+    if (step in SUPPLIER_FORM_SECTIONS) {
+      return SUPPLIER_FORM_SECTIONS[step as SupplierFormSection];
+    }
+    if (step in FORM_SECTIONS) {
+      return FORM_SECTIONS[step as FormSection];
+    }
+    return { title: step, titleTh: '' };
+  };
+
   return (
     <div className="relative">
       {/* Mobile View - Horizontal Scroll */}
       <div className="sm:hidden overflow-x-auto pb-4 -mx-4 px-4">
         <div className="flex gap-2 min-w-max">
           {steps.map((step, index) => {
-            const section = FORM_SECTIONS[step];
+            const section = getSectionInfo(step);
             const isCompleted = completedSteps.includes(step);
             const isCurrent = index === currentStep;
             
@@ -62,9 +86,10 @@ export function ProgressStepper({ steps, currentStep, completedSteps, onStepClic
       {/* Desktop View - Vertical Stepper */}
       <div className="hidden sm:block space-y-1">
         {steps.map((step, index) => {
-          const section = FORM_SECTIONS[step];
+          const section = getSectionInfo(step);
           const isCompleted = completedSteps.includes(step);
           const isCurrent = index === currentStep;
+          const fieldCount = 'fieldCount' in section ? section.fieldCount : undefined;
 
           return (
             <button
@@ -90,24 +115,31 @@ export function ProgressStepper({ steps, currentStep, completedSteps, onStepClic
                 {isCompleted ? (
                   <Check className="w-4 h-4" />
                 ) : (
-                  SECTION_ICONS[step]
+                  SECTION_ICONS[step] || <FileText className="w-4 h-4" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p
-                  className={cn(
-                    'font-medium text-sm truncate',
-                    isCurrent ? 'text-primary' : 'text-foreground'
+                <div className="flex items-center gap-2">
+                  <p
+                    className={cn(
+                      'font-medium text-sm truncate',
+                      isCurrent ? 'text-primary' : 'text-foreground'
+                    )}
+                  >
+                    {section.title}
+                  </p>
+                  {fieldCount !== undefined && (
+                    <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                      {fieldCount}
+                    </span>
                   )}
-                >
-                  {section.title}
-                </p>
+                </div>
                 <p className="text-xs text-muted-foreground truncate">
                   {section.titleTh}
                 </p>
               </div>
               {isCompleted && (
-                <span className="text-xs text-success font-medium">Complete</span>
+                <span className="text-xs text-success font-medium">✓</span>
               )}
             </button>
           );

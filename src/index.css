@@ -184,11 +184,13 @@
     @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium;
   }
 
-  .division-df { @apply bg-orange-100 text-orange-800; }
-  .division-nf { @apply bg-purple-100 text-purple-800; }
-  .division-ff { @apply bg-green-100 text-green-800; }
-  .division-sl { @apply bg-pink-100 text-pink-800; }
-  .division-hl { @apply bg-blue-100 text-blue-800; }
-  .division-hol { @apply bg-teal-100 text-teal-800; }
-  .division-ph { @apply bg-red-100 text-red-800; }
+  .division-df { @apply bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300; }
+  .division-nf { @apply bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300; }
+  .division-ff { @apply bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300; }
+  .division-sl { @apply bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300; }
+  .division-hl { @apply bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300; }
+  .division-hol { @apply bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300; }
+  .division-ph { @apply bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300; }
+  .division-gs { @apply bg-slate-100 text-slate-800 dark:bg-slate-900/30 dark:text-slate-300; }
+  .division-hb { @apply bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300; }
 }

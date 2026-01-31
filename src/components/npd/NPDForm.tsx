@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Division, UserType, FormSection, FORM_SECTIONS, DIVISIONS, ChannelType, NPDFormField } from '@/types/npd';
+import { Division, UserType, SupplierFormSection, SUPPLIER_FORM_SECTIONS, DIVISIONS, ChannelType, NPDFormField, SUPPLIER_FORM_STEPS } from '@/types/npd';
 import { NPDSubmission } from '@/types/workflow';
-import { getFieldsForContext } from '@/data/npd-fields';
+import { getFieldsForSectionAndDivision, PRODUCT_CATEGORIES } from '@/data/npd-fields-supplier';
 import { DivisionSelector } from './DivisionSelector';
 import { ProgressStepper } from './ProgressStepper';
 import { FormSectionComponent } from './FormSection';
@@ -24,22 +24,37 @@ import { Badge } from '@/components/ui/badge';
 import { useSubmissions } from '@/hooks/useSubmissions';
 
 // Generate dummy data based on field type
-const generateDummyValue = (field: NPDFormField): string | number => {
-  // If dropdown, pick first option
+const generateDummyValue = (field: NPDFormField, formData: Record<string, string | number | File | null>): string | number => {
+  // If dropdown, pick first option or context-aware option
   if (field.inputType === 'dropdown' && field.dropdownOptions?.length) {
+    // For sub_category, pick based on selected category
+    if (field.id === 'sub_category') {
+      const category = formData['category'] as string;
+      const subCategories = PRODUCT_CATEGORIES[category];
+      if (subCategories?.length) return subCategories[0];
+    }
     return field.dropdownOptions[0];
   }
 
   // Handle specific field types
   switch (field.inputType) {
     case 'number':
-      if (field.id.includes('price') || field.id.includes('cost')) return 199.99;
-      if (field.id.includes('weight')) return 1.5;
-      if (field.id.includes('width') || field.id.includes('length') || field.id.includes('height')) return 25;
-      if (field.id.includes('wattage')) return 1500;
-      if (field.id.includes('qty') || field.id.includes('size')) return 10;
-      if (field.id.includes('gp')) return 25;
+      if (field.id.includes('price') || field.id.includes('cost') || field.id === 'srp') return 199.99;
+      if (field.id.includes('weight_net')) return 500;
+      if (field.id.includes('weight_gross')) return 550;
+      if (field.id.includes('weight')) return 5.5;
+      if (field.id.includes('dimension_l') || field.id.includes('carton_dimension_l')) return 30;
+      if (field.id.includes('dimension_w') || field.id.includes('carton_dimension_w')) return 20;
+      if (field.id.includes('dimension_h') || field.id.includes('carton_dimension_h')) return 25;
+      if (field.id.includes('moq')) return 100;
+      if (field.id.includes('lead_time')) return 7;
       if (field.id.includes('shelf_life')) return 365;
+      if (field.id.includes('qty')) return 12;
+      if (field.id.includes('pack_per')) return 8;
+      if (field.id.includes('layer')) return 5;
+      if (field.id.includes('allowance')) return 2;
+      if (field.id.includes('multiple')) return 10;
+      if (field.id.includes('safety_stock')) return 14;
       return 100;
     
     case 'date':
@@ -48,24 +63,37 @@ const generateDummyValue = (field: NPDFormField): string | number => {
       return date.toISOString().split('T')[0];
     
     case 'textarea':
-      if (field.id.includes('ingredient')) return 'Water, Sugar, Salt, Natural Flavoring';
+      if (field.id.includes('ingredient')) return 'Water, Sugar, Salt, Natural Flavoring, Preservatives (E211)';
+      if (field.id.includes('allergen')) return 'Contains: Milk, Soy. May contain traces of nuts.';
+      if (field.id.includes('nutrition')) return 'Per 100g: Calories 120kcal, Fat 3g, Carbs 18g, Protein 5g';
+      if (field.id.includes('warning')) return 'Keep out of reach of children. Store in cool, dry place.';
+      if (field.id.includes('usage')) return 'For best results, follow package instructions.';
+      if (field.id.includes('remarks')) return 'Special handling required for temperature-sensitive items.';
       return 'Sample description text for testing purposes.';
     
     case 'file':
-      return ''; // Handled separately in async function
+    case 'readonly':
+    case 'calculated':
+      return ''; // Handled separately
     
     default: // text
-      if (field.id.includes('barcode')) return '8851234567890';
-      if (field.id.includes('product_name_th')) return 'สินค้าทดสอบ';
-      if (field.id.includes('product_name_en')) return 'Test Product';
-      if (field.id.includes('brand')) return 'TestBrand';
-      if (field.id.includes('model')) return 'Model-X100';
-      if (field.id.includes('tis')) return 'TIS-12345-2567';
-      if (field.id.includes('fda')) return 'FDA-67890-2567';
-      if (field.id.includes('size')) return 'M';
-      if (field.id.includes('age')) return '18-45';
-      if (field.id.includes('material')) return 'Cotton 100%';
-      if (field.id.includes('supplier')) return 'Test Supplier Co., Ltd.';
+      if (field.id === 'barcode') return '8851234567890';
+      if (field.id === 'product_name_th') return 'สินค้าทดสอบ ตัวอย่าง';
+      if (field.id === 'product_name_en') return 'Test Sample Product';
+      if (field.id === 'brand') return 'TestBrand Premium';
+      if (field.id === 'model') return 'TB-2025-PRO';
+      if (field.id === 'supplier_code') return 'SUP-ITEM-001';
+      if (field.id === 'supplier_name') return 'Demo Supplier Co., Ltd.';
+      if (field.id === 'tisi_number') return 'มอก. 1234-2567';
+      if (field.id === 'fda_number') return '10-1-12345-1-0001';
+      if (field.id === 'iso_cert') return 'ISO 9001:2015, ISO 22000:2018';
+      if (field.id === 'size') return '500ml';
+      if (field.id === 'color') return 'White / Black';
+      if (field.id === 'material') return 'Cotton 100%';
+      if (field.id === 'manufacturer') return 'Thai Manufacturing Co., Ltd.';
+      if (field.id === 'pack_size') return '6 pcs/pack';
+      if (field.id === 'season_code') return 'SS25';
+      if (field.id === 'article_number') return 'ART-2025-0001';
       return 'Sample Value';
   }
 };
@@ -73,7 +101,6 @@ const generateDummyValue = (field: NPDFormField): string | number => {
 // Fetch a random product image from Picsum and convert to File
 const fetchRandomProductImage = async (fieldId: string): Promise<File | null> => {
   try {
-    // Use Picsum for random images - 1400x1400 as specified in the image fields
     const randomSeed = Math.floor(Math.random() * 1000);
     const imageUrl = `https://picsum.photos/seed/${randomSeed}/1400/1400`;
     
@@ -90,16 +117,10 @@ const fetchRandomProductImage = async (fieldId: string): Promise<File | null> =>
   }
 };
 
-// Form steps
-const FORM_STEPS: FormSection[] = [
-  'basic_info',
-  'product_images',
-  'specifications',
-  'dimensions',
-  'pricing',
-  'compliance',
-  'logistics',
-];
+// Calculate CBM from carton dimensions
+const calculateCBM = (l: number, w: number, h: number): number => {
+  return (l * w * h) / 1000000; // Convert cm³ to m³
+};
 
 interface NPDFormProps {
   userRole: UserType;
@@ -120,14 +141,13 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
   const [selectedDivision, setSelectedDivision] = useState<Division | null>(null);
   const [pendingDivision, setPendingDivision] = useState<Division | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // Channel defaults to 'both' since items can be sold online and offline
   const channel: ChannelType = 'both';
 
   // Form State
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<Record<string, string | number | File | null>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [completedSections, setCompletedSections] = useState<FormSection[]>([]);
+  const [completedSections, setCompletedSections] = useState<SupplierFormSection[]>([]);
 
   // Initialize form when editing an existing submission
   useEffect(() => {
@@ -136,9 +156,8 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
       setSelectedDivision(editingSubmission.division);
       setSetupComplete(true);
       setFormData(editingSubmission.formData || {});
-      // Mark first section as completed since we have data
       if (Object.keys(editingSubmission.formData || {}).length > 0) {
-        setCompletedSections(['basic_info']);
+        setCompletedSections(['product_identification']);
       }
     }
   }, [editingSubmission]);
@@ -153,6 +172,11 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
       setSelectedDivision(pendingDivision);
       setSetupComplete(true);
       setPendingDivision(null);
+      // Auto-populate supplier name
+      setFormData(prev => ({
+        ...prev,
+        supplier_name: 'Demo Supplier Co., Ltd.',
+      }));
     }
   };
 
@@ -161,20 +185,27 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
   };
 
   // Get current section and fields
-
-  // Get current section and fields
-  const currentSection = FORM_STEPS[currentStep];
+  const currentSection = SUPPLIER_FORM_STEPS[currentStep];
   
   const currentFields = useMemo(() => {
     if (!selectedDivision) return [];
-    
-    const contextFields = getFieldsForContext(selectedDivision, userRole, channel);
-    return contextFields.filter(field => field.section === currentSection);
-  }, [selectedDivision, userRole, channel, currentSection]);
+    return getFieldsForSectionAndDivision(currentSection, selectedDivision);
+  }, [selectedDivision, currentSection]);
+
+  // Calculate CBM when carton dimensions change
+  const calculatedCBM = useMemo(() => {
+    const l = formData['carton_dimension_l'] as number || 0;
+    const w = formData['carton_dimension_w'] as number || 0;
+    const h = formData['carton_dimension_h'] as number || 0;
+    if (l && w && h) {
+      return calculateCBM(l, w, h);
+    }
+    return null;
+  }, [formData]);
 
   // Calculate progress
   const progress = useMemo(() => {
-    const totalSteps = FORM_STEPS.length;
+    const totalSteps = SUPPLIER_FORM_STEPS.length;
     const completed = completedSections.length;
     return Math.round((completed / totalSteps) * 100);
   }, [completedSections]);
@@ -182,6 +213,7 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
   // Handle field change
   const handleFieldChange = (fieldId: string, value: string | number | File | null) => {
     setFormData(prev => ({ ...prev, [fieldId]: value }));
+    
     // Clear error when field is updated
     if (errors[fieldId]) {
       setErrors(prev => {
@@ -190,6 +222,17 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
         return newErrors;
       });
     }
+
+    // Handle category change - reset sub_category
+    if (fieldId === 'category') {
+      setFormData(prev => ({ ...prev, [fieldId]: value, sub_category: '' }));
+    }
+  };
+
+  // Get dynamic dropdown options for sub_category
+  const getSubCategoryOptions = (): string[] => {
+    const category = formData['category'] as string;
+    return PRODUCT_CATEGORIES[category] || [];
   };
 
   // Validate current section
@@ -197,7 +240,7 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
     const newErrors: Record<string, string> = {};
     
     currentFields.forEach(field => {
-      if (field.requirement === 'mandatory') {
+      if (field.requirement === 'mandatory' && field.inputType !== 'readonly' && field.inputType !== 'calculated') {
         const value = formData[field.id];
         if (!value || (typeof value === 'string' && value.trim() === '')) {
           newErrors[field.id] = `${field.name} is required`;
@@ -223,14 +266,14 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
 
     // Auto-save logic
     if (currentStep === 0 && !currentSubmissionId) {
-      // First step (Basic Information) - create draft
       setIsSaving(true);
       try {
         const productNameEn = (formData['product_name_en'] as string) || 'New Product';
         const productNameTh = (formData['product_name_th'] as string) || '';
         
+        // Cast division to match mock data type
         const result = await createSubmission(
-          selectedDivision!,
+          selectedDivision! as 'HL' | 'DF' | 'SL' | 'FF' | 'GS' | 'HB',
           productNameEn,
           productNameTh,
           formData
@@ -247,7 +290,6 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
         setIsSaving(false);
       }
     } else if (currentSubmissionId) {
-      // Subsequent steps - update existing draft
       setIsSaving(true);
       try {
         const success = await updateFormData(currentSubmissionId, formData);
@@ -262,7 +304,7 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
     }
 
     // Navigate to next step
-    if (currentStep < FORM_STEPS.length - 1) {
+    if (currentStep < SUPPLIER_FORM_STEPS.length - 1) {
       setCurrentStep(prev => prev + 1);
     }
   };
@@ -274,8 +316,7 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
   };
 
   const handleStepClick = (stepIndex: number) => {
-    // Allow navigation to previous or completed steps
-    if (stepIndex <= currentStep || completedSections.includes(FORM_STEPS[stepIndex])) {
+    if (stepIndex <= currentStep || completedSections.includes(SUPPLIER_FORM_STEPS[stepIndex])) {
       setCurrentStep(stepIndex);
     }
   };
@@ -283,7 +324,7 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
   // Save draft manually
   const handleSaveDraft = async () => {
     if (!currentSubmissionId) {
-      toast.info('Complete Basic Information first to create a draft');
+      toast.info('Complete Product Identification first to create a draft');
       return;
     }
     
@@ -310,7 +351,7 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
 
     // Validate all sections
     let allValid = true;
-    for (let i = 0; i < FORM_STEPS.length; i++) {
+    for (let i = 0; i < SUPPLIER_FORM_STEPS.length; i++) {
       setCurrentStep(i);
       if (!validateCurrentSection()) {
         allValid = false;
@@ -330,7 +371,7 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
       const productNameTh = (formData['product_name_th'] as string) || '';
       
       const result = await createSubmission(
-        selectedDivision,
+        selectedDivision as 'HL' | 'DF' | 'SL' | 'FF' | 'GS' | 'HB',
         productNameEn,
         productNameTh,
         formData
@@ -347,7 +388,7 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
 
   // Reset form
   const handleReset = () => {
-    setFormData({});
+    setFormData({ supplier_name: 'Demo Supplier Co., Ltd.' });
     setErrors({});
     setCompletedSections([]);
     setCurrentStep(0);
@@ -363,11 +404,20 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
     const newData: Record<string, string | number | File | null> = { ...formData };
     
     const fileFields = currentFields.filter(f => f.inputType === 'file');
-    const nonFileFields = currentFields.filter(f => f.inputType !== 'file');
+    const nonFileFields = currentFields.filter(f => f.inputType !== 'file' && f.inputType !== 'readonly' && f.inputType !== 'calculated');
     
     // Fill non-file fields immediately
     nonFileFields.forEach(field => {
-      newData[field.id] = generateDummyValue(field);
+      // Handle sub_category with dynamic options
+      if (field.id === 'sub_category') {
+        const category = newData['category'] as string || formData['category'] as string;
+        const subCategories = PRODUCT_CATEGORIES[category];
+        if (subCategories?.length) {
+          newData[field.id] = subCategories[0];
+        }
+      } else {
+        newData[field.id] = generateDummyValue(field, newData);
+      }
     });
     
     // Fetch random images for file fields in parallel
@@ -403,6 +453,19 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
     handleReset();
   };
 
+  // Prepare fields with dynamic dropdown options
+  const preparedFields = useMemo(() => {
+    return currentFields.map(field => {
+      if (field.id === 'sub_category') {
+        return {
+          ...field,
+          dropdownOptions: getSubCategoryOptions(),
+        };
+      }
+      return field;
+    });
+  }, [currentFields, formData['category']]);
+
   // Setup Screen
   if (!setupComplete) {
     return (
@@ -416,13 +479,16 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
           
           {/* Header */}
           <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary mb-4">
-                <FileDown className="w-8 h-8 text-primary-foreground" />
-              </div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">
-                New Product Development
-              </h1>
-              <p className="text-muted-foreground max-w-lg mx-auto">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary mb-4">
+              <FileDown className="w-8 h-8 text-primary-foreground" />
+            </div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              New Product Registration
+            </h1>
+            <p className="text-muted-foreground max-w-lg mx-auto">
+              Episode 1: Supplier Initial Registration (80 Fields)
+            </p>
+            <p className="text-sm text-muted-foreground mt-2">
               เริ่มต้นกรอกข้อมูลสินค้าใหม่ กรุณาเลือกประเภทสินค้า
             </p>
           </div>
@@ -432,7 +498,7 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
             <CardHeader>
               <CardTitle>Select Product Division</CardTitle>
               <CardDescription>
-                เลือกประเภทสินค้าที่ต้องการเพิ่ม
+                เลือกประเภทสินค้าที่ต้องการเพิ่ม - Different divisions show different fields
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -451,7 +517,7 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
                 Your Role: <span className="text-primary">{userRole.toUpperCase()}</span> • Channel: Online & Offline
               </p>
               <p className="text-sm text-muted-foreground">
-                บทบาทของท่านถูกกำหนดจาก Demo Role ด้านบน
+                80 fields across 6 sections • Conditional fields based on division
               </p>
             </div>
           </div>
@@ -469,7 +535,7 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
                     <span className="font-semibold text-foreground">
                       {DIVISIONS[pendingDivision].label} - {DIVISIONS[pendingDivision].fullName}
                     </span>
-                    {' '}as a{' '}
+                    {' '}({DIVISIONS[pendingDivision].category}) as a{' '}
                     <span className="font-semibold text-foreground">{userRole.toUpperCase()}</span>.
                     <br /><br />
                     ยืนยันการเลือกประเภทสินค้านี้?
@@ -506,8 +572,11 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
                 <Badge className={cn('division-badge', DIVISIONS[selectedDivision!].color)}>
                   {DIVISIONS[selectedDivision!].label}
                 </Badge>
-                <span className="text-sm text-muted-foreground">
-                  {userRole.toUpperCase()} • Online & Offline
+                <Badge variant="outline" className="text-xs">
+                  {DIVISIONS[selectedDivision!].category}
+                </Badge>
+                <span className="text-sm text-muted-foreground hidden sm:inline">
+                  {userRole.toUpperCase()} • 80 Fields
                 </span>
               </div>
             </div>
@@ -552,13 +621,14 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
           <aside className="hidden lg:block w-72 shrink-0">
             <div className="sticky top-24 bg-card rounded-xl border border-border p-4">
               <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-4">
-                Form Sections
+                Form Sections (6)
               </h3>
               <ProgressStepper
-                steps={FORM_STEPS}
+                steps={SUPPLIER_FORM_STEPS}
                 currentStep={currentStep}
                 completedSteps={completedSections}
                 onStepClick={handleStepClick}
+                sectionInfo={SUPPLIER_FORM_SECTIONS}
               />
             </div>
           </aside>
@@ -568,10 +638,11 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
             {/* Mobile Progress */}
             <div className="lg:hidden mb-6">
               <ProgressStepper
-                steps={FORM_STEPS}
+                steps={SUPPLIER_FORM_STEPS}
                 currentStep={currentStep}
                 completedSteps={completedSections}
                 onStepClick={handleStepClick}
+                sectionInfo={SUPPLIER_FORM_SECTIONS}
               />
             </div>
 
@@ -579,7 +650,10 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
             <Card>
               <CardContent className="p-6 sm:p-8">
                 {/* Auto Fill Button */}
-                <div className="flex justify-end mb-6">
+                <div className="flex justify-between items-center mb-6">
+                  <div className="text-sm text-muted-foreground">
+                    Section {currentStep + 1} of {SUPPLIER_FORM_STEPS.length} • {SUPPLIER_FORM_SECTIONS[currentSection].fieldCount} fields
+                  </div>
                   <Button 
                     variant="secondary" 
                     size="sm" 
@@ -587,16 +661,19 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
                     disabled={isAutoFilling}
                   >
                     <Wand2 className={cn("w-4 h-4 mr-2", isAutoFilling && "animate-spin")} />
-                    {isAutoFilling ? 'Fetching Images...' : 'Auto Fill with Dummy Data'}
+                    {isAutoFilling ? 'Fetching Images...' : 'Auto Fill Section'}
                   </Button>
                 </div>
                 
                 <FormSectionComponent
                   section={currentSection}
-                  fields={currentFields}
+                  fields={preparedFields}
                   values={formData}
                   errors={errors}
                   onChange={handleFieldChange}
+                  calculatedValues={{
+                    cbm_per_carton: calculatedCBM,
+                  }}
                 />
               </CardContent>
             </Card>
@@ -613,14 +690,14 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
               </Button>
 
               <div className="flex items-center gap-3">
-                {currentStep === FORM_STEPS.length - 1 ? (
+                {currentStep === SUPPLIER_FORM_STEPS.length - 1 ? (
                   <Button
                     onClick={handleSubmit}
                     disabled={isSubmitting}
                     className="bg-accent hover:bg-accent/90 text-accent-foreground"
                   >
                     <Send className="w-4 h-4 mr-2" />
-                    {isSubmitting ? 'Submitting...' : 'Submit Form'}
+                    {isSubmitting ? 'Submitting...' : 'Submit for Review'}
                   </Button>
                 ) : (
                   <Button onClick={handleNext} disabled={isSaving}>

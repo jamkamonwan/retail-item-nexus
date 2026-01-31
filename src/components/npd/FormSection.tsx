@@ -1,17 +1,18 @@
-import { NPDFormField, FormSection as FormSectionType, FORM_SECTIONS } from '@/types/npd';
+import { NPDFormField, SupplierFormSection, SUPPLIER_FORM_SECTIONS } from '@/types/npd';
 import { FormField } from './FormField';
 import { cn } from '@/lib/utils';
 
 interface FormSectionProps {
-  section: FormSectionType;
+  section: SupplierFormSection;
   fields: NPDFormField[];
   values: Record<string, string | number | File | null>;
   errors: Record<string, string>;
   onChange: (fieldId: string, value: string | number | File | null) => void;
+  calculatedValues?: Record<string, number | null>;
 }
 
-export function FormSectionComponent({ section, fields, values, errors, onChange }: FormSectionProps) {
-  const sectionInfo = FORM_SECTIONS[section];
+export function FormSectionComponent({ section, fields, values, errors, onChange, calculatedValues }: FormSectionProps) {
+  const sectionInfo = SUPPLIER_FORM_SECTIONS[section];
   
   // Group fields by requirement
   const mandatoryFields = fields.filter(f => f.requirement === 'mandatory');
@@ -24,9 +25,14 @@ export function FormSectionComponent({ section, fields, values, errors, onChange
     return (
       <div className={cn('space-y-4', className)}>
         {title && (
-          <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-            {title}
-          </h4>
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+              {title}
+            </h4>
+            <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
+              {groupFields.length} field{groupFields.length !== 1 ? 's' : ''}
+            </span>
+          </div>
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {groupFields.map((field) => (
@@ -42,6 +48,7 @@ export function FormSectionComponent({ section, fields, values, errors, onChange
                 value={values[field.id] || null}
                 onChange={(value) => onChange(field.id, value)}
                 error={errors[field.id]}
+                calculatedValue={calculatedValues?.[field.id]}
               />
             </div>
           ))}
@@ -63,18 +70,18 @@ export function FormSectionComponent({ section, fields, values, errors, onChange
       </div>
 
       {/* Field Legend */}
-      <div className="flex flex-wrap gap-4 text-sm">
+      <div className="flex flex-wrap gap-4 text-sm bg-muted/30 p-3 rounded-lg">
         <div className="flex items-center gap-2">
           <span className="text-destructive font-bold">*</span>
-          <span className="text-muted-foreground">Mandatory</span>
+          <span className="text-muted-foreground">Mandatory ({mandatoryFields.length})</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-warning font-bold">◇</span>
-          <span className="text-muted-foreground">Conditional</span>
+          <span className="text-muted-foreground">Conditional ({conditionalFields.length})</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground">○</span>
-          <span className="text-muted-foreground">Optional</span>
+          <span className="text-muted-foreground">Optional ({optionalFields.length})</span>
         </div>
       </div>
 
@@ -89,7 +96,7 @@ export function FormSectionComponent({ section, fields, values, errors, onChange
 
       {fields.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
-          <p>No fields to display for this section based on your selection.</p>
+          <p>No fields to display for this section based on your division selection.</p>
         </div>
       )}
     </div>
