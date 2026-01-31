@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useSubmissions } from '@/hooks/useSubmissions';
 import { UserType } from '@/types/npd';
-import { NPDSubmission, WORKFLOW_STATUSES } from '@/types/workflow';
+import { NPDSubmission, WORKFLOW_STATUSES, WorkflowStatus } from '@/types/workflow';
 import { WorkflowDashboard } from './WorkflowDashboard';
 import { SubmissionView } from './SubmissionView';
 import { NPDForm } from './NPDForm';
@@ -16,6 +17,7 @@ type View = 'dashboard' | 'form' | 'submission';
 
 export function AuthenticatedWorkflowApp() {
   const { role } = useAuth();
+  const { submissions, loading, updateStatus, refetch } = useSubmissions();
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [selectedSubmission, setSelectedSubmission] = useState<NPDSubmission | null>(null);
   
@@ -34,29 +36,54 @@ export function AuthenticatedWorkflowApp() {
   const handleBackToList = () => {
     setSelectedSubmission(null);
     setCurrentView('dashboard');
+    refetch(); // Refresh after returning from form/submission
   };
 
-  const handleApprove = () => {
-    if (selectedSubmission) {
-      const nextStatus = WORKFLOW_STATUSES[selectedSubmission.status].nextStatus;
-      if (nextStatus) {
-        toast.success(`${selectedSubmission.productNameEn} approved!`);
+  const handleApprove = async (submission: NPDSubmission) => {
+    const nextStatus = WORKFLOW_STATUSES[submission.status].nextStatus;
+    if (nextStatus) {
+      const success = await updateStatus(
+        submission.id,
+        nextStatus,
+        'approve',
+        demoRole
+      );
+      if (success) {
+        toast.success(`${submission.productNameEn} approved!`);
+        if (selectedSubmission?.id === submission.id) {
+          handleBackToList();
+        }
+      }
+    }
+  };
+
+  const handleReject = async (submission: NPDSubmission) => {
+    const success = await updateStatus(
+      submission.id,
+      'rejected' as WorkflowStatus,
+      'reject',
+      demoRole
+    );
+    if (success) {
+      toast.error(`${submission.productNameEn} rejected`);
+      if (selectedSubmission?.id === submission.id) {
         handleBackToList();
       }
     }
   };
 
-  const handleReject = () => {
-    if (selectedSubmission) {
-      toast.error(`${selectedSubmission.productNameEn} rejected`);
-      handleBackToList();
-    }
-  };
-
-  const handleRequestRevision = () => {
-    if (selectedSubmission) {
-      toast.info(`${selectedSubmission.productNameEn} sent back for revision`);
-      handleBackToList();
+  const handleRequestRevision = async (submission: NPDSubmission) => {
+    const success = await updateStatus(
+      submission.id,
+      'revision_needed' as WorkflowStatus,
+      'request_revision',
+      demoRole
+    );
+    if (success) {
+      toast.info(`${submission.productNameEn} sent back for revision`);
+      if (selectedSubmission?.id === submission.id) {
+        handleBackToList();
+      }
     }
   };
 
@@ -109,13 +136,18 @@ export function AuthenticatedWorkflowApp() {
         {currentView === 'dashboard' && (
           <WorkflowDashboard
             currentUserRole={demoRole}
+            submissions={submissions}
+            loading={loading}
             onViewSubmission={handleViewSubmission}
             onCreateNew={handleCreateNew}
+            onApprove={handleApprove}
+            onReject={handleReject}
+            onRequestRevision={handleRequestRevision}
           />
         )}
 
         {currentView === 'form' && (
-          <NPDForm />
+          <NPDForm onSubmitSuccess={handleBackToList} />
         )}
 
         {currentView === 'submission' && selectedSubmission && (
@@ -123,9 +155,9 @@ export function AuthenticatedWorkflowApp() {
             submission={selectedSubmission}
             currentUserRole={demoRole}
             onBack={handleBackToList}
-            onApprove={handleApprove}
-            onReject={handleReject}
-            onRequestRevision={handleRequestRevision}
+            onApprove={() => handleApprove(selectedSubmission)}
+            onReject={() => handleReject(selectedSubmission)}
+            onRequestRevision={() => handleRequestRevision(selectedSubmission)}
           />
         )}
       </main>
