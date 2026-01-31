@@ -10,12 +10,13 @@ import { FieldApprovalConfigScreen } from './FieldApprovalConfigScreen';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { RoleSimulator } from './RoleSimulator';
 import { SupplierDashboard, ApproverDashboard, AdminDashboard } from './dashboards';
+import { UserManagement } from '@/components/admin';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { LayoutDashboard, FileText, Settings2, ListChecks, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
-type View = 'dashboard' | 'form' | 'submission' | 'config' | 'all-items';
+type View = 'dashboard' | 'form' | 'submission' | 'config' | 'all-items' | 'users';
 
 // Map roles to their pending status for approver dashboard
 const ROLE_PENDING_STATUS: Partial<Record<UserType, WorkflowStatus>> = {
@@ -62,6 +63,10 @@ export function AuthenticatedWorkflowApp() {
 
   const handleNavigateToConfig = () => {
     setCurrentView('config');
+  };
+
+  const handleNavigateToUsers = () => {
+    setCurrentView('users');
   };
 
   const handleApprove = async (submission: NPDSubmission) => {
@@ -139,6 +144,10 @@ export function AuthenticatedWorkflowApp() {
               <ListChecks className="w-4 h-4" />
               All Items
             </TabsTrigger>
+            <TabsTrigger value="users" className="gap-2">
+              <Users className="w-4 h-4" />
+              Users
+            </TabsTrigger>
             <TabsTrigger value="config" className="gap-2">
               <Settings2 className="w-4 h-4" />
               Config
@@ -183,6 +192,7 @@ export function AuthenticatedWorkflowApp() {
             loading={loading}
             onViewSubmission={handleViewSubmission}
             onNavigateToConfig={handleNavigateToConfig}
+            onNavigateToUsers={handleNavigateToUsers}
           />
         );
       case 'buyer':
@@ -274,6 +284,10 @@ export function AuthenticatedWorkflowApp() {
 
         {currentView === 'config' && (
           <FieldApprovalConfigScreen />
+        )}
+
+        {currentView === 'users' && (
+          <UserManagement onBack={handleBackToList} />
         )}
 
         {currentView === 'submission' && selectedSubmission && (

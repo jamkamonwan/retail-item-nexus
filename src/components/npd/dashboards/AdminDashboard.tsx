@@ -22,6 +22,7 @@ interface AdminDashboardProps {
   loading: boolean;
   onViewSubmission: (submission: NPDSubmission) => void;
   onNavigateToConfig: () => void;
+  onNavigateToUsers: () => void;
 }
 
 export function AdminDashboard({
@@ -29,6 +30,7 @@ export function AdminDashboard({
   loading,
   onViewSubmission,
   onNavigateToConfig,
+  onNavigateToUsers,
 }: AdminDashboardProps) {
   // Calculate status counts
   const statusCounts = submissions.reduce((acc, s) => {
@@ -168,12 +170,11 @@ export function AdminDashboard({
           </CardHeader>
         </Card>
         
-        <Card className="opacity-60">
+        <Card className="hover:bg-accent/50 cursor-pointer transition-colors" onClick={onNavigateToUsers}>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Users className="w-5 h-5 text-muted-foreground" />
+              <Users className="w-5 h-5 text-primary" />
               User Management
-              <Badge variant="outline" className="ml-auto">Coming Soon</Badge>
             </CardTitle>
             <CardDescription>
               Manage users and role assignments

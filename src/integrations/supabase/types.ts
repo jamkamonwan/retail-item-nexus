@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      departments: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       field_approval_config: {
         Row: {
           created_at: string
@@ -184,8 +205,11 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          last_login_at: string | null
+          status: Database["public"]["Enums"]["user_status"]
           updated_at: string
           user_id: string
+          user_type: Database["public"]["Enums"]["user_type"]
         }
         Insert: {
           avatar_url?: string | null
@@ -193,8 +217,11 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          last_login_at?: string | null
+          status?: Database["public"]["Enums"]["user_status"]
           updated_at?: string
           user_id: string
+          user_type?: Database["public"]["Enums"]["user_type"]
         }
         Update: {
           avatar_url?: string | null
@@ -202,7 +229,84 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          last_login_at?: string | null
+          status?: Database["public"]["Enums"]["user_status"]
           updated_at?: string
+          user_id?: string
+          user_type?: Database["public"]["Enums"]["user_type"]
+        }
+        Relationships: []
+      }
+      suppliers: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+        }
+        Relationships: []
+      }
+      user_departments: {
+        Row: {
+          created_at: string
+          department_code: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          department_code: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          department_code?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_departments_department_code_fkey"
+            columns: ["department_code"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      user_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          permission: Database["public"]["Enums"]["permission_type"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          permission: Database["public"]["Enums"]["permission_type"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          permission?: Database["public"]["Enums"]["permission_type"]
           user_id?: string
         }
         Relationships: []
@@ -228,6 +332,35 @@ export type Database = {
         }
         Relationships: []
       }
+      user_suppliers: {
+        Row: {
+          created_at: string
+          id: string
+          supplier_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          supplier_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          supplier_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_suppliers_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -244,6 +377,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role:
@@ -255,6 +389,16 @@ export type Database = {
         | "im"
         | "dc_income"
         | "admin"
+        | "nsd"
+      permission_type:
+        | "can_approve"
+        | "can_reject"
+        | "can_revise"
+        | "can_view_all_depts"
+        | "can_export"
+        | "can_access_reports"
+      user_status: "active" | "inactive" | "locked"
+      user_type: "internal" | "external"
       workflow_status:
         | "draft"
         | "pending_buyer"
@@ -400,7 +544,18 @@ export const Constants = {
         "im",
         "dc_income",
         "admin",
+        "nsd",
       ],
+      permission_type: [
+        "can_approve",
+        "can_reject",
+        "can_revise",
+        "can_view_all_depts",
+        "can_export",
+        "can_access_reports",
+      ],
+      user_status: ["active", "inactive", "locked"],
+      user_type: ["internal", "external"],
       workflow_status: [
         "draft",
         "pending_buyer",
