@@ -6,14 +6,15 @@ import { NPDSubmission, WORKFLOW_STATUSES, WorkflowStatus } from '@/types/workfl
 import { WorkflowDashboard } from './WorkflowDashboard';
 import { SubmissionView } from './SubmissionView';
 import { NPDForm } from './NPDForm';
+import { FieldApprovalConfigScreen } from './FieldApprovalConfigScreen';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { RoleSimulator } from './RoleSimulator';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
-import { LayoutDashboard, FileText } from 'lucide-react';
+import { LayoutDashboard, FileText, Settings2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-type View = 'dashboard' | 'form' | 'submission';
+type View = 'dashboard' | 'form' | 'submission' | 'config';
 
 export function AuthenticatedWorkflowApp() {
   const { role } = useAuth();
@@ -109,6 +110,10 @@ export function AuthenticatedWorkflowApp() {
                     <FileText className="w-4 h-4" />
                     New Entry
                   </TabsTrigger>
+                  <TabsTrigger value="config" className="gap-2">
+                    <Settings2 className="w-4 h-4" />
+                    Config
+                  </TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
@@ -148,6 +153,10 @@ export function AuthenticatedWorkflowApp() {
 
         {currentView === 'form' && (
           <NPDForm userRole={demoRole} onSubmitSuccess={handleBackToList} onCancel={handleBackToList} />
+        )}
+
+        {currentView === 'config' && (
+          <FieldApprovalConfigScreen />
         )}
 
         {currentView === 'submission' && selectedSubmission && (

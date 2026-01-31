@@ -9,3 +9,4 @@ export { NPDForm } from './NPDForm';
 export { WorkflowDashboard } from './WorkflowDashboard';
 export { SubmissionView } from './SubmissionView';
 export { AuthenticatedWorkflowApp } from './AuthenticatedWorkflowApp';
+export { FieldApprovalConfigScreen } from './FieldApprovalConfigScreen';
