@@ -1,6 +1,6 @@
 import { UserType, USER_TYPES } from '@/types/npd';
 import { cn } from '@/lib/utils';
-import { Building2, Users, Briefcase, Calculator, Truck, Database, DollarSign } from 'lucide-react';
+import { Building2, Users, Briefcase, Calculator, Truck, Database, DollarSign, ShieldCheck } from 'lucide-react';
 
 interface UserTypeSelectorProps {
   selected: UserType | null;
@@ -16,6 +16,7 @@ const USER_TYPE_ICONS: Record<UserType, React.ReactNode> = {
   scm: <Truck className="w-5 h-5" />,
   im: <Database className="w-5 h-5" />,
   dc_income: <DollarSign className="w-5 h-5" />,
+  admin: <ShieldCheck className="w-5 h-5" />,
 };
 
 export function UserTypeSelector({ selected, onSelect, isExternal = false }: UserTypeSelectorProps) {

@@ -1,6 +1,6 @@
 import { UserType, USER_TYPES } from '@/types/npd';
 import { cn } from '@/lib/utils';
-import { Building2, Users, Briefcase, Calculator, Truck, Database, DollarSign, Shield } from 'lucide-react';
+import { Building2, Users, Briefcase, Calculator, Truck, Database, DollarSign, Shield, ShieldCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface RoleDisplayProps {
@@ -16,6 +16,7 @@ const USER_TYPE_ICONS: Record<UserType, React.ReactNode> = {
   scm: <Truck className="w-4 h-4" />,
   im: <Database className="w-4 h-4" />,
   dc_income: <DollarSign className="w-4 h-4" />,
+  admin: <ShieldCheck className="w-4 h-4" />,
 };
 
 export function RoleDisplay({ role, isExternal }: RoleDisplayProps) {

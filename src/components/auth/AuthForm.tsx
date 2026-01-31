@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Loader2, FileDown, Building2, Users, Briefcase, Calculator, Truck, Database, DollarSign } from 'lucide-react';
+import { Loader2, FileDown, Building2, Users, Briefcase, Calculator, Truck, Database, DollarSign, ShieldCheck } from 'lucide-react';
 
 const ROLE_ICONS: Record<UserType, React.ReactNode> = {
   supplier: <Building2 className="w-4 h-4" />,
@@ -18,6 +18,7 @@ const ROLE_ICONS: Record<UserType, React.ReactNode> = {
   scm: <Truck className="w-4 h-4" />,
   im: <Database className="w-4 h-4" />,
   dc_income: <DollarSign className="w-4 h-4" />,
+  admin: <ShieldCheck className="w-4 h-4" />,
 };
 
 export function AuthForm() {
