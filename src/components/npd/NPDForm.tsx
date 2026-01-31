@@ -107,7 +107,11 @@ interface NPDFormProps {
 }
 
 export function NPDForm({ userRole, onSubmitSuccess, onCancel }: NPDFormProps) {
-  const { createSubmission } = useSubmissions();
+  const { createSubmission, updateFormData } = useSubmissions();
+  
+  // Draft tracking state
+  const [currentSubmissionId, setCurrentSubmissionId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   
   // Setup State
   const [setupComplete, setSetupComplete] = useState(false);
@@ -187,17 +191,61 @@ export function NPDForm({ userRole, onSubmitSuccess, onCancel }: NPDFormProps) {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Navigate steps
-  const handleNext = () => {
-    if (validateCurrentSection()) {
-      if (!completedSections.includes(currentSection)) {
-        setCompletedSections(prev => [...prev, currentSection]);
-      }
-      if (currentStep < FORM_STEPS.length - 1) {
-        setCurrentStep(prev => prev + 1);
-      }
-    } else {
+  // Navigate steps with auto-save
+  const handleNext = async () => {
+    if (!validateCurrentSection()) {
       toast.error('Please fill in all required fields');
+      return;
+    }
+
+    // Mark section as completed
+    if (!completedSections.includes(currentSection)) {
+      setCompletedSections(prev => [...prev, currentSection]);
+    }
+
+    // Auto-save logic
+    if (currentStep === 0 && !currentSubmissionId) {
+      // First step (Basic Information) - create draft
+      setIsSaving(true);
+      try {
+        const productNameEn = (formData['product_name_en'] as string) || 'New Product';
+        const productNameTh = (formData['product_name_th'] as string) || '';
+        
+        const result = await createSubmission(
+          selectedDivision!,
+          productNameEn,
+          productNameTh,
+          formData
+        );
+        
+        if (result) {
+          setCurrentSubmissionId(result.id);
+          toast.success('Draft created');
+        }
+      } catch (error) {
+        console.error('Error creating draft:', error);
+        toast.error('Failed to save draft');
+      } finally {
+        setIsSaving(false);
+      }
+    } else if (currentSubmissionId) {
+      // Subsequent steps - update existing draft
+      setIsSaving(true);
+      try {
+        const success = await updateFormData(currentSubmissionId, formData);
+        if (success) {
+          toast.success('Progress saved');
+        }
+      } catch (error) {
+        console.error('Error updating draft:', error);
+      } finally {
+        setIsSaving(false);
+      }
+    }
+
+    // Navigate to next step
+    if (currentStep < FORM_STEPS.length - 1) {
+      setCurrentStep(prev => prev + 1);
     }
   };
 
@@ -214,9 +262,25 @@ export function NPDForm({ userRole, onSubmitSuccess, onCancel }: NPDFormProps) {
     }
   };
 
-  // Save draft
-  const handleSaveDraft = () => {
-    toast.success('Draft saved successfully');
+  // Save draft manually
+  const handleSaveDraft = async () => {
+    if (!currentSubmissionId) {
+      toast.info('Complete Basic Information first to create a draft');
+      return;
+    }
+    
+    setIsSaving(true);
+    try {
+      const success = await updateFormData(currentSubmissionId, formData);
+      if (success) {
+        toast.success('Draft saved successfully');
+      }
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      toast.error('Failed to save draft');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Submit form
@@ -269,6 +333,7 @@ export function NPDForm({ userRole, onSubmitSuccess, onCancel }: NPDFormProps) {
     setErrors({});
     setCompletedSections([]);
     setCurrentStep(0);
+    setCurrentSubmissionId(null);
     toast.info('Form has been reset');
   };
 
@@ -444,9 +509,14 @@ export function NPDForm({ userRole, onSubmitSuccess, onCancel }: NPDFormProps) {
               </div>
 
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={handleSaveDraft}>
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Draft
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleSaveDraft}
+                  disabled={isSaving || !currentSubmissionId}
+                >
+                  <Save className={cn("w-4 h-4 mr-2", isSaving && "animate-spin")} />
+                  {isSaving ? 'Saving...' : 'Save Draft'}
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleReset}>
                   <RotateCcw className="w-4 h-4" />
@@ -535,8 +605,8 @@ export function NPDForm({ userRole, onSubmitSuccess, onCancel }: NPDFormProps) {
                     {isSubmitting ? 'Submitting...' : 'Submit Form'}
                   </Button>
                 ) : (
-                  <Button onClick={handleNext}>
-                    Next
+                  <Button onClick={handleNext} disabled={isSaving}>
+                    {isSaving ? 'Saving...' : 'Next'}
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 )}
