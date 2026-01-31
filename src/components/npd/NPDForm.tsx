@@ -51,7 +51,7 @@ const generateDummyValue = (field: NPDFormField): string | number => {
       return 'Sample description text for testing purposes.';
     
     case 'file':
-      return ''; // Skip file fields
+      return ''; // Handled separately in async function
     
     default: // text
       if (field.id.includes('barcode')) return '8851234567890';
@@ -66,6 +66,26 @@ const generateDummyValue = (field: NPDFormField): string | number => {
       if (field.id.includes('material')) return 'Cotton 100%';
       if (field.id.includes('supplier')) return 'Test Supplier Co., Ltd.';
       return 'Sample Value';
+  }
+};
+
+// Fetch a random product image from Picsum and convert to File
+const fetchRandomProductImage = async (fieldId: string): Promise<File | null> => {
+  try {
+    // Use Picsum for random images - 1400x1400 as specified in the image fields
+    const randomSeed = Math.floor(Math.random() * 1000);
+    const imageUrl = `https://picsum.photos/seed/${randomSeed}/1400/1400`;
+    
+    const response = await fetch(imageUrl);
+    if (!response.ok) throw new Error('Failed to fetch image');
+    
+    const blob = await response.blob();
+    const fileName = `${fieldId}_${randomSeed}.jpg`;
+    
+    return new File([blob], fileName, { type: 'image/jpeg' });
+  } catch (error) {
+    console.error('Error fetching random image:', error);
+    return null;
   }
 };
 
@@ -253,18 +273,44 @@ export function NPDForm({ userRole, onSubmitSuccess, onCancel }: NPDFormProps) {
   };
 
   // Auto-fill current section with dummy data
-  const handleAutoFill = () => {
+  const [isAutoFilling, setIsAutoFilling] = useState(false);
+  
+  const handleAutoFill = async () => {
+    setIsAutoFilling(true);
     const newData: Record<string, string | number | File | null> = { ...formData };
     
-    currentFields.forEach(field => {
-      if (field.inputType !== 'file') {
-        newData[field.id] = generateDummyValue(field);
-      }
+    const fileFields = currentFields.filter(f => f.inputType === 'file');
+    const nonFileFields = currentFields.filter(f => f.inputType !== 'file');
+    
+    // Fill non-file fields immediately
+    nonFileFields.forEach(field => {
+      newData[field.id] = generateDummyValue(field);
     });
+    
+    // Fetch random images for file fields in parallel
+    if (fileFields.length > 0) {
+      toast.info(`Fetching ${fileFields.length} random product image(s)...`);
+      
+      const imagePromises = fileFields.map(async (field) => {
+        const file = await fetchRandomProductImage(field.id);
+        return { fieldId: field.id, file };
+      });
+      
+      const imageResults = await Promise.all(imagePromises);
+      
+      imageResults.forEach(({ fieldId, file }) => {
+        if (file) {
+          newData[fieldId] = file;
+        }
+      });
+    }
     
     setFormData(newData);
     setErrors({});
-    toast.success(`Auto-filled ${currentFields.filter(f => f.inputType !== 'file').length} fields with dummy data`);
+    
+    const filledCount = nonFileFields.length + fileFields.filter(f => newData[f.id]).length;
+    toast.success(`Auto-filled ${filledCount} fields with dummy data`);
+    setIsAutoFilling(false);
   };
 
   // Start Over
@@ -446,9 +492,14 @@ export function NPDForm({ userRole, onSubmitSuccess, onCancel }: NPDFormProps) {
               <CardContent className="p-6 sm:p-8">
                 {/* Auto Fill Button */}
                 <div className="flex justify-end mb-6">
-                  <Button variant="secondary" size="sm" onClick={handleAutoFill}>
-                    <Wand2 className="w-4 h-4 mr-2" />
-                    Auto Fill with Dummy Data
+                  <Button 
+                    variant="secondary" 
+                    size="sm" 
+                    onClick={handleAutoFill}
+                    disabled={isAutoFilling}
+                  >
+                    <Wand2 className={cn("w-4 h-4 mr-2", isAutoFilling && "animate-spin")} />
+                    {isAutoFilling ? 'Fetching Images...' : 'Auto Fill with Dummy Data'}
                   </Button>
                 </div>
                 
