@@ -44,7 +44,6 @@ export function UserManagement({ onBack }: UserManagementProps) {
   };
 
   const handleView = (user: UserProfile) => {
-    // For now, open edit dialog in read mode (could be enhanced)
     setSelectedUser(user);
     setFormOpen(true);
   };
@@ -56,9 +55,9 @@ export function UserManagement({ onBack }: UserManagementProps) {
 
   const handleFormSubmit = async (data: CreateUserData | UpdateUserData) => {
     if ('email' in data) {
-      await createUser(data);
+      await createUser(data as CreateUserData);
     } else {
-      await updateUser(data);
+      await updateUser(data as UpdateUserData);
     }
   };
 
@@ -66,9 +65,9 @@ export function UserManagement({ onBack }: UserManagementProps) {
     setConfirmDialog({
       open: true,
       title: 'Deactivate User',
-      description: `Are you sure you want to deactivate ${user.full_name || user.email}? They will no longer be able to log in.`,
+      description: `Are you sure you want to deactivate ${user.fullName || user.email}? They will no longer be able to log in.`,
       action: async () => {
-        await deactivateUser(user.user_id);
+        await deactivateUser(user.id);
         setConfirmDialog((prev) => ({ ...prev, open: false }));
       },
     });
@@ -78,9 +77,9 @@ export function UserManagement({ onBack }: UserManagementProps) {
     setConfirmDialog({
       open: true,
       title: 'Activate User',
-      description: `Are you sure you want to activate ${user.full_name || user.email}?`,
+      description: `Are you sure you want to activate ${user.fullName || user.email}?`,
       action: async () => {
-        await activateUser(user.user_id);
+        await activateUser(user.id);
         setConfirmDialog((prev) => ({ ...prev, open: false }));
       },
     });
@@ -90,9 +89,9 @@ export function UserManagement({ onBack }: UserManagementProps) {
     setConfirmDialog({
       open: true,
       title: 'Reset Password',
-      description: `Are you sure you want to reset the password for ${user.full_name || user.email}? A new temporary password will be generated.`,
+      description: `Are you sure you want to reset the password for ${user.fullName || user.email}? A new temporary password will be generated.`,
       action: async () => {
-        await resetPassword(user.user_id);
+        await resetPassword(user.id);
         setConfirmDialog((prev) => ({ ...prev, open: false }));
       },
     });

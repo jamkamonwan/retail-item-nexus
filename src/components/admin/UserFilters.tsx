@@ -2,8 +2,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Search, X } from 'lucide-react';
-import { UserFilters, UserStatus } from '@/types/admin';
-import { Department, Supplier } from '@/types/admin';
+import { UserFilters, UserStatus, Department, Supplier } from '@/types/admin';
 import { USER_TYPES, UserType } from '@/types/npd';
 
 interface UserFiltersProps {
@@ -25,7 +24,7 @@ export function UserFiltersComponent({ filters, onFiltersChange, departments, su
   };
 
   const handleRoleChange = (value: string) => {
-    onFiltersChange({ ...filters, role: value === 'all' ? null : value });
+    onFiltersChange({ ...filters, role: value === 'all' ? null : value as UserType });
   };
 
   const handleDepartmentChange = (value: string) => {

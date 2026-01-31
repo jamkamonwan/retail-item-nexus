@@ -1,135 +1,84 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { User, Session } from '@supabase/supabase-js';
-import { UserType } from '@/types/npd';
+import { useState, useCallback } from 'react';
+import { MockRole, mockUsers, getUserByRole } from '@/data/mock';
+
+// Re-export MockRole as UserType for compatibility
+export type UserType = MockRole;
+
+interface MockUser {
+  id: string;
+  email: string;
+}
 
 interface AuthState {
-  user: User | null;
-  session: Session | null;
+  user: MockUser | null;
+  session: { user: MockUser } | null;
   role: UserType | null;
   loading: boolean;
 }
 
+// Global state for demo role switching
+let currentMockUserId = 'user-buyer-001'; // Default to buyer
+
 export function useAuth() {
-  const [authState, setAuthState] = useState<AuthState>({
-    user: null,
-    session: null,
-    role: null,
-    loading: true,
+  const [authState, setAuthState] = useState<AuthState>(() => {
+    const mockUser = mockUsers.find(u => u.id === currentMockUserId);
+    return {
+      user: mockUser ? { id: mockUser.id, email: mockUser.email } : null,
+      session: mockUser ? { user: { id: mockUser.id, email: mockUser.email } } : null,
+      role: mockUser?.role || null,
+      loading: false,
+    };
   });
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchUserRole = async (userId: string): Promise<UserType | null> => {
-      try {
-        const { data } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', userId)
-          .maybeSingle();
-        return (data?.role as UserType) ?? null;
-      } catch {
-        return null;
-      }
-    };
-
-    // Listener for ONGOING auth changes (does NOT control initial loading)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (!isMounted) return;
-
-        const user = session?.user ?? null;
-        
-        // Update user/session immediately
-        setAuthState(prev => ({
-          ...prev,
-          user,
-          session,
-          role: user ? prev.role : null,
-        }));
-
-        // Fetch role in background (fire and forget for ongoing changes)
-        if (user) {
-          fetchUserRole(user.id).then(role => {
-            if (isMounted) {
-              setAuthState(prev => ({ ...prev, role }));
-            }
-          });
-        }
-      }
-    );
-
-    // INITIAL load (controls loading state)
-    const initializeAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!isMounted) return;
-
-        const user = session?.user ?? null;
-        let role: UserType | null = null;
-
-        // Fetch role BEFORE setting loading false
-        if (user) {
-          role = await fetchUserRole(user.id);
-        }
-
-        if (isMounted) {
-          setAuthState({
-            user,
-            session,
-            role,
-            loading: false,
-          });
-        }
-      } catch (error) {
-        console.error('Auth initialization error:', error);
-        if (isMounted) {
-          setAuthState({
-            user: null,
-            session: null,
-            role: null,
-            loading: false,
-          });
-        }
-      }
-    };
-
-    initializeAuth();
-
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
+  const setMockUser = useCallback((userId: string) => {
+    currentMockUserId = userId;
+    const mockUser = mockUsers.find(u => u.id === userId);
+    setAuthState({
+      user: mockUser ? { id: mockUser.id, email: mockUser.email } : null,
+      session: mockUser ? { user: { id: mockUser.id, email: mockUser.email } } : null,
+      role: mockUser?.role || null,
+      loading: false,
+    });
   }, []);
 
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
+  const setMockRole = useCallback((role: UserType) => {
+    const mockUser = getUserByRole(role);
+    if (mockUser) {
+      currentMockUserId = mockUser.id;
+      setAuthState({
+        user: { id: mockUser.id, email: mockUser.email },
+        session: { user: { id: mockUser.id, email: mockUser.email } },
+        role: mockUser.role,
+        loading: false,
+      });
+    }
+  }, []);
+
+  // Mock sign in - just sets the user
+  const signIn = async (email: string, _password: string) => {
+    const mockUser = mockUsers.find(u => u.email === email);
+    if (mockUser) {
+      setMockUser(mockUser.id);
+      return { error: null };
+    }
+    return { error: { message: 'User not found in mock data' } };
   };
 
-  const signUp = async (email: string, password: string, fullName: string, role: UserType) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: window.location.origin,
-        data: {
-          full_name: fullName,
-          role: role,
-        },
-      },
-    });
-
-    return { data, error };
+  // Mock sign up - just logs
+  const signUp = async (email: string, _password: string, fullName: string, role: UserType) => {
+    console.log('[Mock] Sign up:', { email, fullName, role });
+    return { data: null, error: null };
   };
 
+  // Mock sign out
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    return { error };
+    setAuthState({
+      user: null,
+      session: null,
+      role: null,
+      loading: false,
+    });
+    return { error: null };
   };
 
   return {
@@ -137,5 +86,7 @@ export function useAuth() {
     signIn,
     signUp,
     signOut,
+    setMockUser,
+    setMockRole,
   };
 }

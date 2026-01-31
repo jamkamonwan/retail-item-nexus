@@ -1,6 +1,6 @@
 import { UserType, USER_TYPES } from '@/types/npd';
 import { cn } from '@/lib/utils';
-import { Building2, Users, Briefcase, Calculator, Truck, Database, DollarSign, ChevronDown, Shield, ShieldCheck } from 'lucide-react';
+import { Building2, Users, Briefcase, Calculator, Truck, Database, DollarSign, ChevronDown, Shield, ShieldCheck, Store } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,10 +26,11 @@ const USER_TYPE_ICONS: Record<UserType, React.ReactNode> = {
   im: <Database className="w-4 h-4" />,
   dc_income: <DollarSign className="w-4 h-4" />,
   admin: <ShieldCheck className="w-4 h-4" />,
+  nsd: <Shield className="w-4 h-4" />,
 };
 
 const EXTERNAL_ROLES: UserType[] = ['supplier'];
-const INTERNAL_ROLES: UserType[] = ['buyer', 'commercial', 'finance', 'scm', 'im', 'dc_income'];
+const INTERNAL_ROLES: UserType[] = ['buyer', 'commercial', 'finance', 'scm', 'im', 'dc_income', 'nsd'];
 const ADMIN_ROLES: UserType[] = ['admin'];
 
 export function RoleSimulator({ selectedRole, onRoleChange }: RoleSimulatorProps) {

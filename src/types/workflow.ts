@@ -1,16 +1,18 @@
 // NPD Workflow Type Definitions
+// Updated for mock-data-driven design-first development
 
-import { UserType, Division, FormSection } from './npd';
+import { UserType, Division } from './npd';
 
 // Workflow Status - Detailed flow from Supplier to Approval
 export type WorkflowStatus = 
-  | 'draft'           // Supplier working on initial data
-  | 'pending_buyer'   // Submitted to Buyer for review
-  | 'pending_commercial' // Buyer approved, Commercial reviewing
-  | 'pending_finance' // Commercial approved, Finance reviewing
-  | 'approved'        // All approvals complete
-  | 'rejected'        // Rejected at any stage
-  | 'revision_needed'; // Sent back for revision
+  | 'draft'
+  | 'pending_buyer'
+  | 'pending_commercial'
+  | 'pending_finance'
+  | 'pending_secondary'
+  | 'approved'
+  | 'rejected'
+  | 'revision_needed';
 
 export const WORKFLOW_STATUSES: Record<WorkflowStatus, { 
   label: string; 
@@ -46,6 +48,13 @@ export const WORKFLOW_STATUSES: Record<WorkflowStatus, {
     nextStatus: 'approved',
     previousStatus: 'pending_commercial'
   },
+  pending_secondary: { 
+    label: 'Secondary Review', 
+    labelTh: 'รอตรวจสอบเพิ่มเติม', 
+    color: 'bg-indigo-100 text-indigo-800',
+    nextStatus: 'approved',
+    previousStatus: 'pending_commercial'
+  },
   approved: { 
     label: 'Approved', 
     labelTh: 'อนุมัติแล้ว', 
@@ -69,6 +78,7 @@ export const APPROVAL_PERMISSIONS: Record<WorkflowStatus, UserType[]> = {
   pending_buyer: ['buyer'],
   pending_commercial: ['commercial'],
   pending_finance: ['finance'],
+  pending_secondary: ['scm', 'im', 'dc_income', 'nsd'],
   approved: [],
   rejected: [],
   revision_needed: ['supplier'],
@@ -80,6 +90,7 @@ export const EDIT_PERMISSIONS: Record<WorkflowStatus, UserType[]> = {
   pending_buyer: ['buyer'],
   pending_commercial: ['commercial'],
   pending_finance: ['finance'],
+  pending_secondary: ['scm', 'im', 'dc_income', 'nsd'],
   approved: [],
   rejected: [],
   revision_needed: ['supplier'],
@@ -93,7 +104,10 @@ export interface NPDSubmission {
   productNameTh: string;
   productNameEn: string;
   barcode: string;
+  supplierId?: string;
   supplierName: string;
+  createdBy?: string;
+  createdByName?: string;
   createdAt: Date;
   updatedAt: Date;
   submittedAt?: Date;
@@ -105,12 +119,13 @@ export interface NPDSubmission {
 // Workflow History Entry
 export interface WorkflowHistoryEntry {
   id: string;
-  timestamp: Date;
-  fromStatus: WorkflowStatus;
+  fromStatus: WorkflowStatus | null;
   toStatus: WorkflowStatus;
-  action: 'submit' | 'approve' | 'reject' | 'request_revision' | 'revise';
-  performedBy: UserType;
+  action: string;
+  performedBy: string;
+  performedByRole: UserType;
   comment?: string;
+  createdAt: Date;
 }
 
 // Field Permission for current user
@@ -129,7 +144,6 @@ export function getFieldPermission(
     return 'edit';
   }
   
-  // Everyone can view fields that were filled by others
   return 'view';
 }
 
@@ -157,6 +171,8 @@ export function getNextAction(
       return { action: 'Approve & Send to Finance', actionTh: 'อนุมัติและส่งต่อ Finance' };
     case 'pending_finance':
       return { action: 'Final Approval', actionTh: 'อนุมัติขั้นสุดท้าย' };
+    case 'pending_secondary':
+      return { action: 'Approve', actionTh: 'อนุมัติ' };
     case 'revision_needed':
       return { action: 'Resubmit', actionTh: 'ส่งใหม่' };
     default:

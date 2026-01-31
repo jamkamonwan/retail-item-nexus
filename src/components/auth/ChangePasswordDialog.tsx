@@ -9,7 +9,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Loader2, Lock, Eye, EyeOff } from 'lucide-react';
 
@@ -58,34 +57,11 @@ export function ChangePasswordDialog({ open, onPasswordChanged }: ChangePassword
     }
 
     setLoading(true);
-    try {
-      // Update password using Supabase auth
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
-
-      if (updateError) throw updateError;
-
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No user found');
-
-      // Clear the must_change_password flag
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ must_change_password: false })
-        .eq('user_id', user.id);
-
-      if (profileError) throw profileError;
-
-      toast.success('Password changed successfully!');
-      onPasswordChanged();
-    } catch (error: any) {
-      console.error('Password change error:', error);
-      toast.error(error.message || 'Failed to change password');
-    } finally {
-      setLoading(false);
-    }
+    // Mock password change
+    await new Promise(resolve => setTimeout(resolve, 500));
+    toast.success('Password changed successfully!');
+    onPasswordChanged();
+    setLoading(false);
   };
 
   return (
