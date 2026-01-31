@@ -1,6 +1,6 @@
 import { Division, DIVISIONS } from '@/types/npd';
 import { cn } from '@/lib/utils';
-import { Package, ShoppingBag, Snowflake, Shirt, Cpu, Home, Cross } from 'lucide-react';
+import { Package, ShoppingBag, Snowflake, Shirt, Cpu, Heart, Store } from 'lucide-react';
 
 interface DivisionSelectorProps {
   selected: Division | null;
@@ -9,18 +9,16 @@ interface DivisionSelectorProps {
 
 const DIVISION_ICONS: Record<Division, React.ReactNode> = {
   HL: <Cpu className="w-6 h-6" />,
-  HOL: <Home className="w-6 h-6" />,
   DF: <Snowflake className="w-6 h-6" />,
-  NF: <Package className="w-6 h-6" />,
   SL: <Shirt className="w-6 h-6" />,
   FF: <ShoppingBag className="w-6 h-6" />,
-  PH: <Cross className="w-6 h-6" />,
-  NSD: <Package className="w-6 h-6" />,
+  GS: <Store className="w-6 h-6" />,
+  HB: <Heart className="w-6 h-6" />,
 };
 
 export function DivisionSelector({ selected, onSelect }: DivisionSelectorProps) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
       {(Object.entries(DIVISIONS) as [Division, typeof DIVISIONS[Division]][]).map(([key, div]) => {
         const isSelected = selected === key;
         return (

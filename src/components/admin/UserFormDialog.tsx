@@ -12,18 +12,17 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { UserProfile, CreateUserData, UpdateUserData, Department, Supplier, UserTypeValue } from '@/types/admin';
+import { UserProfile, CreateUserData, UpdateUserData, Supplier, UserTypeValue } from '@/types/admin';
 import { USER_TYPES, UserType } from '@/types/npd';
 import { Wand2 } from 'lucide-react';
 
 // Dummy data generator
 const DUMMY_FIRST_NAMES = ['John', 'Jane', 'Michael', 'Sarah', 'David', 'Emma', 'Chris', 'Lisa', 'Robert', 'Anna'];
 const DUMMY_LAST_NAMES = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Martinez', 'Wilson'];
-const DUMMY_ROLES = ['buyer', 'commercial', 'finance', 'scm', 'im', 'admin'];
+const DUMMY_ROLES: UserType[] = ['buyer', 'commercial', 'finance', 'scm', 'im', 'admin'];
 
 const generateDummyUser = () => {
   const firstName = DUMMY_FIRST_NAMES[Math.floor(Math.random() * DUMMY_FIRST_NAMES.length)];
@@ -35,15 +34,16 @@ const generateDummyUser = () => {
     fullName: `${firstName} ${lastName}`,
     email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}.${timestamp}@example.com`,
     userType: 'internal' as const,
-    roles: [role],
+    role: role,
     supplierId: '',
   };
 };
+
 const userSchema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters').max(100, 'Name too long'),
   email: z.string().email('Invalid email format'),
   userType: z.enum(['internal', 'external']),
-  roles: z.array(z.string()).min(1, 'At least one role required'),
+  role: z.string().min(1, 'Role is required'),
   supplierId: z.string().optional(),
 });
 
@@ -73,7 +73,7 @@ export function UserFormDialog({
       fullName: '',
       email: '',
       userType: 'internal',
-      roles: [],
+      role: '',
       supplierId: '',
     },
   });
@@ -83,18 +83,18 @@ export function UserFormDialog({
   useEffect(() => {
     if (user) {
       form.reset({
-        fullName: user.full_name || '',
+        fullName: user.fullName || '',
         email: user.email || '',
-        userType: user.user_type,
-        roles: user.roles,
-        supplierId: user.supplier?.id || '',
+        userType: user.userType,
+        role: user.role,
+        supplierId: user.supplierId || '',
       });
     } else {
       form.reset({
         fullName: '',
         email: '',
         userType: 'internal',
-        roles: [],
+        role: '',
         supplierId: '',
       });
     }
@@ -105,10 +105,10 @@ export function UserFormDialog({
     try {
       if (isEditing) {
         await onSubmit({
-          userId: user!.user_id,
+          userId: user!.id,
           fullName: values.fullName,
           userType: values.userType as UserTypeValue,
-          roles: values.roles,
+          role: values.role as UserType,
           supplierId: values.userType === 'external' ? values.supplierId : undefined,
         });
       } else {
@@ -116,7 +116,7 @@ export function UserFormDialog({
           email: values.email,
           fullName: values.fullName,
           userType: values.userType as UserTypeValue,
-          roles: values.roles,
+          role: values.role as UserType,
           supplierId: values.userType === 'external' ? values.supplierId : undefined,
         });
       }
@@ -125,16 +125,6 @@ export function UserFormDialog({
       setSubmitting(false);
     }
   };
-
-  const toggleRole = (role: string) => {
-    const current = form.getValues('roles');
-    const updated = current.includes(role)
-      ? current.filter((r) => r !== role)
-      : [...current, role];
-    form.setValue('roles', updated, { shouldValidate: true });
-  };
-
-  const selectedRoles = form.watch('roles');
 
   const handleAutoFill = () => {
     const dummyData = generateDummyUser();
@@ -211,25 +201,26 @@ export function UserFormDialog({
               </RadioGroup>
             </div>
 
-            {/* Roles */}
+            {/* Role */}
             <div className="space-y-2">
-              <Label>Roles * (select at least one)</Label>
-              <div className="grid grid-cols-4 gap-2 p-3 border rounded-md bg-muted/30">
-                {Object.entries(USER_TYPES).map(([key, value]) => (
-                  <div key={key} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`role-${key}`}
-                      checked={selectedRoles.includes(key)}
-                      onCheckedChange={() => toggleRole(key)}
-                    />
-                    <Label htmlFor={`role-${key}`} className="font-normal text-sm">
+              <Label>Role *</Label>
+              <Select
+                value={form.watch('role')}
+                onValueChange={(val) => form.setValue('role', val, { shouldValidate: true })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(USER_TYPES).map(([key, value]) => (
+                    <SelectItem key={key} value={key}>
                       {value.label}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-              {form.formState.errors.roles && (
-                <p className="text-sm text-destructive">{form.formState.errors.roles.message}</p>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {form.formState.errors.role && (
+                <p className="text-sm text-destructive">{form.formState.errors.role.message}</p>
               )}
             </div>
 

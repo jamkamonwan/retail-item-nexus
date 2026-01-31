@@ -67,8 +67,8 @@ export function UserTable({
         <TableHeader>
           <TableRow>
             <TableHead>User</TableHead>
-            <TableHead>Role(s)</TableHead>
-            <TableHead>Department(s)</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Department</TableHead>
             <TableHead>Supplier</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Last Login</TableHead>
@@ -81,36 +81,28 @@ export function UserTable({
             <TableRow key={user.id}>
               <TableCell>
                 <div className="flex flex-col">
-                  <span className="font-medium">{user.full_name || 'No name'}</span>
+                  <span className="font-medium">{user.fullName || 'No name'}</span>
                   <span className="text-sm text-muted-foreground">{user.email}</span>
                 </div>
               </TableCell>
               <TableCell>
-                <div className="flex flex-wrap gap-1">
-                  {user.roles.map((role) => (
-                    <Badge key={role} variant="secondary" className="text-xs">
-                      {USER_TYPES[role as keyof typeof USER_TYPES]?.label || role}
-                    </Badge>
-                  ))}
-                </div>
+                <Badge variant="secondary" className="text-xs">
+                  {USER_TYPES[user.role]?.label || user.role}
+                </Badge>
               </TableCell>
               <TableCell>
-                <div className="flex flex-wrap gap-1">
-                  {user.departments.length > 0 ? (
-                    user.departments.map((dept) => (
-                      <Badge key={dept} variant="outline" className="text-xs">
-                        {dept}
-                      </Badge>
-                    ))
-                  ) : (
-                    <span className="text-muted-foreground text-sm">—</span>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell>
-                {user.supplier ? (
+                {user.department ? (
                   <Badge variant="outline" className="text-xs">
-                    {user.supplier.name}
+                    {user.department}
+                  </Badge>
+                ) : (
+                  <span className="text-muted-foreground text-sm">—</span>
+                )}
+              </TableCell>
+              <TableCell>
+                {user.supplierName ? (
+                  <Badge variant="outline" className="text-xs">
+                    {user.supplierName}
                   </Badge>
                 ) : (
                   <span className="text-muted-foreground text-sm">—</span>
@@ -120,10 +112,10 @@ export function UserTable({
                 <Badge className={statusColors[user.status]}>{user.status}</Badge>
               </TableCell>
               <TableCell className="text-sm text-muted-foreground">
-                {user.last_login_at ? format(new Date(user.last_login_at), 'MMM d, yyyy') : '—'}
+                {user.lastLoginAt ? format(new Date(user.lastLoginAt), 'MMM d, yyyy') : '—'}
               </TableCell>
               <TableCell className="text-sm text-muted-foreground">
-                {format(new Date(user.created_at), 'MMM d, yyyy')}
+                {format(new Date(user.createdAt), 'MMM d, yyyy')}
               </TableCell>
               <TableCell>
                 <DropdownMenu>

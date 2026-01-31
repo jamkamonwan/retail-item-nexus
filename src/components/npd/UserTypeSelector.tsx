@@ -17,6 +17,7 @@ const USER_TYPE_ICONS: Record<UserType, React.ReactNode> = {
   im: <Database className="w-5 h-5" />,
   dc_income: <DollarSign className="w-5 h-5" />,
   admin: <ShieldCheck className="w-5 h-5" />,
+  nsd: <Building2 className="w-5 h-5" />,
 };
 
 export function UserTypeSelector({ selected, onSelect, isExternal = false }: UserTypeSelectorProps) {

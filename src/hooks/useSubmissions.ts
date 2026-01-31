@@ -1,56 +1,48 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './useAuth';
-import { NPDSubmission, WorkflowStatus, WorkflowHistoryEntry } from '@/types/workflow';
-import { Division, UserType } from '@/types/npd';
+import { useState, useCallback } from 'react';
+import { 
+  mockSubmissions, 
+  MockSubmission, 
+  MockWorkflowStatus, 
+  MockDivision,
+  MockHistoryEntry 
+} from '@/data/mock';
+import { MockRole } from '@/data/mock/users';
 import { toast } from 'sonner';
 
+// Re-export types for compatibility
+export type WorkflowStatus = MockWorkflowStatus;
+export type Division = MockDivision;
+
+export interface NPDSubmission extends MockSubmission {}
+
+// Workflow status configuration
+export const WORKFLOW_STATUSES: Record<WorkflowStatus, { 
+  label: string; 
+  color: string; 
+  nextStatus?: WorkflowStatus;
+  canEdit?: boolean;
+}> = {
+  draft: { label: 'Draft', color: 'bg-gray-500', nextStatus: 'pending_buyer', canEdit: true },
+  pending_buyer: { label: 'Pending Buyer', color: 'bg-yellow-500', nextStatus: 'pending_commercial' },
+  pending_commercial: { label: 'Pending Commercial', color: 'bg-orange-500', nextStatus: 'pending_finance' },
+  pending_finance: { label: 'Pending Finance', color: 'bg-blue-500', nextStatus: 'approved' },
+  pending_secondary: { label: 'Secondary Review', color: 'bg-purple-500', nextStatus: 'approved' },
+  approved: { label: 'Approved', color: 'bg-green-500' },
+  rejected: { label: 'Rejected', color: 'bg-red-500' },
+  revision_needed: { label: 'Revision Needed', color: 'bg-amber-500', canEdit: true },
+};
+
 export function useSubmissions() {
-  const { user } = useAuth();
-  const [submissions, setSubmissions] = useState<NPDSubmission[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [submissions, setSubmissions] = useState<NPDSubmission[]>([...mockSubmissions]);
+  const [loading, setLoading] = useState(false);
 
-  // Fetch all submissions
-  const fetchSubmissions = async () => {
-    if (!user) {
-      setSubmissions([]);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from('npd_submissions')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      // Transform database records to NPDSubmission format
-      const transformed: NPDSubmission[] = (data || []).map(row => ({
-        id: row.id,
-        division: row.division as Division,
-        status: row.status as WorkflowStatus,
-        productNameTh: row.product_name_th || '',
-        productNameEn: row.product_name_en,
-        barcode: row.barcode || '',
-        supplierName: row.supplier_name || '',
-        createdAt: new Date(row.created_at),
-        updatedAt: new Date(row.updated_at),
-        submittedAt: row.submitted_at ? new Date(row.submitted_at) : undefined,
-        approvedAt: row.approved_at ? new Date(row.approved_at) : undefined,
-        formData: row.form_data as Record<string, string | number | File | null>,
-        history: [], // Will be fetched separately if needed
-      }));
-
-      setSubmissions(transformed);
-    } catch (error: any) {
-      console.error('Error fetching submissions:', error);
-      toast.error('Failed to load submissions');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetchSubmissions = useCallback(async () => {
+    setLoading(true);
+    // Simulate network delay for realistic UX
+    await new Promise(resolve => setTimeout(resolve, 300));
+    setSubmissions([...mockSubmissions]);
+    setLoading(false);
+  }, []);
 
   // Create a new submission
   const createSubmission = async (
@@ -59,127 +51,75 @@ export function useSubmissions() {
     productNameTh: string,
     formData: Record<string, string | number | File | null>
   ): Promise<NPDSubmission | null> => {
-    if (!user) {
-      toast.error('Please sign in to create submissions');
-      return null;
-    }
-
-    try {
-      // Filter out File objects from formData for JSON storage
-      const jsonFormData: Record<string, string | number | null> = {};
-      for (const [key, value] of Object.entries(formData)) {
-        if (!(value instanceof File)) {
-          jsonFormData[key] = value;
-        }
+    // Filter out File objects for storage
+    const jsonFormData: Record<string, string | number | null> = {};
+    for (const [key, value] of Object.entries(formData)) {
+      if (!(value instanceof File)) {
+        jsonFormData[key] = value;
       }
-
-      const { data, error } = await supabase
-        .from('npd_submissions')
-        .insert({
-          division: division,
-          product_name_en: productNameEn,
-          product_name_th: productNameTh,
-          form_data: jsonFormData,
-          created_by: user.id,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      const newSubmission: NPDSubmission = {
-        id: data.id,
-        division: data.division as Division,
-        status: data.status as WorkflowStatus,
-        productNameTh: data.product_name_th || '',
-        productNameEn: data.product_name_en,
-        barcode: data.barcode || '',
-        supplierName: data.supplier_name || '',
-        createdAt: new Date(data.created_at),
-        updatedAt: new Date(data.updated_at),
-        formData: data.form_data as Record<string, string | number | File | null>,
-        history: [],
-      };
-
-      setSubmissions(prev => [newSubmission, ...prev]);
-      toast.success('Submission created successfully');
-      return newSubmission;
-    } catch (error: any) {
-      console.error('Error creating submission:', error);
-      toast.error('Failed to create submission');
-      return null;
     }
+
+    const newSubmission: NPDSubmission = {
+      id: `sub-${Date.now()}`,
+      division,
+      status: 'draft',
+      productNameTh,
+      productNameEn,
+      barcode: '',
+      supplierId: 'supplier-001',
+      supplierName: 'ACME Corporation',
+      createdBy: 'user-supplier-001',
+      createdByName: 'John Supplier',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      formData: jsonFormData,
+      history: [],
+    };
+
+    setSubmissions(prev => [newSubmission, ...prev]);
+    toast.success('Submission created successfully');
+    return newSubmission;
   };
 
-  // Update submission status (workflow action)
+  // Update submission status
   const updateStatus = async (
     submissionId: string,
     newStatus: WorkflowStatus,
     action: string,
-    userRole: UserType,
+    userRole: MockRole,
     comment?: string
   ): Promise<boolean> => {
-    if (!user) {
-      toast.error('Please sign in');
+    const submission = submissions.find(s => s.id === submissionId);
+    if (!submission) {
+      toast.error('Submission not found');
       return false;
     }
 
-    try {
-      // Get current submission
-      const submission = submissions.find(s => s.id === submissionId);
-      if (!submission) throw new Error('Submission not found');
+    const historyEntry: MockHistoryEntry = {
+      id: `hist-${Date.now()}`,
+      fromStatus: submission.status,
+      toStatus: newStatus,
+      action,
+      performedBy: 'current-user',
+      performedByRole: userRole,
+      comment,
+      createdAt: new Date(),
+    };
 
-      // Update submission status
-      const updateData: Record<string, any> = { status: newStatus };
-      
-      if (newStatus === 'pending_buyer' && !submission.submittedAt) {
-        updateData.submitted_at = new Date().toISOString();
-      }
-      if (newStatus === 'approved') {
-        updateData.approved_at = new Date().toISOString();
-      }
+    setSubmissions(prev => prev.map(s => 
+      s.id === submissionId 
+        ? { 
+            ...s, 
+            status: newStatus, 
+            updatedAt: new Date(),
+            submittedAt: newStatus === 'pending_buyer' && !s.submittedAt ? new Date() : s.submittedAt,
+            approvedAt: newStatus === 'approved' ? new Date() : s.approvedAt,
+            history: [...s.history, historyEntry],
+          }
+        : s
+    ));
 
-      const { error: updateError } = await supabase
-        .from('npd_submissions')
-        .update(updateData)
-        .eq('id', submissionId);
-
-      if (updateError) throw updateError;
-
-      // Add history entry
-      const { error: historyError } = await supabase
-        .from('npd_workflow_history')
-        .insert({
-          submission_id: submissionId,
-          from_status: submission.status,
-          to_status: newStatus,
-          action,
-          performed_by: user.id,
-          performed_by_role: userRole,
-          comment,
-        });
-
-      if (historyError) console.error('Failed to add history:', historyError);
-
-      // Update local state
-      setSubmissions(prev => prev.map(s => 
-        s.id === submissionId 
-          ? { 
-              ...s, 
-              status: newStatus, 
-              updatedAt: new Date(),
-              submittedAt: updateData.submitted_at ? new Date(updateData.submitted_at) : s.submittedAt,
-              approvedAt: updateData.approved_at ? new Date(updateData.approved_at) : s.approvedAt,
-            }
-          : s
-      ));
-
-      return true;
-    } catch (error: any) {
-      console.error('Error updating status:', error);
-      toast.error('Failed to update submission');
-      return false;
-    }
+    return true;
   };
 
   // Update submission form data
@@ -187,39 +127,21 @@ export function useSubmissions() {
     submissionId: string,
     formData: Record<string, string | number | File | null>
   ): Promise<boolean> => {
-    try {
-      // Filter out File objects from formData for JSON storage
-      const jsonFormData: Record<string, string | number | null> = {};
-      for (const [key, value] of Object.entries(formData)) {
-        if (!(value instanceof File)) {
-          jsonFormData[key] = value;
-        }
+    const jsonFormData: Record<string, string | number | null> = {};
+    for (const [key, value] of Object.entries(formData)) {
+      if (!(value instanceof File)) {
+        jsonFormData[key] = value;
       }
-
-      const { error } = await supabase
-        .from('npd_submissions')
-        .update({ form_data: jsonFormData })
-        .eq('id', submissionId);
-
-      if (error) throw error;
-
-      setSubmissions(prev => prev.map(s => 
-        s.id === submissionId 
-          ? { ...s, formData, updatedAt: new Date() }
-          : s
-      ));
-
-      return true;
-    } catch (error: any) {
-      console.error('Error updating form data:', error);
-      toast.error('Failed to save changes');
-      return false;
     }
-  };
 
-  useEffect(() => {
-    fetchSubmissions();
-  }, [user]);
+    setSubmissions(prev => prev.map(s => 
+      s.id === submissionId 
+        ? { ...s, formData: jsonFormData, updatedAt: new Date() }
+        : s
+    ));
+
+    return true;
+  };
 
   return {
     submissions,

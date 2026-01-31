@@ -1,21 +1,20 @@
 // NPD (New Product Development) Type Definitions
+// Updated for mock-data-driven design-first development
 
 // Product Divisions - Different product categories
-export type Division = 'HL' | 'HOL' | 'DF' | 'NF' | 'SL' | 'FF' | 'PH' | 'NSD';
+export type Division = 'HL' | 'DF' | 'SL' | 'FF' | 'GS' | 'HB';
 
 export const DIVISIONS: Record<Division, { label: string; fullName: string; color: string }> = {
   HL: { label: 'HL', fullName: 'Hard Lines', color: 'division-hl' },
-  HOL: { label: 'HOL', fullName: 'Home Office Living', color: 'division-hol' },
   DF: { label: 'DF', fullName: 'Dairy & Frozen', color: 'division-df' },
-  NF: { label: 'NF', fullName: 'Non-Food', color: 'division-nf' },
   SL: { label: 'SL', fullName: 'Soft Lines', color: 'division-sl' },
   FF: { label: 'FF', fullName: 'Fresh Food', color: 'division-ff' },
-  PH: { label: 'PH', fullName: 'Pharmacy', color: 'division-ph' },
-  NSD: { label: 'NSD', fullName: 'Non-Stock Direct', color: 'bg-gray-100 text-gray-800' },
+  GS: { label: 'GS', fullName: 'General Store', color: 'division-gs' },
+  HB: { label: 'HB', fullName: 'Health & Beauty', color: 'division-hb' },
 };
 
-// User Types - Who is filling the form
-export type UserType = 'supplier' | 'buyer' | 'commercial' | 'finance' | 'scm' | 'im' | 'dc_income' | 'admin';
+// User Types - Who is using the system
+export type UserType = 'supplier' | 'buyer' | 'commercial' | 'finance' | 'scm' | 'im' | 'dc_income' | 'admin' | 'nsd';
 
 export const USER_TYPES: Record<UserType, { label: string; description: string }> = {
   supplier: { label: 'Supplier', description: 'External supplier/vendor' },
@@ -26,6 +25,7 @@ export const USER_TYPES: Record<UserType, { label: string; description: string }
   im: { label: 'IM', description: 'Inventory Management' },
   dc_income: { label: 'DC Income', description: 'Distribution Center Income' },
   admin: { label: 'Administrator', description: 'System administrator' },
+  nsd: { label: 'NSD', description: 'New Store Development' },
 };
 
 // Channel Type - Online vs Offline

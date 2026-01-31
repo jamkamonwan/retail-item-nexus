@@ -17,6 +17,7 @@ const USER_TYPE_ICONS: Record<UserType, React.ReactNode> = {
   im: <Database className="w-4 h-4" />,
   dc_income: <DollarSign className="w-4 h-4" />,
   admin: <ShieldCheck className="w-4 h-4" />,
+  nsd: <Shield className="w-4 h-4" />,
 };
 
 export function RoleDisplay({ role, isExternal }: RoleDisplayProps) {

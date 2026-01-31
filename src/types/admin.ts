@@ -1,4 +1,7 @@
 // Admin & User Management Types
+// Updated for mock-data-driven design-first development
+
+import { UserType } from './npd';
 
 export type UserStatus = 'active' | 'inactive' | 'locked';
 
@@ -25,38 +28,40 @@ export interface Department {
   id: string;
   code: string;
   name: string;
-  created_at: string;
+  description?: string;
+  createdAt: Date;
 }
 
 export interface Supplier {
   id: string;
   name: string;
   code: string;
-  is_active: boolean;
-  created_at: string;
+  isActive: boolean;
+  contactEmail?: string;
+  contactPhone?: string;
+  address?: string;
+  createdAt: Date;
 }
 
 export interface UserProfile {
   id: string;
-  user_id: string;
-  email: string | null;
-  full_name: string | null;
-  avatar_url: string | null;
+  email: string;
+  fullName: string;
+  role: UserType;
+  userType: UserTypeValue;
   status: UserStatus;
-  user_type: UserTypeValue;
-  last_login_at: string | null;
-  created_at: string;
-  updated_at: string;
-  // Joined data
-  roles: string[];
-  departments: string[];
-  permissions: PermissionType[];
-  supplier?: Supplier | null;
+  department?: string;
+  supplierId?: string;
+  supplierName?: string;
+  permissions: string[];
+  avatarUrl?: string;
+  lastLoginAt?: Date;
+  createdAt: Date;
 }
 
 export interface UserFilters {
   search: string;
-  role: string | null;
+  role: UserType | null;
   department: string | null;
   status: UserStatus | null;
   supplierId: string | null;
@@ -65,9 +70,9 @@ export interface UserFilters {
 export interface CreateUserData {
   email: string;
   fullName: string;
+  role: UserType;
   userType: UserTypeValue;
-  roles: string[];
-  departments?: string[];
+  department?: string;
   supplierId?: string;
   permissions?: PermissionType[];
 }
@@ -75,10 +80,10 @@ export interface CreateUserData {
 export interface UpdateUserData {
   userId: string;
   fullName?: string;
+  role?: UserType;
   userType?: UserTypeValue;
   status?: UserStatus;
-  roles?: string[];
-  departments?: string[];
+  department?: string;
   supplierId?: string;
   permissions?: PermissionType[];
 }
