@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Division, UserType, FormSection, FORM_SECTIONS, DIVISIONS, ChannelType } from '@/types/npd';
+import { Division, UserType, FormSection, FORM_SECTIONS, DIVISIONS, ChannelType, NPDFormField } from '@/types/npd';
 import { getFieldsForContext } from '@/data/npd-fields';
 import { DivisionSelector } from './DivisionSelector';
 import { ProgressStepper } from './ProgressStepper';
@@ -16,11 +16,58 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { ArrowLeft, ArrowRight, Save, Send, FileDown, RotateCcw, Info } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Save, Send, FileDown, RotateCcw, Info, Wand2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { useSubmissions } from '@/hooks/useSubmissions';
+
+// Generate dummy data based on field type
+const generateDummyValue = (field: NPDFormField): string | number => {
+  // If dropdown, pick first option
+  if (field.inputType === 'dropdown' && field.dropdownOptions?.length) {
+    return field.dropdownOptions[0];
+  }
+
+  // Handle specific field types
+  switch (field.inputType) {
+    case 'number':
+      if (field.id.includes('price') || field.id.includes('cost')) return 199.99;
+      if (field.id.includes('weight')) return 1.5;
+      if (field.id.includes('width') || field.id.includes('length') || field.id.includes('height')) return 25;
+      if (field.id.includes('wattage')) return 1500;
+      if (field.id.includes('qty') || field.id.includes('size')) return 10;
+      if (field.id.includes('gp')) return 25;
+      if (field.id.includes('shelf_life')) return 365;
+      return 100;
+    
+    case 'date':
+      const date = new Date();
+      date.setMonth(date.getMonth() + 1);
+      return date.toISOString().split('T')[0];
+    
+    case 'textarea':
+      if (field.id.includes('ingredient')) return 'Water, Sugar, Salt, Natural Flavoring';
+      return 'Sample description text for testing purposes.';
+    
+    case 'file':
+      return ''; // Skip file fields
+    
+    default: // text
+      if (field.id.includes('barcode')) return '8851234567890';
+      if (field.id.includes('product_name_th')) return 'สินค้าทดสอบ';
+      if (field.id.includes('product_name_en')) return 'Test Product';
+      if (field.id.includes('brand')) return 'TestBrand';
+      if (field.id.includes('model')) return 'Model-X100';
+      if (field.id.includes('tis')) return 'TIS-12345-2567';
+      if (field.id.includes('fda')) return 'FDA-67890-2567';
+      if (field.id.includes('size')) return 'M';
+      if (field.id.includes('age')) return '18-45';
+      if (field.id.includes('material')) return 'Cotton 100%';
+      if (field.id.includes('supplier')) return 'Test Supplier Co., Ltd.';
+      return 'Sample Value';
+  }
+};
 
 // Form steps
 const FORM_STEPS: FormSection[] = [
@@ -205,6 +252,21 @@ export function NPDForm({ userRole, onSubmitSuccess, onCancel }: NPDFormProps) {
     toast.info('Form has been reset');
   };
 
+  // Auto-fill current section with dummy data
+  const handleAutoFill = () => {
+    const newData: Record<string, string | number | File | null> = { ...formData };
+    
+    currentFields.forEach(field => {
+      if (field.inputType !== 'file') {
+        newData[field.id] = generateDummyValue(field);
+      }
+    });
+    
+    setFormData(newData);
+    setErrors({});
+    toast.success(`Auto-filled ${currentFields.filter(f => f.inputType !== 'file').length} fields with dummy data`);
+  };
+
   // Start Over
   const handleStartOver = () => {
     setSetupComplete(false);
@@ -382,6 +444,14 @@ export function NPDForm({ userRole, onSubmitSuccess, onCancel }: NPDFormProps) {
             {/* Form Card */}
             <Card>
               <CardContent className="p-6 sm:p-8">
+                {/* Auto Fill Button */}
+                <div className="flex justify-end mb-6">
+                  <Button variant="secondary" size="sm" onClick={handleAutoFill}>
+                    <Wand2 className="w-4 h-4 mr-2" />
+                    Auto Fill with Dummy Data
+                  </Button>
+                </div>
+                
                 <FormSectionComponent
                   section={currentSection}
                   fields={currentFields}
