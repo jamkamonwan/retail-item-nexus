@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import { Division, UserType, FormSection, FORM_SECTIONS, DIVISIONS, ChannelType } from '@/types/npd';
 import { getFieldsForContext } from '@/data/npd-fields';
 import { DivisionSelector } from './DivisionSelector';
-import { RoleSimulator } from './RoleSimulator';
 import { ProgressStepper } from './ProgressStepper';
 import { FormSectionComponent } from './FormSection';
 import { Button } from '@/components/ui/button';
@@ -25,16 +24,16 @@ const FORM_STEPS: FormSection[] = [
 ];
 
 interface NPDFormProps {
+  userRole: UserType;
   onSubmitSuccess?: () => void;
 }
 
-export function NPDForm({ onSubmitSuccess }: NPDFormProps = {}) {
+export function NPDForm({ userRole, onSubmitSuccess }: NPDFormProps) {
   const { createSubmission } = useSubmissions();
   
   // Setup State
   const [setupComplete, setSetupComplete] = useState(false);
   const [selectedDivision, setSelectedDivision] = useState<Division | null>(null);
-  const [selectedUserType, setSelectedUserType] = useState<UserType | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   // Channel defaults to 'both' since items can be sold online and offline
   const channel: ChannelType = 'both';
@@ -49,11 +48,11 @@ export function NPDForm({ onSubmitSuccess }: NPDFormProps = {}) {
   const currentSection = FORM_STEPS[currentStep];
   
   const currentFields = useMemo(() => {
-    if (!selectedDivision || !selectedUserType) return [];
+    if (!selectedDivision) return [];
     
-    const contextFields = getFieldsForContext(selectedDivision, selectedUserType, channel);
+    const contextFields = getFieldsForContext(selectedDivision, userRole, channel);
     return contextFields.filter(field => field.section === currentSection);
-  }, [selectedDivision, selectedUserType, channel, currentSection]);
+  }, [selectedDivision, userRole, channel, currentSection]);
 
   // Calculate progress
   const progress = useMemo(() => {
@@ -181,7 +180,6 @@ export function NPDForm({ onSubmitSuccess }: NPDFormProps = {}) {
   const handleStartOver = () => {
     setSetupComplete(false);
     setSelectedDivision(null);
-    setSelectedUserType(null);
     handleReset();
   };
 
@@ -224,37 +222,15 @@ export function NPDForm({ onSubmitSuccess }: NPDFormProps = {}) {
             </CardContent>
           </Card>
 
-          {/* Step 2: Role Detection (Simulated) */}
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <span className={cn(
-                  'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold',
-                  selectedDivision ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                )}>
-                  2
-                </span>
-                Your Role
-              </CardTitle>
-              <CardDescription>
-                ระบบจะตรวจสอบบทบาทของท่านโดยอัตโนมัติ
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <RoleSimulator
-                selectedRole={selectedUserType}
-                onRoleChange={setSelectedUserType}
-              />
-            </CardContent>
-          </Card>
-
-          {/* Channel Info Banner */}
+          {/* Role Info Banner */}
           <div className="mb-8 p-4 rounded-xl border border-border bg-muted/30 flex items-start gap-3">
             <Info className="w-5 h-5 text-muted-foreground mt-0.5" />
             <div>
-              <p className="font-medium text-foreground">Channel: Online & Offline</p>
+              <p className="font-medium text-foreground">
+                Your Role: <span className="text-primary">{userRole.toUpperCase()}</span> • Channel: Online & Offline
+              </p>
               <p className="text-sm text-muted-foreground">
-                สินค้าจะถูกจำหน่ายทั้งช่องทางออนไลน์และออฟไลน์ ข้อมูลที่ต้องกรอกจะครอบคลุมทั้งสองช่องทาง
+                บทบาทของท่านถูกกำหนดจาก Demo Role ด้านบน สินค้าจะถูกจำหน่ายทั้งช่องทางออนไลน์และออฟไลน์
               </p>
             </div>
           </div>
@@ -264,7 +240,7 @@ export function NPDForm({ onSubmitSuccess }: NPDFormProps = {}) {
             <Button
               size="lg"
               onClick={() => setSetupComplete(true)}
-              disabled={!selectedDivision || !selectedUserType}
+              disabled={!selectedDivision}
               className="px-8 bg-accent hover:bg-accent/90 text-accent-foreground"
             >
               Start Form Entry
@@ -294,7 +270,7 @@ export function NPDForm({ onSubmitSuccess }: NPDFormProps = {}) {
                   {DIVISIONS[selectedDivision!].label}
                 </Badge>
                 <span className="text-sm text-muted-foreground">
-                  {selectedUserType?.toUpperCase()} • Online & Offline
+                  {userRole.toUpperCase()} • Online & Offline
                 </span>
               </div>
             </div>
