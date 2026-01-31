@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { NPDSubmission, WORKFLOW_STATUSES, getFieldPermission, getNextAction, canTakeAction } from '@/types/workflow';
 import { UserType, Division, DIVISIONS, FormSection, FORM_SECTIONS } from '@/types/npd';
 import { getFieldsForContext } from '@/data/npd-fields';
@@ -18,11 +18,39 @@ import {
   User,
   Lock,
   Edit3,
-  Eye
+  Eye,
+  Image as ImageIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+
+// Component to display image preview from File object
+function ImagePreview({ file, fieldName }: { file: File; fieldName: string }) {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  if (!previewUrl) {
+    return (
+      <div className="w-full h-32 bg-muted rounded-lg flex items-center justify-center">
+        <ImageIcon className="w-8 h-8 text-muted-foreground" />
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={previewUrl}
+      alt={fieldName}
+      className="w-full h-32 object-cover rounded-lg border border-border"
+    />
+  );
+}
 
 interface SubmissionViewProps {
   submission: NPDSubmission;
@@ -220,10 +248,22 @@ export function SubmissionView({
                           </p>
                         )}
                         
-                        {field.inputType === 'textarea' ? (
+                        {field.inputType === 'file' ? (
+                          // Render image preview for file fields
+                          mockValue instanceof File ? (
+                            <ImagePreview file={mockValue} fieldName={field.name} />
+                          ) : (
+                            <div className="w-full h-32 bg-muted rounded-lg flex items-center justify-center">
+                              <div className="text-center">
+                                <ImageIcon className="w-8 h-8 mx-auto text-muted-foreground mb-1" />
+                                <span className="text-xs text-muted-foreground">No image uploaded</span>
+                              </div>
+                            </div>
+                          )
+                        ) : field.inputType === 'textarea' ? (
                           <Textarea
                             value={mockValue as string}
-                            disabled={!isEditable}
+                            readOnly
                             placeholder={field.placeholder || `Enter ${field.name.toLowerCase()}`}
                             className={cn(
                               'mt-1',
@@ -234,7 +274,7 @@ export function SubmissionView({
                           <Input
                             type={field.inputType === 'number' ? 'number' : 'text'}
                             value={mockValue as string}
-                            disabled={!isEditable}
+                            readOnly
                             placeholder={field.placeholder || `Enter ${field.name.toLowerCase()}`}
                             className={cn(
                               'mt-1',

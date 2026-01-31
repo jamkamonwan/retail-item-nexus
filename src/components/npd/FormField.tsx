@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { NPDFormField } from '@/types/npd';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,7 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { Upload, AlertCircle, HelpCircle } from 'lucide-react';
+import { Upload, AlertCircle, HelpCircle, X } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -28,6 +29,19 @@ interface FormFieldProps {
 export function FormField({ field, value, onChange, error, disabled }: FormFieldProps) {
   const isRequired = field.requirement === 'mandatory';
   const isConditional = field.requirement === 'conditional';
+  
+  // File preview URL - hooks must be at top level
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  
+  useEffect(() => {
+    if (value instanceof File) {
+      const url = URL.createObjectURL(value);
+      setPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setPreviewUrl(null);
+    }
+  }, [value]);
 
   const labelClasses = cn(
     'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
@@ -70,31 +84,57 @@ export function FormField({ field, value, onChange, error, disabled }: FormField
 
       case 'file':
         return (
-          <div
-            className={cn(
-              'border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors',
-              'hover:border-primary/50 hover:bg-muted/30',
-              error ? 'border-destructive' : 'border-border',
-              disabled && 'opacity-50 cursor-not-allowed'
+          <div className="space-y-2">
+            {previewUrl ? (
+              <div className="relative group">
+                <img
+                  src={previewUrl}
+                  alt={field.name}
+                  className="w-full h-48 object-cover rounded-lg border border-border"
+                />
+                {!disabled && (
+                  <button
+                    type="button"
+                    onClick={() => onChange(null)}
+                    className="absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+                <div className="absolute bottom-2 left-2 bg-background/80 backdrop-blur-sm rounded px-2 py-1">
+                  <span className="text-xs text-foreground">
+                    {value instanceof File ? value.name : 'Image'}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div
+                className={cn(
+                  'border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors',
+                  'hover:border-primary/50 hover:bg-muted/30',
+                  error ? 'border-destructive' : 'border-border',
+                  disabled && 'opacity-50 cursor-not-allowed'
+                )}
+              >
+                <input
+                  type="file"
+                  id={field.id}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    onChange(file);
+                  }}
+                  disabled={disabled}
+                />
+                <label htmlFor={field.id} className="cursor-pointer block">
+                  <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    Click to upload or drag and drop
+                  </span>
+                </label>
+              </div>
             )}
-          >
-            <input
-              type="file"
-              id={field.id}
-              className="hidden"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0] || null;
-                onChange(file);
-              }}
-              disabled={disabled}
-            />
-            <label htmlFor={field.id} className="cursor-pointer block">
-              <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                {value instanceof File ? value.name : 'Click to upload or drag and drop'}
-              </span>
-            </label>
           </div>
         );
 
