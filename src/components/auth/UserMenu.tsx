@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, User, Building2, Users, Briefcase, Calculator, Truck, Database, DollarSign } from 'lucide-react';
+import { LogOut, User, Building2, Users, Briefcase, Calculator, Truck, Database, DollarSign, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
 const ROLE_ICONS: Record<UserType, React.ReactNode> = {
@@ -22,6 +22,7 @@ const ROLE_ICONS: Record<UserType, React.ReactNode> = {
   scm: <Truck className="w-4 h-4" />,
   im: <Database className="w-4 h-4" />,
   dc_income: <DollarSign className="w-4 h-4" />,
+  admin: <ShieldCheck className="w-4 h-4" />,
 };
 
 export function UserMenu() {

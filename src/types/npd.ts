@@ -15,7 +15,7 @@ export const DIVISIONS: Record<Division, { label: string; fullName: string; colo
 };
 
 // User Types - Who is filling the form
-export type UserType = 'supplier' | 'buyer' | 'commercial' | 'finance' | 'scm' | 'im' | 'dc_income';
+export type UserType = 'supplier' | 'buyer' | 'commercial' | 'finance' | 'scm' | 'im' | 'dc_income' | 'admin';
 
 export const USER_TYPES: Record<UserType, { label: string; description: string }> = {
   supplier: { label: 'Supplier', description: 'External supplier/vendor' },
@@ -25,6 +25,7 @@ export const USER_TYPES: Record<UserType, { label: string; description: string }
   scm: { label: 'SCM', description: 'Supply Chain Management' },
   im: { label: 'IM', description: 'Inventory Management' },
   dc_income: { label: 'DC Income', description: 'Distribution Center Income' },
+  admin: { label: 'Administrator', description: 'System administrator' },
 };
 
 // Channel Type - Online vs Offline

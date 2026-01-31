@@ -9,15 +9,24 @@ import { NPDForm } from './NPDForm';
 import { FieldApprovalConfigScreen } from './FieldApprovalConfigScreen';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { RoleSimulator } from './RoleSimulator';
+import { SupplierDashboard, ApproverDashboard, AdminDashboard } from './dashboards';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
-import { LayoutDashboard, FileText, Settings2 } from 'lucide-react';
+import { LayoutDashboard, FileText, Settings2, ListChecks, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
-type View = 'dashboard' | 'form' | 'submission' | 'config';
+type View = 'dashboard' | 'form' | 'submission' | 'config' | 'all-items';
+
+// Map roles to their pending status for approver dashboard
+const ROLE_PENDING_STATUS: Partial<Record<UserType, WorkflowStatus>> = {
+  buyer: 'pending_buyer',
+  commercial: 'pending_commercial',
+  finance: 'pending_finance',
+  // scm and im could be added when their workflow stages are implemented
+};
 
 export function AuthenticatedWorkflowApp() {
-  const { role } = useAuth();
+  const { role, user } = useAuth();
   const { submissions, loading, updateStatus, refetch } = useSubmissions();
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [selectedSubmission, setSelectedSubmission] = useState<NPDSubmission | null>(null);
@@ -25,6 +34,9 @@ export function AuthenticatedWorkflowApp() {
   
   // Allow role switching for demo purposes - default to authenticated role or 'buyer'
   const [demoRole, setDemoRole] = useState<UserType>(role || 'buyer');
+
+  // Use demoRole for determining which dashboard to show
+  const activeRole = demoRole;
 
   const handleViewSubmission = (submission: NPDSubmission) => {
     setSelectedSubmission(submission);
@@ -48,6 +60,10 @@ export function AuthenticatedWorkflowApp() {
     refetch(); // Refresh after returning from form/submission
   };
 
+  const handleNavigateToConfig = () => {
+    setCurrentView('config');
+  };
+
   const handleApprove = async (submission: NPDSubmission) => {
     const nextStatus = WORKFLOW_STATUSES[submission.status].nextStatus;
     if (nextStatus) {
@@ -55,7 +71,7 @@ export function AuthenticatedWorkflowApp() {
         submission.id,
         nextStatus,
         'approve',
-        demoRole
+        activeRole
       );
       if (success) {
         toast.success(`${submission.productNameEn} approved!`);
@@ -71,7 +87,7 @@ export function AuthenticatedWorkflowApp() {
       submission.id,
       'rejected' as WorkflowStatus,
       'reject',
-      demoRole
+      activeRole
     );
     if (success) {
       toast.error(`${submission.productNameEn} rejected`);
@@ -86,13 +102,109 @@ export function AuthenticatedWorkflowApp() {
       submission.id,
       'revision_needed' as WorkflowStatus,
       'request_revision',
-      demoRole
+      activeRole
     );
     if (success) {
       toast.info(`${submission.productNameEn} sent back for revision`);
       if (selectedSubmission?.id === submission.id) {
         handleBackToList();
       }
+    }
+  };
+
+  // Determine which tabs to show based on role
+  const getNavigationTabs = () => {
+    switch (activeRole) {
+      case 'supplier':
+        return (
+          <>
+            <TabsTrigger value="dashboard" className="gap-2">
+              <LayoutDashboard className="w-4 h-4" />
+              My Submissions
+            </TabsTrigger>
+            <TabsTrigger value="form" className="gap-2">
+              <FileText className="w-4 h-4" />
+              New Entry
+            </TabsTrigger>
+          </>
+        );
+      case 'admin':
+        return (
+          <>
+            <TabsTrigger value="dashboard" className="gap-2">
+              <LayoutDashboard className="w-4 h-4" />
+              Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="all-items" className="gap-2">
+              <ListChecks className="w-4 h-4" />
+              All Items
+            </TabsTrigger>
+            <TabsTrigger value="config" className="gap-2">
+              <Settings2 className="w-4 h-4" />
+              Config
+            </TabsTrigger>
+          </>
+        );
+      default:
+        // Approver roles (buyer, commercial, finance, scm, im, dc_income)
+        return (
+          <>
+            <TabsTrigger value="dashboard" className="gap-2">
+              <LayoutDashboard className="w-4 h-4" />
+              Review Queue
+            </TabsTrigger>
+            <TabsTrigger value="all-items" className="gap-2">
+              <ListChecks className="w-4 h-4" />
+              All Items
+            </TabsTrigger>
+          </>
+        );
+    }
+  };
+
+  // Render the appropriate dashboard based on role
+  const renderDashboard = () => {
+    switch (activeRole) {
+      case 'supplier':
+        return (
+          <SupplierDashboard
+            submissions={submissions}
+            loading={loading}
+            userId={user?.id}
+            onCreateNew={handleCreateNew}
+            onEditDraft={handleEditDraft}
+            onViewSubmission={handleViewSubmission}
+          />
+        );
+      case 'admin':
+        return (
+          <AdminDashboard
+            submissions={submissions}
+            loading={loading}
+            onViewSubmission={handleViewSubmission}
+            onNavigateToConfig={handleNavigateToConfig}
+          />
+        );
+      case 'buyer':
+      case 'commercial':
+      case 'finance':
+      case 'scm':
+      case 'im':
+      case 'dc_income':
+        // For roles without specific pending status, default to pending_finance
+        const pendingStatus = ROLE_PENDING_STATUS[activeRole] || 'pending_finance';
+        return (
+          <ApproverDashboard
+            role={activeRole}
+            pendingStatus={pendingStatus}
+            submissions={submissions}
+            loading={loading}
+            onViewSubmission={handleViewSubmission}
+            onApprove={handleApprove}
+            onReject={handleReject}
+            onRequestRevision={handleRequestRevision}
+          />
+        );
     }
   };
 
@@ -110,18 +222,7 @@ export function AuthenticatedWorkflowApp() {
                 onValueChange={(v) => setCurrentView(v as View)}
               >
                 <TabsList>
-                  <TabsTrigger value="dashboard" className="gap-2">
-                    <LayoutDashboard className="w-4 h-4" />
-                    Workflow
-                  </TabsTrigger>
-                  <TabsTrigger value="form" className="gap-2">
-                    <FileText className="w-4 h-4" />
-                    New Entry
-                  </TabsTrigger>
-                  <TabsTrigger value="config" className="gap-2">
-                    <Settings2 className="w-4 h-4" />
-                    Config
-                  </TabsTrigger>
+                  {getNavigationTabs()}
                 </TabsList>
               </Tabs>
             </div>
@@ -146,9 +247,11 @@ export function AuthenticatedWorkflowApp() {
 
       {/* Main Content */}
       <main className="container max-w-7xl mx-auto px-4 py-6">
-        {currentView === 'dashboard' && (
+        {currentView === 'dashboard' && renderDashboard()}
+
+        {currentView === 'all-items' && (
           <WorkflowDashboard
-            currentUserRole={demoRole}
+            currentUserRole={activeRole}
             submissions={submissions}
             loading={loading}
             onViewSubmission={handleViewSubmission}
@@ -162,7 +265,7 @@ export function AuthenticatedWorkflowApp() {
 
         {currentView === 'form' && (
           <NPDForm 
-            userRole={demoRole} 
+            userRole={activeRole} 
             editingSubmission={editingSubmission}
             onSubmitSuccess={handleBackToList} 
             onCancel={handleBackToList} 
@@ -176,7 +279,7 @@ export function AuthenticatedWorkflowApp() {
         {currentView === 'submission' && selectedSubmission && (
           <SubmissionView
             submission={selectedSubmission}
-            currentUserRole={demoRole}
+            currentUserRole={activeRole}
             onBack={handleBackToList}
             onApprove={() => handleApprove(selectedSubmission)}
             onReject={() => handleReject(selectedSubmission)}

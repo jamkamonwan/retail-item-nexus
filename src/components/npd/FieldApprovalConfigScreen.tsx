@@ -103,13 +103,14 @@ export function FieldApprovalConfigScreen() {
 
   const getRoleBadgeColor = (role: UserType): string => {
     const colors: Record<UserType, string> = {
-      supplier: 'bg-green-100 text-green-800',
-      buyer: 'bg-blue-100 text-blue-800',
-      commercial: 'bg-purple-100 text-purple-800',
-      finance: 'bg-orange-100 text-orange-800',
-      scm: 'bg-teal-100 text-teal-800',
-      im: 'bg-pink-100 text-pink-800',
-      dc_income: 'bg-yellow-100 text-yellow-800',
+      supplier: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+      buyer: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+      commercial: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+      finance: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+      scm: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300',
+      im: 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300',
+      dc_income: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+      admin: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
     };
     return colors[role] || 'bg-muted text-muted-foreground';
   };

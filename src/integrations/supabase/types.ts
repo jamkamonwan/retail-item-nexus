@@ -254,6 +254,7 @@ export type Database = {
         | "scm"
         | "im"
         | "dc_income"
+        | "admin"
       workflow_status:
         | "draft"
         | "pending_buyer"
@@ -398,6 +399,7 @@ export const Constants = {
         "scm",
         "im",
         "dc_income",
+        "admin",
       ],
       workflow_status: [
         "draft",

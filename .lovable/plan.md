@@ -1,8 +1,8 @@
 
-# User Story 7.1: Role-Based Dashboard Implementation
+# User Story 7.1: Role-Based Dashboard Implementation ✅ COMPLETE
 
 ## Overview
-Enhance the NPD system to provide role-specific dashboard experiences. After login, each role will see a customized view showing only the information and actions relevant to their responsibilities.
+Enhanced the NPD system to provide role-specific dashboard experiences. After login, each role now sees a customized view showing only the information and actions relevant to their responsibilities.
 
 ## What This Means For You
 - **Supplier**: See your submissions and drafts with focus on creation/editing
