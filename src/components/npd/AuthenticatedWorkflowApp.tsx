@@ -21,6 +21,7 @@ export function AuthenticatedWorkflowApp() {
   const { submissions, loading, updateStatus, refetch } = useSubmissions();
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [selectedSubmission, setSelectedSubmission] = useState<NPDSubmission | null>(null);
+  const [editingSubmission, setEditingSubmission] = useState<NPDSubmission | null>(null);
   
   // Allow role switching for demo purposes - default to authenticated role or 'buyer'
   const [demoRole, setDemoRole] = useState<UserType>(role || 'buyer');
@@ -31,11 +32,18 @@ export function AuthenticatedWorkflowApp() {
   };
 
   const handleCreateNew = () => {
+    setEditingSubmission(null);
+    setCurrentView('form');
+  };
+
+  const handleEditDraft = (submission: NPDSubmission) => {
+    setEditingSubmission(submission);
     setCurrentView('form');
   };
 
   const handleBackToList = () => {
     setSelectedSubmission(null);
+    setEditingSubmission(null);
     setCurrentView('dashboard');
     refetch(); // Refresh after returning from form/submission
   };
@@ -145,6 +153,7 @@ export function AuthenticatedWorkflowApp() {
             loading={loading}
             onViewSubmission={handleViewSubmission}
             onCreateNew={handleCreateNew}
+            onEditDraft={handleEditDraft}
             onApprove={handleApprove}
             onReject={handleReject}
             onRequestRevision={handleRequestRevision}
@@ -152,7 +161,12 @@ export function AuthenticatedWorkflowApp() {
         )}
 
         {currentView === 'form' && (
-          <NPDForm userRole={demoRole} onSubmitSuccess={handleBackToList} onCancel={handleBackToList} />
+          <NPDForm 
+            userRole={demoRole} 
+            editingSubmission={editingSubmission}
+            onSubmitSuccess={handleBackToList} 
+            onCancel={handleBackToList} 
+          />
         )}
 
         {currentView === 'config' && (

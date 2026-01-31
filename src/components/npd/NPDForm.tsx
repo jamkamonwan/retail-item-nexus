@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Division, UserType, FormSection, FORM_SECTIONS, DIVISIONS, ChannelType, NPDFormField } from '@/types/npd';
+import { NPDSubmission } from '@/types/workflow';
 import { getFieldsForContext } from '@/data/npd-fields';
 import { DivisionSelector } from './DivisionSelector';
 import { ProgressStepper } from './ProgressStepper';
@@ -102,11 +103,12 @@ const FORM_STEPS: FormSection[] = [
 
 interface NPDFormProps {
   userRole: UserType;
+  editingSubmission?: NPDSubmission | null;
   onSubmitSuccess?: () => void;
   onCancel?: () => void;
 }
 
-export function NPDForm({ userRole, onSubmitSuccess, onCancel }: NPDFormProps) {
+export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel }: NPDFormProps) {
   const { createSubmission, updateFormData } = useSubmissions();
   
   // Draft tracking state
@@ -120,6 +122,26 @@ export function NPDForm({ userRole, onSubmitSuccess, onCancel }: NPDFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   // Channel defaults to 'both' since items can be sold online and offline
   const channel: ChannelType = 'both';
+
+  // Form State
+  const [currentStep, setCurrentStep] = useState(0);
+  const [formData, setFormData] = useState<Record<string, string | number | File | null>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [completedSections, setCompletedSections] = useState<FormSection[]>([]);
+
+  // Initialize form when editing an existing submission
+  useEffect(() => {
+    if (editingSubmission) {
+      setCurrentSubmissionId(editingSubmission.id);
+      setSelectedDivision(editingSubmission.division);
+      setSetupComplete(true);
+      setFormData(editingSubmission.formData || {});
+      // Mark first section as completed since we have data
+      if (Object.keys(editingSubmission.formData || {}).length > 0) {
+        setCompletedSections(['basic_info']);
+      }
+    }
+  }, [editingSubmission]);
 
   // Handle division selection with confirmation
   const handleDivisionSelect = (division: Division) => {
@@ -138,11 +160,7 @@ export function NPDForm({ userRole, onSubmitSuccess, onCancel }: NPDFormProps) {
     setPendingDivision(null);
   };
 
-  // Form State
-  const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState<Record<string, string | number | File | null>>({});
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [completedSections, setCompletedSections] = useState<FormSection[]>([]);
+  // Get current section and fields
 
   // Get current section and fields
   const currentSection = FORM_STEPS[currentStep];
