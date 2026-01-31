@@ -35,7 +35,8 @@ import {
   ChevronDown,
   ArrowRight,
   FileText,
-  Loader2
+  Loader2,
+  Pencil
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -46,6 +47,7 @@ interface WorkflowDashboardProps {
   loading?: boolean;
   onViewSubmission?: (submission: NPDSubmission) => void;
   onCreateNew?: () => void;
+  onEditDraft?: (submission: NPDSubmission) => void;
   onApprove?: (submission: NPDSubmission) => void;
   onReject?: (submission: NPDSubmission) => void;
   onRequestRevision?: (submission: NPDSubmission) => void;
@@ -57,6 +59,7 @@ export function WorkflowDashboard({
   loading = false,
   onViewSubmission,
   onCreateNew,
+  onEditDraft,
   onApprove,
   onReject,
   onRequestRevision,
@@ -271,6 +274,19 @@ export function WorkflowDashboard({
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
+                            {/* Edit button for drafts and revision_needed (supplier only) */}
+                            {(submission.status === 'draft' || submission.status === 'revision_needed') && 
+                             currentUserRole === 'supplier' && (
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => onEditDraft?.(submission)}
+                              >
+                                <Pencil className="w-4 h-4 mr-1" />
+                                Edit
+                              </Button>
+                            )}
+                            
                             <Button 
                               variant="ghost" 
                               size="sm"
