@@ -128,13 +128,14 @@ serve(async (req: Request): Promise<Response> => {
 
       const newUserId = newUser.user.id;
 
-      // Update profile with additional fields
+      // Update profile with additional fields and set must_change_password flag
       await adminClient
         .from("profiles")
         .update({
           full_name: body.fullName,
           user_type: body.userType,
           status: "active",
+          must_change_password: true, // Force password change on first login
         })
         .eq("user_id", newUserId);
 
