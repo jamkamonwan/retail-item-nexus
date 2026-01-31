@@ -1,126 +1,261 @@
 
-# User Story 7.1: Role-Based Dashboard Implementation ✅ COMPLETE
+
+# User Story 7.2: Role-Based Access Control and User Account Management
 
 ## Overview
-Enhanced the NPD system to provide role-specific dashboard experiences. After login, each role now sees a customized view showing only the information and actions relevant to their responsibilities.
+This plan implements a comprehensive admin panel for managing users, roles, permissions, and departments. Administrators will be able to create, update, and deactivate user accounts with granular control over access permissions.
 
 ## What This Means For You
-- **Supplier**: See your submissions and drafts with focus on creation/editing
-- **Buyer**: See items pending your review with approval actions
-- **SCM/Finance/Commercial**: See items at your approval stage
-- **Admin**: See system-wide overview plus configuration options
-
-Each role will have a tailored experience showing what matters most to them.
+- **Admins** get a full user management dashboard to create and manage accounts
+- Each user can have assigned **roles**, **departments**, and specific **permissions**
+- Users can be **activated/deactivated** without deleting their data
+- **Search and filter** users by name, role, department, or status
+- Track when users were created and last logged in
 
 ---
 
 ## Technical Details
 
-### 1. Add Admin Role to Type System
+### 1. Database Schema Updates
 
-**File: `src/types/npd.ts`**
-- Add `'admin'` to the `UserType` union type
-- Add Admin entry to `USER_TYPES` constant with label "Administrator"
+**New Tables to Create:**
 
-### 2. Create Role-Based Dashboard Views
-
-**New File: `src/components/npd/dashboards/SupplierDashboard.tsx`**
-- Show "My Drafts" section prominently
-- Show "My Submissions" with status tracking
-- Quick action: "Create New Submission" button
-- Filter to only show user's own submissions
-
-**New File: `src/components/npd/dashboards/ApproverDashboard.tsx`**
-- Reusable component for Buyer, Commercial, Finance, SCM roles
-- Props: `role`, `pendingStatus` (e.g., 'pending_buyer')
-- Show "Awaiting Your Review" queue prominently
-- Count badge for pending items
-- Quick approve/reject actions inline
-
-**New File: `src/components/npd/dashboards/AdminDashboard.tsx`**
-- System overview with all submission counts by status
-- User management section (future)
-- Link to Field Approval Config
-- Analytics summary
-
-### 3. Update AuthenticatedWorkflowApp
-
-**File: `src/components/npd/AuthenticatedWorkflowApp.tsx`**
-
-Changes:
-- Remove the Demo Role Switcher (or make it Admin-only)
-- Use actual `role` from `useAuth()` instead of `demoRole`
-- Render different dashboard based on user's role:
-
+**a) `departments` table** - Store department definitions
 ```text
-Role Mapping:
-  supplier  → SupplierDashboard
-  buyer     → ApproverDashboard (pendingStatus: 'pending_buyer')
-  commercial → ApproverDashboard (pendingStatus: 'pending_commercial')
-  finance   → ApproverDashboard (pendingStatus: 'pending_finance')
-  scm       → ApproverDashboard (pendingStatus: 'pending_scm' - future)
-  im        → ApproverDashboard (pendingStatus: 'pending_im' - future)
-  admin     → AdminDashboard
+- id: uuid (primary key)
+- code: text (HL, HOL, DF, NF, SL, FF, PH)
+- name: text (Home & Lifestyle, etc.)
+- created_at: timestamp
 ```
 
-### 4. Enhance Header Navigation
+**b) `user_departments` table** - Junction table for user-department assignments
+```text
+- id: uuid (primary key)
+- user_id: uuid (references profiles.user_id)
+- department_code: text
+- created_at: timestamp
+- unique constraint on (user_id, department_code)
+```
+
+**c) `user_permissions` table** - Store granular permissions
+```text
+- id: uuid (primary key)
+- user_id: uuid (references profiles.user_id)
+- permission: text (can_approve, can_reject, can_revise, can_view_all_depts, can_export, can_access_reports)
+- created_at: timestamp
+```
+
+**d) `suppliers` table** - Store supplier entities
+```text
+- id: uuid (primary key)
+- name: text
+- code: text (unique)
+- is_active: boolean
+- created_at: timestamp
+```
+
+**e) `user_suppliers` table** - Link users to suppliers
+```text
+- id: uuid (primary key)
+- user_id: uuid (references profiles.user_id)
+- supplier_id: uuid (references suppliers.id)
+- created_at: timestamp
+```
+
+**Modify `profiles` table:**
+```text
+- Add: status text ('active', 'inactive', 'locked') default 'active'
+- Add: last_login_at timestamp (nullable)
+- Add: user_type text ('internal', 'external') default 'internal'
+```
+
+**Update `app_role` enum:** Add 'nsd' role if not present
+
+### 2. RLS Policies
+
+**Security considerations:**
+- Only admins can view all user data
+- Users can view their own profile
+- Only admins can create/update/deactivate users
+- Create security definer function: `is_admin(user_id)` to check admin role
+
+### 3. New Components
+
+**a) `src/components/admin/UserManagement.tsx`**
+Main container with:
+- Search bar (name, email, user ID)
+- Filter dropdowns (role, department, status, supplier)
+- User list table with sortable columns
+- Create/Edit/Deactivate actions
+
+**b) `src/components/admin/UserTable.tsx`**
+Table component displaying:
+- User ID, Name, Email
+- Role(s) badges
+- Department(s)
+- Supplier (if applicable)
+- Status indicator (Active/Inactive/Locked)
+- Last login date
+- Created date
+- Action buttons (View, Edit, Deactivate)
+
+**c) `src/components/admin/UserFormDialog.tsx`**
+Modal dialog for Create/Edit user:
+- Full name (required, 2-100 chars)
+- Email (required, unique, read-only after creation)
+- User type toggle: Internal / External
+- Multi-select roles
+- Department multi-select (required for internal)
+- Supplier select (required for external)
+- Permission checkboxes:
+  - Can approve submissions
+  - Can reject submissions
+  - Can send back for corrections
+  - Can view all departments
+  - Can export data
+  - Can access reports
+- Status toggle (Active/Inactive)
+
+**d) `src/components/admin/UserFilters.tsx`**
+Filter component with:
+- Search input with debounce
+- Role dropdown filter
+- Department dropdown filter
+- Status dropdown filter
+- Clear filters button
+
+### 4. New Hooks
+
+**a) `src/hooks/useUsers.ts`**
+```text
+- fetchUsers(filters) - Get paginated user list with filters
+- createUser(userData) - Create new user via Supabase auth.admin API
+- updateUser(userId, data) - Update user profile, roles, departments
+- deactivateUser(userId) - Set status to 'inactive'
+- activateUser(userId) - Set status to 'active'
+- resetPassword(userId) - Trigger password reset email
+- unlockAccount(userId) - Set status from 'locked' to 'active'
+```
+
+**b) `src/hooks/useDepartments.ts`**
+```text
+- departments - List of all departments
+- loading state
+```
+
+**c) `src/hooks/useSuppliers.ts`**
+```text
+- suppliers - List of all suppliers
+- loading state
+- addSupplier(name, code) - Create new supplier
+```
+
+### 5. Backend Edge Function
+
+**`supabase/functions/admin-user-management/index.ts`**
+Required for admin-only operations:
+- Create user (uses service role to call auth.admin.createUser)
+- Send welcome email with temporary password
+- Generate secure temporary password
+- Force password change on first login
+
+This is needed because client-side cannot create users for others.
+
+### 6. Update AdminDashboard
+
+**File: `src/components/npd/dashboards/AdminDashboard.tsx`**
+
+Add clickable "User Management" card that navigates to user management view:
+- Link to new UserManagement component
+- Show count of active/inactive users
+
+### 7. Update AuthenticatedWorkflowApp
 
 **File: `src/components/npd/AuthenticatedWorkflowApp.tsx`**
 
-- Show/hide navigation tabs based on role:
-  - Supplier: "My Submissions" | "New Entry"
-  - Approvers: "Review Queue" | "All Items"  
-  - Admin: "Dashboard" | "All Items" | "Config" | "Users"
-- Keep user name and role badge visible in header (already done via UserMenu)
+- Add 'users' to View type
+- Add Users tab for admin role
+- Route to UserManagement component when 'users' view is active
 
-### 5. Role-Based Data Filtering
+### 8. Type Updates
 
-**File: `src/hooks/useSubmissions.ts`**
+**File: `src/types/npd.ts`**
 
-Add optional filtering parameter:
-- `filterByRole?: UserType` - filters submissions relevant to role
-- Supplier: Filter by `created_by = current_user_id`
-- Buyer: Can see all, but highlights `pending_buyer`
-- Finance: Can see all, but highlights `pending_finance`
-
-### 6. Update Database Migration (Optional Enhancement)
-
-Add department support for future use:
-- Add `department` column to `profiles` table
-- Allow filtering submissions by department
-
----
-
-## Dashboard Layout Summary
-
-| Role | Primary View | Key Actions | Config Access |
-|------|-------------|-------------|---------------|
-| Supplier | My Submissions list | Create, Edit Draft | No |
-| Buyer | Pending Buyer Queue | Approve, Reject, Revise | No |
-| Commercial | Pending Commercial Queue | Approve, Reject, Revise | No |
-| Finance | Pending Finance Queue | Approve, Reject, Revise | No |
-| SCM | Pending SCM Queue | Approve, Reject, Revise | No |
-| Admin | System Overview | All actions | Yes |
-
----
-
-## Files to Create
-1. `src/components/npd/dashboards/SupplierDashboard.tsx`
-2. `src/components/npd/dashboards/ApproverDashboard.tsx`
-3. `src/components/npd/dashboards/AdminDashboard.tsx`
-4. `src/components/npd/dashboards/index.ts`
-
-## Files to Modify
-1. `src/types/npd.ts` - Add admin role
-2. `src/components/npd/AuthenticatedWorkflowApp.tsx` - Route to correct dashboard
-3. `src/hooks/useSubmissions.ts` - Add role-based filtering
-4. Database migration - Update `app_role` enum to include 'admin'
+Add new types:
+```text
+- Department type and DEPARTMENTS constant
+- UserStatus type: 'active' | 'inactive' | 'locked'
+- UserPermission type
+- User interface with full profile data
+```
 
 ---
 
 ## Implementation Order
-1. Add admin role to types and database enum
-2. Create dashboard components (Supplier, Approver, Admin)
-3. Update AuthenticatedWorkflowApp to render based on role
-4. Add role-based filtering to useSubmissions hook
-5. Test each role's experience end-to-end
+
+1. **Database migrations** - Create new tables and update existing ones
+2. **RLS policies** - Secure admin-only access
+3. **Edge function** - Create admin user management endpoint
+4. **Type definitions** - Add new types to npd.ts
+5. **Hooks** - useUsers, useDepartments, useSuppliers
+6. **Components** - UserTable, UserFormDialog, UserFilters, UserManagement
+7. **Update AdminDashboard** - Link to user management
+8. **Update navigation** - Add Users tab for admin
+
+---
+
+## Files to Create
+
+| File | Purpose |
+|------|---------|
+| `src/components/admin/UserManagement.tsx` | Main user management container |
+| `src/components/admin/UserTable.tsx` | Users list table |
+| `src/components/admin/UserFormDialog.tsx` | Create/Edit user modal |
+| `src/components/admin/UserFilters.tsx` | Search and filter controls |
+| `src/components/admin/index.ts` | Export all admin components |
+| `src/hooks/useUsers.ts` | User CRUD operations |
+| `src/hooks/useDepartments.ts` | Department data hook |
+| `src/hooks/useSuppliers.ts` | Supplier data hook |
+| `supabase/functions/admin-user-management/index.ts` | Admin user API |
+
+## Files to Modify
+
+| File | Changes |
+|------|---------|
+| `src/types/npd.ts` | Add Department, UserStatus, UserPermission types |
+| `src/components/npd/dashboards/AdminDashboard.tsx` | Link to User Management |
+| `src/components/npd/AuthenticatedWorkflowApp.tsx` | Add 'users' view and navigation |
+
+## Database Migrations
+
+1. Create `departments` table with seed data
+2. Create `user_departments` junction table
+3. Create `user_permissions` table
+4. Create `suppliers` and `user_suppliers` tables
+5. Alter `profiles` table to add status, last_login_at, user_type
+6. Update RLS policies for admin access
+7. Create `is_admin()` security definer function
+
+---
+
+## Security Considerations
+
+- Admin status checked via server-side `is_admin()` function (not client-side)
+- Edge function uses service role key for privileged operations
+- RLS policies restrict non-admin users from viewing other user data
+- Sensitive operations require confirmation dialogs
+- All admin actions should be logged (future: audit trail table)
+
+---
+
+## Validation Rules Summary
+
+| Field | Validation |
+|-------|------------|
+| Email | Valid format, unique in system |
+| Full Name | 2-100 characters, required |
+| Role | At least one role required |
+| Department | Required for internal users |
+| Supplier | Required for external/supplier users |
+| Password | Minimum 6 characters (auto-generated for admin-created users) |
+
