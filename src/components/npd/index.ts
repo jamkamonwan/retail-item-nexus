@@ -9,3 +9,4 @@ export { NPDForm } from './NPDForm';
 export { WorkflowDashboard } from './WorkflowDashboard';
 export { SubmissionView } from './SubmissionView';
 export { WorkflowApp } from './WorkflowApp';
+export { AuthenticatedWorkflowApp } from './AuthenticatedWorkflowApp';
