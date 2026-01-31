@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { Division, UserType, SupplierFormSection, SUPPLIER_FORM_SECTIONS, DIVISIONS, ChannelType, NPDFormField, SUPPLIER_FORM_STEPS } from '@/types/npd';
 import { NPDSubmission } from '@/types/workflow';
 import { getFieldsForSectionAndDivision, PRODUCT_CATEGORIES } from '@/data/npd-fields-supplier';
+import { getVisibleFields } from '@/utils/conditional-fields';
 import { DivisionSelector } from './DivisionSelector';
 import { ProgressStepper } from './ProgressStepper';
 import { FormSectionComponent } from './FormSection';
@@ -89,11 +90,15 @@ const generateDummyValue = (field: NPDFormField, formData: Record<string, string
       if (field.id === 'iso_cert') return 'ISO 9001:2015, ISO 22000:2018';
       if (field.id === 'size') return '500ml';
       if (field.id === 'color') return 'White / Black';
+      if (field.id === 'hex_color_code') return '#FFFFFF';
       if (field.id === 'material') return 'Cotton 100%';
       if (field.id === 'manufacturer') return 'Thai Manufacturing Co., Ltd.';
       if (field.id === 'pack_size') return '6 pcs/pack';
       if (field.id === 'season_code') return 'SS25';
       if (field.id === 'article_number') return 'ART-2025-0001';
+      if (field.id === 'group_name') return 'Color Variants Group';
+      if (field.id === 'sku_reference') return 'SKU-REF-001';
+      if (field.id === 'group_barcode') return '8851234567899';
       return 'Sample Value';
   }
 };
@@ -187,10 +192,17 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
   // Get current section and fields
   const currentSection = SUPPLIER_FORM_STEPS[currentStep];
   
-  const currentFields = useMemo(() => {
+  // Get all fields for current section, then apply conditional filtering
+  const allSectionFields = useMemo(() => {
     if (!selectedDivision) return [];
     return getFieldsForSectionAndDivision(currentSection, selectedDivision);
   }, [selectedDivision, currentSection]);
+  
+  // Apply conditional visibility filtering based on form data
+  const currentFields = useMemo(() => {
+    if (!selectedDivision) return [];
+    return getVisibleFields(allSectionFields, formData, selectedDivision);
+  }, [selectedDivision, allSectionFields, formData]);
 
   // Calculate CBM when carton dimensions change
   const calculatedCBM = useMemo(() => {
@@ -235,15 +247,25 @@ export function NPDForm({ userRole, editingSubmission, onSubmitSuccess, onCancel
     return PRODUCT_CATEGORIES[category] || [];
   };
 
-  // Validate current section
+  // Validate current section - only validates visible fields
   const validateCurrentSection = (): boolean => {
     const newErrors: Record<string, string> = {};
     
+    // Only validate currently visible fields
     currentFields.forEach(field => {
+      // Validate mandatory fields
       if (field.requirement === 'mandatory' && field.inputType !== 'readonly' && field.inputType !== 'calculated') {
         const value = formData[field.id];
         if (!value || (typeof value === 'string' && value.trim() === '')) {
           newErrors[field.id] = `${field.name} is required`;
+        }
+      }
+      
+      // Conditional fields become mandatory when visible
+      if (field.requirement === 'conditional') {
+        const value = formData[field.id];
+        if (!value || (typeof value === 'string' && value.trim() === '')) {
+          newErrors[field.id] = `${field.name} is required when triggered`;
         }
       }
     });
