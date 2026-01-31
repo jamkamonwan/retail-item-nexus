@@ -90,17 +90,10 @@ export function useAuth() {
         emailRedirectTo: window.location.origin,
         data: {
           full_name: fullName,
+          role: role, // Pass role in metadata for the trigger to use
         },
       },
     });
-
-    if (!error && data.user) {
-      // Insert user role
-      await supabase.from('user_roles').insert({
-        user_id: data.user.id,
-        role: role,
-      });
-    }
 
     return { data, error };
   };
