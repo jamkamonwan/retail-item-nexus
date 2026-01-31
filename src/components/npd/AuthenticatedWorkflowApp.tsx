@@ -147,7 +147,7 @@ export function AuthenticatedWorkflowApp() {
         )}
 
         {currentView === 'form' && (
-          <NPDForm userRole={demoRole} onSubmitSuccess={handleBackToList} />
+          <NPDForm userRole={demoRole} onSubmitSuccess={handleBackToList} onCancel={handleBackToList} />
         )}
 
         {currentView === 'submission' && selectedSubmission && (
