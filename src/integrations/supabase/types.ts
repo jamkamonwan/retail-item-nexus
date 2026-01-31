@@ -14,6 +14,98 @@ export type Database = {
   }
   public: {
     Tables: {
+      npd_submissions: {
+        Row: {
+          approved_at: string | null
+          barcode: string | null
+          created_at: string
+          created_by: string | null
+          division: string
+          form_data: Json
+          id: string
+          product_name_en: string
+          product_name_th: string | null
+          status: Database["public"]["Enums"]["workflow_status"]
+          submitted_at: string | null
+          supplier_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          barcode?: string | null
+          created_at?: string
+          created_by?: string | null
+          division: string
+          form_data?: Json
+          id?: string
+          product_name_en: string
+          product_name_th?: string | null
+          status?: Database["public"]["Enums"]["workflow_status"]
+          submitted_at?: string | null
+          supplier_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          barcode?: string | null
+          created_at?: string
+          created_by?: string | null
+          division?: string
+          form_data?: Json
+          id?: string
+          product_name_en?: string
+          product_name_th?: string | null
+          status?: Database["public"]["Enums"]["workflow_status"]
+          submitted_at?: string | null
+          supplier_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      npd_workflow_history: {
+        Row: {
+          action: string
+          comment: string | null
+          created_at: string
+          from_status: Database["public"]["Enums"]["workflow_status"] | null
+          id: string
+          performed_by: string | null
+          performed_by_role: string | null
+          submission_id: string
+          to_status: Database["public"]["Enums"]["workflow_status"]
+        }
+        Insert: {
+          action: string
+          comment?: string | null
+          created_at?: string
+          from_status?: Database["public"]["Enums"]["workflow_status"] | null
+          id?: string
+          performed_by?: string | null
+          performed_by_role?: string | null
+          submission_id: string
+          to_status: Database["public"]["Enums"]["workflow_status"]
+        }
+        Update: {
+          action?: string
+          comment?: string | null
+          created_at?: string
+          from_status?: Database["public"]["Enums"]["workflow_status"] | null
+          id?: string
+          performed_by?: string | null
+          performed_by_role?: string | null
+          submission_id?: string
+          to_status?: Database["public"]["Enums"]["workflow_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "npd_workflow_history_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "npd_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -91,6 +183,14 @@ export type Database = {
         | "scm"
         | "im"
         | "dc_income"
+      workflow_status:
+        | "draft"
+        | "pending_buyer"
+        | "pending_commercial"
+        | "pending_finance"
+        | "approved"
+        | "rejected"
+        | "revision_needed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -226,6 +326,15 @@ export const Constants = {
         "scm",
         "im",
         "dc_income",
+      ],
+      workflow_status: [
+        "draft",
+        "pending_buyer",
+        "pending_commercial",
+        "pending_finance",
+        "approved",
+        "rejected",
+        "revision_needed",
       ],
     },
   },

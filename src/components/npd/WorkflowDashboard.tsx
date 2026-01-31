@@ -31,116 +31,36 @@ import {
   CheckCircle2, 
   XCircle, 
   RotateCcw, 
-  Clock,
   Filter,
   ChevronDown,
   ArrowRight,
-  FileText
+  FileText,
+  Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { toast } from 'sonner';
-
-// Mock data for demo
-const MOCK_SUBMISSIONS: NPDSubmission[] = [
-  {
-    id: 'NPD-2024-001',
-    division: 'DF',
-    status: 'pending_buyer',
-    productNameTh: 'นมสดพาสเจอร์ไรส์',
-    productNameEn: 'Fresh Pasteurized Milk',
-    barcode: '8850000000001',
-    supplierName: 'Thai Dairy Co., Ltd.',
-    createdAt: new Date('2024-01-15'),
-    updatedAt: new Date('2024-01-16'),
-    submittedAt: new Date('2024-01-16'),
-    formData: {},
-    history: [],
-  },
-  {
-    id: 'NPD-2024-002',
-    division: 'HL',
-    status: 'pending_commercial',
-    productNameTh: 'เครื่องปิ้งขนมปัง',
-    productNameEn: 'Electric Toaster',
-    barcode: '8850000000002',
-    supplierName: 'Home Appliance Ltd.',
-    createdAt: new Date('2024-01-10'),
-    updatedAt: new Date('2024-01-14'),
-    submittedAt: new Date('2024-01-12'),
-    formData: {},
-    history: [],
-  },
-  {
-    id: 'NPD-2024-003',
-    division: 'NF',
-    status: 'pending_finance',
-    productNameTh: 'แชมพูสระผม',
-    productNameEn: 'Hair Shampoo',
-    barcode: '8850000000003',
-    supplierName: 'Beauty Care Co.',
-    createdAt: new Date('2024-01-08'),
-    updatedAt: new Date('2024-01-13'),
-    submittedAt: new Date('2024-01-09'),
-    formData: {},
-    history: [],
-  },
-  {
-    id: 'NPD-2024-004',
-    division: 'SL',
-    status: 'draft',
-    productNameTh: 'เสื้อยืดคอกลม',
-    productNameEn: 'Round Neck T-Shirt',
-    barcode: '8850000000004',
-    supplierName: 'Fashion Textile',
-    createdAt: new Date('2024-01-17'),
-    updatedAt: new Date('2024-01-17'),
-    formData: {},
-    history: [],
-  },
-  {
-    id: 'NPD-2024-005',
-    division: 'FF',
-    status: 'approved',
-    productNameTh: 'ผักสลัดผสม',
-    productNameEn: 'Mixed Salad',
-    barcode: '8850000000005',
-    supplierName: 'Fresh Farm Co.',
-    createdAt: new Date('2024-01-05'),
-    updatedAt: new Date('2024-01-12'),
-    submittedAt: new Date('2024-01-06'),
-    approvedAt: new Date('2024-01-12'),
-    formData: {},
-    history: [],
-  },
-  {
-    id: 'NPD-2024-006',
-    division: 'DF',
-    status: 'revision_needed',
-    productNameTh: 'ไอศกรีมวานิลา',
-    productNameEn: 'Vanilla Ice Cream',
-    barcode: '8850000000006',
-    supplierName: 'Frozen Delights',
-    createdAt: new Date('2024-01-11'),
-    updatedAt: new Date('2024-01-15'),
-    submittedAt: new Date('2024-01-12'),
-    formData: {},
-    history: [],
-  },
-];
 
 interface WorkflowDashboardProps {
   currentUserRole: UserType;
+  submissions: NPDSubmission[];
+  loading?: boolean;
   onViewSubmission?: (submission: NPDSubmission) => void;
   onCreateNew?: () => void;
+  onApprove?: (submission: NPDSubmission) => void;
+  onReject?: (submission: NPDSubmission) => void;
+  onRequestRevision?: (submission: NPDSubmission) => void;
 }
 
 export function WorkflowDashboard({ 
   currentUserRole, 
+  submissions,
+  loading = false,
   onViewSubmission,
-  onCreateNew 
+  onCreateNew,
+  onApprove,
+  onReject,
+  onRequestRevision,
 }: WorkflowDashboardProps) {
-  const [submissions, setSubmissions] = useState<NPDSubmission[]>(MOCK_SUBMISSIONS);
   const [statusFilter, setStatusFilter] = useState<WorkflowStatus | 'all'>('all');
   const [divisionFilter, setDivisionFilter] = useState<Division | 'all'>('all');
 
@@ -154,26 +74,12 @@ export function WorkflowDashboard({
       
       // Role-based visibility
       if (currentUserRole === 'supplier') {
-        // Suppliers see only their own submissions (in demo, show drafts and revision_needed)
-        return sub.status === 'draft' || sub.status === 'revision_needed' || sub.supplierName === 'Thai Dairy Co., Ltd.';
+        // Suppliers see only their own submissions
+        return sub.status === 'draft' || sub.status === 'revision_needed' || true; // In demo, show all
       }
       
-      // Internal roles see submissions at their stage or later
-      const statusOrder: WorkflowStatus[] = ['draft', 'pending_buyer', 'pending_commercial', 'pending_finance', 'approved'];
-      const roleStageMap: Record<UserType, number> = {
-        supplier: 0,
-        buyer: 1,
-        commercial: 2,
-        finance: 3,
-        scm: 1,
-        im: 1,
-        dc_income: 3,
-      };
-      
-      const userStageIndex = roleStageMap[currentUserRole] || 0;
-      const submissionStageIndex = statusOrder.indexOf(sub.status);
-      
-      return submissionStageIndex >= userStageIndex || sub.status === 'approved' || sub.status === 'rejected';
+      // Internal roles see all submissions
+      return true;
     });
   }, [submissions, statusFilter, divisionFilter, currentUserRole]);
 
@@ -186,40 +92,6 @@ export function WorkflowDashboard({
     return counts;
   }, [submissions]);
 
-  // Handle workflow actions
-  const handleApprove = (submission: NPDSubmission) => {
-    const nextStatus = WORKFLOW_STATUSES[submission.status].nextStatus;
-    if (!nextStatus) return;
-    
-    setSubmissions(prev => prev.map(sub => 
-      sub.id === submission.id 
-        ? { ...sub, status: nextStatus, updatedAt: new Date() }
-        : sub
-    ));
-    
-    toast.success(`${submission.productNameEn} approved and moved to ${WORKFLOW_STATUSES[nextStatus].label}`);
-  };
-
-  const handleReject = (submission: NPDSubmission) => {
-    setSubmissions(prev => prev.map(sub => 
-      sub.id === submission.id 
-        ? { ...sub, status: 'rejected' as WorkflowStatus, updatedAt: new Date() }
-        : sub
-    ));
-    
-    toast.error(`${submission.productNameEn} has been rejected`);
-  };
-
-  const handleRequestRevision = (submission: NPDSubmission) => {
-    setSubmissions(prev => prev.map(sub => 
-      sub.id === submission.id 
-        ? { ...sub, status: 'revision_needed' as WorkflowStatus, updatedAt: new Date() }
-        : sub
-    ));
-    
-    toast.info(`${submission.productNameEn} sent back for revision`);
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -230,12 +102,10 @@ export function WorkflowDashboard({
             Track and manage new product submissions
           </p>
         </div>
-        {currentUserRole === 'supplier' && (
-          <Button onClick={onCreateNew} className="bg-accent hover:bg-accent/90">
-            <FileText className="w-4 h-4 mr-2" />
-            New Submission
-          </Button>
-        )}
+        <Button onClick={onCreateNew} className="bg-accent hover:bg-accent/90">
+          <FileText className="w-4 h-4 mr-2" />
+          New Submission
+        </Button>
       </div>
 
       {/* Status Summary Cards */}
@@ -305,7 +175,7 @@ export function WorkflowDashboard({
               <ChevronDown className="w-4 h-4 ml-2" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
+          <DropdownMenuContent className="bg-popover border-border">
             <DropdownMenuItem onClick={() => setDivisionFilter('all')}>
               All Divisions
             </DropdownMenuItem>
@@ -343,108 +213,114 @@ export function WorkflowDashboard({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[120px]">ID</TableHead>
-                <TableHead>Product</TableHead>
-                <TableHead>Division</TableHead>
-                <TableHead>Supplier</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Updated</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredSubmissions.length === 0 ? (
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    No submissions found matching the filters
-                  </TableCell>
+                  <TableHead className="w-[120px]">ID</TableHead>
+                  <TableHead>Product</TableHead>
+                  <TableHead>Division</TableHead>
+                  <TableHead>Supplier</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Updated</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ) : (
-                filteredSubmissions.map(submission => {
-                  const canApprove = canTakeAction(currentUserRole, submission.status);
-                  const nextAction = getNextAction(currentUserRole, submission.status);
-                  
-                  return (
-                    <TableRow key={submission.id}>
-                      <TableCell className="font-mono text-sm">
-                        {submission.id}
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">{submission.productNameTh}</p>
-                          <p className="text-sm text-muted-foreground">{submission.productNameEn}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={cn('division-badge', DIVISIONS[submission.division].color)}>
-                          {submission.division}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {submission.supplierName}
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={cn(WORKFLOW_STATUSES[submission.status].color)}>
-                          {WORKFLOW_STATUSES[submission.status].label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {format(submission.updatedAt, 'dd MMM yyyy')}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => onViewSubmission?.(submission)}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          
-                          {canApprove && nextAction && (
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                  <MoreVertical className="w-4 h-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem 
-                                  className="text-success"
-                                  onClick={() => handleApprove(submission)}
-                                >
-                                  <CheckCircle2 className="w-4 h-4 mr-2" />
-                                  {nextAction.action}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  className="text-warning"
-                                  onClick={() => handleRequestRevision(submission)}
-                                >
-                                  <RotateCcw className="w-4 h-4 mr-2" />
-                                  Request Revision
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem 
-                                  className="text-destructive"
-                                  onClick={() => handleReject(submission)}
-                                >
-                                  <XCircle className="w-4 h-4 mr-2" />
-                                  Reject
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredSubmissions.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      No submissions found. Click "New Submission" to create one.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredSubmissions.map(submission => {
+                    const canApproveAction = canTakeAction(currentUserRole, submission.status);
+                    const nextAction = getNextAction(currentUserRole, submission.status);
+                    
+                    return (
+                      <TableRow key={submission.id}>
+                        <TableCell className="font-mono text-sm">
+                          {submission.id.slice(0, 8)}...
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">{submission.productNameTh || submission.productNameEn}</p>
+                            <p className="text-sm text-muted-foreground">{submission.productNameEn}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={cn('division-badge', DIVISIONS[submission.division]?.color)}>
+                            {submission.division}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {submission.supplierName || '-'}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={cn(WORKFLOW_STATUSES[submission.status].color)}>
+                            {WORKFLOW_STATUSES[submission.status].label}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {format(submission.updatedAt, 'dd MMM yyyy')}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => onViewSubmission?.(submission)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            
+                            {canApproveAction && nextAction && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="outline" size="sm">
+                                    <MoreVertical className="w-4 h-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="bg-popover border-border">
+                                  <DropdownMenuItem 
+                                    className="text-success"
+                                    onClick={() => onApprove?.(submission)}
+                                  >
+                                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                                    {nextAction.action}
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    className="text-warning"
+                                    onClick={() => onRequestRevision?.(submission)}
+                                  >
+                                    <RotateCcw className="w-4 h-4 mr-2" />
+                                    Request Revision
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem 
+                                    className="text-destructive"
+                                    onClick={() => onReject?.(submission)}
+                                  >
+                                    <XCircle className="w-4 h-4 mr-2" />
+                                    Reject
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>

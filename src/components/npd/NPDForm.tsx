@@ -11,6 +11,7 @@ import { ArrowLeft, ArrowRight, Save, Send, FileDown, RotateCcw, Info } from 'lu
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
+import { useSubmissions } from '@/hooks/useSubmissions';
 
 // Form steps
 const FORM_STEPS: FormSection[] = [
@@ -23,11 +24,18 @@ const FORM_STEPS: FormSection[] = [
   'logistics',
 ];
 
-export function NPDForm() {
+interface NPDFormProps {
+  onSubmitSuccess?: () => void;
+}
+
+export function NPDForm({ onSubmitSuccess }: NPDFormProps = {}) {
+  const { createSubmission } = useSubmissions();
+  
   // Setup State
   const [setupComplete, setSetupComplete] = useState(false);
   const [selectedDivision, setSelectedDivision] = useState<Division | null>(null);
   const [selectedUserType, setSelectedUserType] = useState<UserType | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   // Channel defaults to 'both' since items can be sold online and offline
   const channel: ChannelType = 'both';
 
@@ -117,17 +125,46 @@ export function NPDForm() {
   };
 
   // Submit form
-  const handleSubmit = () => {
-    // Validate all sections
-    const allValid = FORM_STEPS.every((section, index) => {
-      setCurrentStep(index);
-      return validateCurrentSection();
-    });
+  const handleSubmit = async () => {
+    if (!selectedDivision) {
+      toast.error('Please select a division');
+      return;
+    }
 
-    if (allValid) {
-      toast.success('Form submitted successfully!');
-    } else {
+    // Validate all sections
+    let allValid = true;
+    for (let i = 0; i < FORM_STEPS.length; i++) {
+      setCurrentStep(i);
+      if (!validateCurrentSection()) {
+        allValid = false;
+        break;
+      }
+    }
+
+    if (!allValid) {
       toast.error('Please complete all required fields before submitting');
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      const productNameEn = (formData['product_name_en'] as string) || 'New Product';
+      const productNameTh = (formData['product_name_th'] as string) || '';
+      
+      const result = await createSubmission(
+        selectedDivision,
+        productNameEn,
+        productNameTh,
+        formData
+      );
+      
+      if (result) {
+        toast.success('Form submitted successfully!');
+        onSubmitSuccess?.();
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -348,10 +385,11 @@ export function NPDForm() {
                 {currentStep === FORM_STEPS.length - 1 ? (
                   <Button
                     onClick={handleSubmit}
+                    disabled={isSubmitting}
                     className="bg-accent hover:bg-accent/90 text-accent-foreground"
                   >
                     <Send className="w-4 h-4 mr-2" />
-                    Submit Form
+                    {isSubmitting ? 'Submitting...' : 'Submit Form'}
                   </Button>
                 ) : (
                   <Button onClick={handleNext}>
