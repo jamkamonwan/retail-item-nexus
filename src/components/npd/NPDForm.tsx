@@ -215,15 +215,16 @@ export function NPDForm({ userRole, onSubmitSuccess, onCancel }: NPDFormProps) {
   // Setup Screen
   if (!setupComplete) {
     return (
-      <div className="min-h-screen bg-background py-8">
-        <div className="container max-w-4xl mx-auto px-4">
+      <div className="min-h-screen bg-background">
+        <div className="container max-w-4xl mx-auto px-4 py-8">
+          {/* Back Button */}
+          <Button variant="outline" size="sm" onClick={onCancel} className="mb-8">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Dashboard
+          </Button>
+          
           {/* Header */}
-          <div className="mb-8">
-            <Button variant="ghost" size="sm" onClick={onCancel} className="mb-6">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
-            </Button>
-            <div className="text-center">
+          <div className="text-center mb-8">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary mb-4">
                 <FileDown className="w-8 h-8 text-primary-foreground" />
               </div>
@@ -231,9 +232,8 @@ export function NPDForm({ userRole, onSubmitSuccess, onCancel }: NPDFormProps) {
                 New Product Development
               </h1>
               <p className="text-muted-foreground max-w-lg mx-auto">
-                เริ่มต้นกรอกข้อมูลสินค้าใหม่ กรุณาเลือกประเภทสินค้า
-              </p>
-            </div>
+              เริ่มต้นกรอกข้อมูลสินค้าใหม่ กรุณาเลือกประเภทสินค้า
+            </p>
           </div>
 
           {/* Division Selection */}
