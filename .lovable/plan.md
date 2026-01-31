@@ -1,261 +1,190 @@
 
 
-# User Story 7.2: Role-Based Access Control and User Account Management
+# Fresh Start Plan: Design-First with Mock Data
 
 ## Overview
-This plan implements a comprehensive admin panel for managing users, roles, permissions, and departments. Administrators will be able to create, update, and deactivate user accounts with granular control over access permissions.
 
-## What This Means For You
-- **Admins** get a full user management dashboard to create and manage accounts
-- Each user can have assigned **roles**, **departments**, and specific **permissions**
-- Users can be **activated/deactivated** without deleting their data
-- **Search and filter** users by name, role, department, or status
-- Track when users were created and last logged in
+This plan resets the backend database completely and refactors the frontend to use **local mock data** instead of database calls. This allows you to:
+- Rapidly iterate on UI/UX designs without database constraints
+- Define user flows and screen layouts first
+- Build the database schema later based on finalized requirements
+
+---
+
+## Phase 1: Database Cleanup
+
+### Drop All Existing Tables
+
+The following tables will be dropped to give you a clean slate:
+
+| Table | Purpose |
+|-------|---------|
+| `npd_submissions` | Product submission records |
+| `npd_workflow_history` | Workflow audit trail |
+| `field_approval_config` | Field-level approval settings |
+| `field_approvals` | Per-field approval tracking |
+| `profiles` | User profile data |
+| `user_roles` | Role assignments |
+| `user_departments` | Department assignments |
+| `user_permissions` | Permission assignments |
+| `user_suppliers` | Supplier-user links |
+| `suppliers` | Supplier master data |
+| `departments` | Department master data |
+
+Also remove:
+- Related database functions (`is_admin`, `handle_new_user`)
+- Database triggers
+- Custom enum types
+
+---
+
+## Phase 2: Frontend Mock Data System
+
+### 2.1 Create Mock Data Files
+
+Create a centralized mock data system at `src/data/mock/`:
+
+```
+src/data/mock/
+  index.ts           # Export all mock data
+  users.ts           # Mock user profiles
+  submissions.ts     # Mock NPD submissions
+  suppliers.ts       # Mock supplier data
+  departments.ts     # Mock departments
+```
+
+### 2.2 Mock User Data
+
+Pre-populated users for each role:
+
+| Role | Name | Email |
+|------|------|-------|
+| supplier | John Supplier | john.supplier@example.com |
+| buyer | Sarah Buyer | sarah.buyer@example.com |
+| commercial | Mike Commercial | mike.commercial@example.com |
+| finance | Lisa Finance | lisa.finance@example.com |
+| admin | Admin User | admin@example.com |
+
+### 2.3 Mock Submission Data
+
+5-10 sample NPD submissions across:
+- Different divisions (HL, DF, SL, etc.)
+- Different workflow statuses (draft, pending_buyer, pending_commercial, etc.)
+- Realistic product names and form data
+
+---
+
+## Phase 3: Refactor Hooks to Use Mock Data
+
+### Replace Database Calls with Mock Data
+
+| Hook | Current Behavior | New Behavior |
+|------|------------------|--------------|
+| `useAuth` | Supabase Auth | Mock user selection |
+| `useSubmissions` | Fetch from DB | Return mock submissions |
+| `useUsers` | Fetch profiles/roles | Return mock users |
+| `useSuppliers` | Fetch suppliers | Return mock suppliers |
+| `useDepartments` | Fetch departments | Return mock departments |
+
+### Add Mock Mode Toggle (Optional)
+
+A simple way to switch between:
+- Mock data (for design)
+- Real database (when ready to connect)
+
+---
+
+## Phase 4: Enhanced Role Simulator
+
+The current "Demo Role" switcher will become the primary way to test different user experiences:
+
+- Keep existing role selector in header
+- Add mock user profile display
+- Show role-specific data in each dashboard
+
+---
+
+## What Changes on Screen
+
+### Dashboard Views
+- **Supplier Dashboard**: Shows 3-5 mock submissions with various statuses
+- **Buyer Dashboard**: Shows pending review queue with mock items
+- **Admin Dashboard**: Shows overview stats from mock data
+- **All Items View**: Lists all mock submissions with filters working
+
+### Forms
+- Auto-fill button continues to work (generates dummy data)
+- Form submissions update local state (not database)
+- All role-based field visibility continues to work
 
 ---
 
 ## Technical Details
 
-### 1. Database Schema Updates
+### Files to Create
 
-**New Tables to Create:**
+1. **`src/data/mock/index.ts`**
+   - Central export for all mock data
+   - Mock state management with React context
 
-**a) `departments` table** - Store department definitions
-```text
-- id: uuid (primary key)
-- code: text (HL, HOL, DF, NF, SL, FF, PH)
-- name: text (Home & Lifestyle, etc.)
-- created_at: timestamp
-```
+2. **`src/data/mock/users.ts`**
+   - 5+ mock user profiles with roles
+   - Type-safe user data structure
 
-**b) `user_departments` table** - Junction table for user-department assignments
-```text
-- id: uuid (primary key)
-- user_id: uuid (references profiles.user_id)
-- department_code: text
-- created_at: timestamp
-- unique constraint on (user_id, department_code)
-```
+3. **`src/data/mock/submissions.ts`**
+   - 10+ mock NPD submissions
+   - Covers all workflow states and divisions
 
-**c) `user_permissions` table** - Store granular permissions
-```text
-- id: uuid (primary key)
-- user_id: uuid (references profiles.user_id)
-- permission: text (can_approve, can_reject, can_revise, can_view_all_depts, can_export, can_access_reports)
-- created_at: timestamp
-```
+4. **`src/data/mock/suppliers.ts`**
+   - 5+ mock supplier companies
 
-**d) `suppliers` table** - Store supplier entities
-```text
-- id: uuid (primary key)
-- name: text
-- code: text (unique)
-- is_active: boolean
-- created_at: timestamp
-```
+### Files to Modify
 
-**e) `user_suppliers` table** - Link users to suppliers
-```text
-- id: uuid (primary key)
-- user_id: uuid (references profiles.user_id)
-- supplier_id: uuid (references suppliers.id)
-- created_at: timestamp
-```
+1. **`src/hooks/useAuth.ts`**
+   - Return mock user instead of Supabase auth
+   - Allow role switching
 
-**Modify `profiles` table:**
-```text
-- Add: status text ('active', 'inactive', 'locked') default 'active'
-- Add: last_login_at timestamp (nullable)
-- Add: user_type text ('internal', 'external') default 'internal'
-```
+2. **`src/hooks/useSubmissions.ts`**
+   - Return mock submissions
+   - Local state for CRUD operations
 
-**Update `app_role` enum:** Add 'nsd' role if not present
+3. **`src/hooks/useUsers.ts`**
+   - Return mock user list
+   - Local state for user management
 
-### 2. RLS Policies
+4. **`src/hooks/useSuppliers.ts`** & **`src/hooks/useDepartments.ts`**
+   - Return static mock data
 
-**Security considerations:**
-- Only admins can view all user data
-- Users can view their own profile
-- Only admins can create/update/deactivate users
-- Create security definer function: `is_admin(user_id)` to check admin role
+5. **`src/components/npd/AuthenticatedWorkflowApp.tsx`**
+   - Remove auth dependency
+   - Always show as "logged in" with mock user
 
-### 3. New Components
+### Database Migration
 
-**a) `src/components/admin/UserManagement.tsx`**
-Main container with:
-- Search bar (name, email, user ID)
-- Filter dropdowns (role, department, status, supplier)
-- User list table with sortable columns
-- Create/Edit/Deactivate actions
-
-**b) `src/components/admin/UserTable.tsx`**
-Table component displaying:
-- User ID, Name, Email
-- Role(s) badges
-- Department(s)
-- Supplier (if applicable)
-- Status indicator (Active/Inactive/Locked)
-- Last login date
-- Created date
-- Action buttons (View, Edit, Deactivate)
-
-**c) `src/components/admin/UserFormDialog.tsx`**
-Modal dialog for Create/Edit user:
-- Full name (required, 2-100 chars)
-- Email (required, unique, read-only after creation)
-- User type toggle: Internal / External
-- Multi-select roles
-- Department multi-select (required for internal)
-- Supplier select (required for external)
-- Permission checkboxes:
-  - Can approve submissions
-  - Can reject submissions
-  - Can send back for corrections
-  - Can view all departments
-  - Can export data
-  - Can access reports
-- Status toggle (Active/Inactive)
-
-**d) `src/components/admin/UserFilters.tsx`**
-Filter component with:
-- Search input with debounce
-- Role dropdown filter
-- Department dropdown filter
-- Status dropdown filter
-- Clear filters button
-
-### 4. New Hooks
-
-**a) `src/hooks/useUsers.ts`**
-```text
-- fetchUsers(filters) - Get paginated user list with filters
-- createUser(userData) - Create new user via Supabase auth.admin API
-- updateUser(userId, data) - Update user profile, roles, departments
-- deactivateUser(userId) - Set status to 'inactive'
-- activateUser(userId) - Set status to 'active'
-- resetPassword(userId) - Trigger password reset email
-- unlockAccount(userId) - Set status from 'locked' to 'active'
-```
-
-**b) `src/hooks/useDepartments.ts`**
-```text
-- departments - List of all departments
-- loading state
-```
-
-**c) `src/hooks/useSuppliers.ts`**
-```text
-- suppliers - List of all suppliers
-- loading state
-- addSupplier(name, code) - Create new supplier
-```
-
-### 5. Backend Edge Function
-
-**`supabase/functions/admin-user-management/index.ts`**
-Required for admin-only operations:
-- Create user (uses service role to call auth.admin.createUser)
-- Send welcome email with temporary password
-- Generate secure temporary password
-- Force password change on first login
-
-This is needed because client-side cannot create users for others.
-
-### 6. Update AdminDashboard
-
-**File: `src/components/npd/dashboards/AdminDashboard.tsx`**
-
-Add clickable "User Management" card that navigates to user management view:
-- Link to new UserManagement component
-- Show count of active/inactive users
-
-### 7. Update AuthenticatedWorkflowApp
-
-**File: `src/components/npd/AuthenticatedWorkflowApp.tsx`**
-
-- Add 'users' to View type
-- Add Users tab for admin role
-- Route to UserManagement component when 'users' view is active
-
-### 8. Type Updates
-
-**File: `src/types/npd.ts`**
-
-Add new types:
-```text
-- Department type and DEPARTMENTS constant
-- UserStatus type: 'active' | 'inactive' | 'locked'
-- UserPermission type
-- User interface with full profile data
-```
+Single SQL migration to:
+- Drop all 11 tables
+- Drop all custom functions and triggers
+- Drop custom enum types
 
 ---
 
-## Implementation Order
+## Benefits of This Approach
 
-1. **Database migrations** - Create new tables and update existing ones
-2. **RLS policies** - Secure admin-only access
-3. **Edge function** - Create admin user management endpoint
-4. **Type definitions** - Add new types to npd.ts
-5. **Hooks** - useUsers, useDepartments, useSuppliers
-6. **Components** - UserTable, UserFormDialog, UserFilters, UserManagement
-7. **Update AdminDashboard** - Link to user management
-8. **Update navigation** - Add Users tab for admin
+1. **Rapid UI iteration**: Change screens without waiting for database updates
+2. **Realistic testing**: Mock data shows how the UI looks with real content
+3. **User story driven**: Design flows first, then build the schema to match
+4. **Easy reset**: Clear mock state without database migrations
+5. **Flexible fields**: Add/remove form fields without schema changes
 
 ---
 
-## Files to Create
+## Next Steps After This Plan
 
-| File | Purpose |
-|------|---------|
-| `src/components/admin/UserManagement.tsx` | Main user management container |
-| `src/components/admin/UserTable.tsx` | Users list table |
-| `src/components/admin/UserFormDialog.tsx` | Create/Edit user modal |
-| `src/components/admin/UserFilters.tsx` | Search and filter controls |
-| `src/components/admin/index.ts` | Export all admin components |
-| `src/hooks/useUsers.ts` | User CRUD operations |
-| `src/hooks/useDepartments.ts` | Department data hook |
-| `src/hooks/useSuppliers.ts` | Supplier data hook |
-| `supabase/functions/admin-user-management/index.ts` | Admin user API |
+Once you approve, I will:
+1. Create the database migration to drop all tables
+2. Create the mock data files
+3. Update all hooks to use mock data
+4. Verify the UI displays mock content correctly
 
-## Files to Modify
-
-| File | Changes |
-|------|---------|
-| `src/types/npd.ts` | Add Department, UserStatus, UserPermission types |
-| `src/components/npd/dashboards/AdminDashboard.tsx` | Link to User Management |
-| `src/components/npd/AuthenticatedWorkflowApp.tsx` | Add 'users' view and navigation |
-
-## Database Migrations
-
-1. Create `departments` table with seed data
-2. Create `user_departments` junction table
-3. Create `user_permissions` table
-4. Create `suppliers` and `user_suppliers` tables
-5. Alter `profiles` table to add status, last_login_at, user_type
-6. Update RLS policies for admin access
-7. Create `is_admin()` security definer function
-
----
-
-## Security Considerations
-
-- Admin status checked via server-side `is_admin()` function (not client-side)
-- Edge function uses service role key for privileged operations
-- RLS policies restrict non-admin users from viewing other user data
-- Sensitive operations require confirmation dialogs
-- All admin actions should be logged (future: audit trail table)
-
----
-
-## Validation Rules Summary
-
-| Field | Validation |
-|-------|------------|
-| Email | Valid format, unique in system |
-| Full Name | 2-100 characters, required |
-| Role | At least one role required |
-| Department | Required for internal users |
-| Supplier | Required for external/supplier users |
-| Password | Minimum 6 characters (auto-generated for admin-created users) |
+Then you can share your user stories and we'll design each screen flow together.
 
