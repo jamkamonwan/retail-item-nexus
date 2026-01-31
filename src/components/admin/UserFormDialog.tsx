@@ -16,7 +16,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { UserProfile, CreateUserData, UpdateUserData, PermissionType, PERMISSIONS, Department, Supplier, UserTypeValue } from '@/types/admin';
+import { UserProfile, CreateUserData, UpdateUserData, Department, Supplier, UserTypeValue } from '@/types/admin';
 import { USER_TYPES, UserType } from '@/types/npd';
 import { Wand2 } from 'lucide-react';
 
@@ -38,7 +38,6 @@ const generateDummyUser = (departments: Department[]) => {
     roles: [role],
     departments: departments.length > 0 ? [departments[Math.floor(Math.random() * departments.length)].code] : [],
     supplierId: '',
-    permissions: Math.random() > 0.5 ? ['can_approve'] : [],
   };
 };
 const userSchema = z.object({
@@ -48,7 +47,6 @@ const userSchema = z.object({
   roles: z.array(z.string()).min(1, 'At least one role required'),
   departments: z.array(z.string()).optional(),
   supplierId: z.string().optional(),
-  permissions: z.array(z.string()).optional(),
 });
 
 type UserFormValues = z.infer<typeof userSchema>;
@@ -82,7 +80,6 @@ export function UserFormDialog({
       roles: [],
       departments: [],
       supplierId: '',
-      permissions: [],
     },
   });
 
@@ -97,7 +94,6 @@ export function UserFormDialog({
         roles: user.roles,
         departments: user.departments,
         supplierId: user.supplier?.id || '',
-        permissions: user.permissions,
       });
     } else {
       form.reset({
@@ -107,7 +103,6 @@ export function UserFormDialog({
         roles: [],
         departments: [],
         supplierId: '',
-        permissions: [],
       });
     }
   }, [user, form]);
@@ -123,7 +118,6 @@ export function UserFormDialog({
           roles: values.roles,
           departments: values.userType === 'internal' ? values.departments : [],
           supplierId: values.userType === 'external' ? values.supplierId : undefined,
-          permissions: values.permissions as PermissionType[],
         });
       } else {
         await onSubmit({
@@ -133,7 +127,6 @@ export function UserFormDialog({
           roles: values.roles,
           departments: values.userType === 'internal' ? values.departments : [],
           supplierId: values.userType === 'external' ? values.supplierId : undefined,
-          permissions: values.permissions as PermissionType[],
         });
       }
       onOpenChange(false);
@@ -158,17 +151,8 @@ export function UserFormDialog({
     form.setValue('departments', updated);
   };
 
-  const togglePermission = (perm: string) => {
-    const current = form.getValues('permissions') || [];
-    const updated = current.includes(perm)
-      ? current.filter((p) => p !== perm)
-      : [...current, perm];
-    form.setValue('permissions', updated);
-  };
-
   const selectedRoles = form.watch('roles');
   const selectedDepartments = form.watch('departments') || [];
-  const selectedPermissions = form.watch('permissions') || [];
 
   const handleAutoFill = () => {
     const dummyData = generateDummyUser(departments);
@@ -309,25 +293,6 @@ export function UserFormDialog({
                 </Select>
               </div>
             )}
-
-            {/* Permissions */}
-            <div className="space-y-2">
-              <Label>Additional Permissions</Label>
-              <div className="grid grid-cols-2 gap-2 p-3 border rounded-md bg-muted/30">
-                {Object.entries(PERMISSIONS).map(([key, value]) => (
-                  <div key={key} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`perm-${key}`}
-                      checked={selectedPermissions.includes(key)}
-                      onCheckedChange={() => togglePermission(key)}
-                    />
-                    <Label htmlFor={`perm-${key}`} className="font-normal text-sm">
-                      {value.label}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </div>
           </form>
         </ScrollArea>
 
