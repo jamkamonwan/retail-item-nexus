@@ -36,9 +36,10 @@ const FORM_STEPS: FormSection[] = [
 interface NPDFormProps {
   userRole: UserType;
   onSubmitSuccess?: () => void;
+  onCancel?: () => void;
 }
 
-export function NPDForm({ userRole, onSubmitSuccess }: NPDFormProps) {
+export function NPDForm({ userRole, onSubmitSuccess, onCancel }: NPDFormProps) {
   const { createSubmission } = useSubmissions();
   
   // Setup State
@@ -217,16 +218,22 @@ export function NPDForm({ userRole, onSubmitSuccess }: NPDFormProps) {
       <div className="min-h-screen bg-background py-8">
         <div className="container max-w-4xl mx-auto px-4">
           {/* Header */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary mb-4">
-              <FileDown className="w-8 h-8 text-primary-foreground" />
+          <div className="mb-8">
+            <Button variant="ghost" size="sm" onClick={onCancel} className="mb-6">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary mb-4">
+                <FileDown className="w-8 h-8 text-primary-foreground" />
+              </div>
+              <h1 className="text-3xl font-bold text-foreground mb-2">
+                New Product Development
+              </h1>
+              <p className="text-muted-foreground max-w-lg mx-auto">
+                เริ่มต้นกรอกข้อมูลสินค้าใหม่ กรุณาเลือกประเภทสินค้า
+              </p>
             </div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              New Product Development
-            </h1>
-            <p className="text-muted-foreground max-w-lg mx-auto">
-              เริ่มต้นกรอกข้อมูลสินค้าใหม่ กรุณาเลือกประเภทสินค้า
-            </p>
           </div>
 
           {/* Division Selection */}
