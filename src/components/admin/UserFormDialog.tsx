@@ -18,7 +18,29 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { UserProfile, CreateUserData, UpdateUserData, PermissionType, PERMISSIONS, Department, Supplier, UserTypeValue } from '@/types/admin';
 import { USER_TYPES, UserType } from '@/types/npd';
+import { Wand2 } from 'lucide-react';
 
+// Dummy data generator
+const DUMMY_FIRST_NAMES = ['John', 'Jane', 'Michael', 'Sarah', 'David', 'Emma', 'Chris', 'Lisa', 'Robert', 'Anna'];
+const DUMMY_LAST_NAMES = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Martinez', 'Wilson'];
+const DUMMY_ROLES = ['buyer', 'commercial', 'finance', 'scm', 'im', 'admin'];
+
+const generateDummyUser = (departments: Department[]) => {
+  const firstName = DUMMY_FIRST_NAMES[Math.floor(Math.random() * DUMMY_FIRST_NAMES.length)];
+  const lastName = DUMMY_LAST_NAMES[Math.floor(Math.random() * DUMMY_LAST_NAMES.length)];
+  const role = DUMMY_ROLES[Math.floor(Math.random() * DUMMY_ROLES.length)];
+  const timestamp = Date.now().toString().slice(-4);
+  
+  return {
+    fullName: `${firstName} ${lastName}`,
+    email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}.${timestamp}@example.com`,
+    userType: 'internal' as const,
+    roles: [role],
+    departments: departments.length > 0 ? [departments[Math.floor(Math.random() * departments.length)].code] : [],
+    supplierId: '',
+    permissions: Math.random() > 0.5 ? ['can_approve'] : [],
+  };
+};
 const userSchema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters').max(100, 'Name too long'),
   email: z.string().email('Invalid email format'),
@@ -148,11 +170,30 @@ export function UserFormDialog({
   const selectedDepartments = form.watch('departments') || [];
   const selectedPermissions = form.watch('permissions') || [];
 
+  const handleAutoFill = () => {
+    const dummyData = generateDummyUser(departments);
+    form.reset(dummyData);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Edit User' : 'Create New User'}</DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle>{isEditing ? 'Edit User' : 'Create New User'}</DialogTitle>
+            {!isEditing && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAutoFill}
+                className="gap-2"
+              >
+                <Wand2 className="h-4 w-4" />
+                Auto Fill
+              </Button>
+            )}
+          </div>
         </DialogHeader>
 
         <ScrollArea className="max-h-[60vh] pr-4">
