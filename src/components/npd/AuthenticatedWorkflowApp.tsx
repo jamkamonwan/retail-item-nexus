@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubmissions } from '@/hooks/useSubmissions';
+import { usePasswordChangeCheck } from '@/hooks/usePasswordChangeCheck';
 import { UserType } from '@/types/npd';
 import { NPDSubmission, WORKFLOW_STATUSES, WorkflowStatus } from '@/types/workflow';
 import { WorkflowDashboard } from './WorkflowDashboard';
 import { SubmissionView } from './SubmissionView';
 import { NPDForm } from './NPDForm';
 import { FieldApprovalConfigScreen } from './FieldApprovalConfigScreen';
-import { UserMenu } from '@/components/auth/UserMenu';
+import { UserMenu, ChangePasswordDialog } from '@/components/auth';
 import { RoleSimulator } from './RoleSimulator';
 import { SupplierDashboard, ApproverDashboard, AdminDashboard } from './dashboards';
 import { UserManagement } from '@/components/admin';
@@ -29,6 +30,7 @@ const ROLE_PENDING_STATUS: Partial<Record<UserType, WorkflowStatus>> = {
 export function AuthenticatedWorkflowApp() {
   const { role, user } = useAuth();
   const { submissions, loading, updateStatus, refetch } = useSubmissions();
+  const { mustChangePassword, loading: passwordCheckLoading, clearPasswordChangeFlag } = usePasswordChangeCheck(user);
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [selectedSubmission, setSelectedSubmission] = useState<NPDSubmission | null>(null);
   const [editingSubmission, setEditingSubmission] = useState<NPDSubmission | null>(null);
@@ -220,6 +222,11 @@ export function AuthenticatedWorkflowApp() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Force password change dialog for admin-created users */}
+      <ChangePasswordDialog 
+        open={mustChangePassword && !passwordCheckLoading} 
+        onPasswordChanged={clearPasswordChangeFlag} 
+      />
       {/* Top Navigation */}
       <header className="sticky top-0 z-50 bg-card border-b border-border">
         <div className="container max-w-7xl mx-auto px-4 py-3">
