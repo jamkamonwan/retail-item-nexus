@@ -6,7 +6,9 @@ import { WorkflowDashboard } from './WorkflowDashboard';
 import { SubmissionView } from './SubmissionView';
 import { NPDForm } from './NPDForm';
 import { UserMenu } from '@/components/auth/UserMenu';
+import { RoleSimulator } from './RoleSimulator';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card } from '@/components/ui/card';
 import { LayoutDashboard, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -16,9 +18,9 @@ export function AuthenticatedWorkflowApp() {
   const { role } = useAuth();
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [selectedSubmission, setSelectedSubmission] = useState<NPDSubmission | null>(null);
-
-  // Use authenticated user's role
-  const currentUserRole: UserType = role || 'buyer';
+  
+  // Allow role switching for demo purposes - default to authenticated role or 'buyer'
+  const [demoRole, setDemoRole] = useState<UserType>(role || 'buyer');
 
   const handleViewSubmission = (submission: NPDSubmission) => {
     setSelectedSubmission(submission);
@@ -84,7 +86,20 @@ export function AuthenticatedWorkflowApp() {
               </Tabs>
             </div>
 
-            <UserMenu />
+            <div className="flex items-center gap-3">
+              {/* Demo Role Switcher */}
+              <Card className="py-2 px-3 bg-card border-border">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground">Demo Role:</span>
+                  <RoleSimulator 
+                    selectedRole={demoRole} 
+                    onRoleChange={setDemoRole}
+                  />
+                </div>
+              </Card>
+              
+              <UserMenu />
+            </div>
           </div>
         </div>
       </header>
@@ -93,7 +108,7 @@ export function AuthenticatedWorkflowApp() {
       <main className="container max-w-7xl mx-auto px-4 py-6">
         {currentView === 'dashboard' && (
           <WorkflowDashboard
-            currentUserRole={currentUserRole}
+            currentUserRole={demoRole}
             onViewSubmission={handleViewSubmission}
             onCreateNew={handleCreateNew}
           />
@@ -106,7 +121,7 @@ export function AuthenticatedWorkflowApp() {
         {currentView === 'submission' && selectedSubmission && (
           <SubmissionView
             submission={selectedSubmission}
-            currentUserRole={currentUserRole}
+            currentUserRole={demoRole}
             onBack={handleBackToList}
             onApprove={handleApprove}
             onReject={handleReject}
