@@ -149,20 +149,6 @@ export function useUsers() {
         throw new Error('Not authenticated');
       }
 
-      const response = await supabase.functions.invoke('admin-user-management', {
-        body: data,
-        headers: {
-          Authorization: `Bearer ${session.session.access_token}`,
-        },
-        method: 'POST',
-      });
-
-      // Check for invocation errors
-      if (response.error) {
-        throw new Error(response.error.message || 'Failed to create user');
-      }
-
-      // The function appends ?action=create-user via URL, we need to construct URL properly
       const url = new URL(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-user-management`);
       url.searchParams.set('action', 'create-user');
 
@@ -171,6 +157,7 @@ export function useUsers() {
         headers: {
           Authorization: `Bearer ${session.session.access_token}`,
           'Content-Type': 'application/json',
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
         },
         body: JSON.stringify(data),
       });
@@ -209,6 +196,7 @@ export function useUsers() {
         headers: {
           Authorization: `Bearer ${session.session.access_token}`,
           'Content-Type': 'application/json',
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
         },
         body: JSON.stringify(data),
       });
@@ -252,6 +240,7 @@ export function useUsers() {
         headers: {
           Authorization: `Bearer ${session.session.access_token}`,
           'Content-Type': 'application/json',
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
         },
         body: JSON.stringify({ userId }),
       });
