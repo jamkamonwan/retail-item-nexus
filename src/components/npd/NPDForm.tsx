@@ -6,6 +6,16 @@ import { ProgressStepper } from './ProgressStepper';
 import { FormSectionComponent } from './FormSection';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { ArrowLeft, ArrowRight, Save, Send, FileDown, RotateCcw, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -34,9 +44,27 @@ export function NPDForm({ userRole, onSubmitSuccess }: NPDFormProps) {
   // Setup State
   const [setupComplete, setSetupComplete] = useState(false);
   const [selectedDivision, setSelectedDivision] = useState<Division | null>(null);
+  const [pendingDivision, setPendingDivision] = useState<Division | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   // Channel defaults to 'both' since items can be sold online and offline
   const channel: ChannelType = 'both';
+
+  // Handle division selection with confirmation
+  const handleDivisionSelect = (division: Division) => {
+    setPendingDivision(division);
+  };
+
+  const handleConfirmDivision = () => {
+    if (pendingDivision) {
+      setSelectedDivision(pendingDivision);
+      setSetupComplete(true);
+      setPendingDivision(null);
+    }
+  };
+
+  const handleCancelDivision = () => {
+    setPendingDivision(null);
+  };
 
   // Form State
   const [currentStep, setCurrentStep] = useState(0);
@@ -197,57 +225,68 @@ export function NPDForm({ userRole, onSubmitSuccess }: NPDFormProps) {
               New Product Development
             </h1>
             <p className="text-muted-foreground max-w-lg mx-auto">
-              เริ่มต้นกรอกข้อมูลสินค้าใหม่ กรุณาเลือกประเภทสินค้าและบทบาทของท่าน
+              เริ่มต้นกรอกข้อมูลสินค้าใหม่ กรุณาเลือกประเภทสินค้า
             </p>
           </div>
 
-          {/* Step 1: Division Selection */}
+          {/* Division Selection */}
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
-                  1
-                </span>
-                Select Product Division
-              </CardTitle>
+              <CardTitle>Select Product Division</CardTitle>
               <CardDescription>
                 เลือกประเภทสินค้าที่ต้องการเพิ่ม
               </CardDescription>
             </CardHeader>
             <CardContent>
               <DivisionSelector
-                selected={selectedDivision}
-                onSelect={setSelectedDivision}
+                selected={null}
+                onSelect={handleDivisionSelect}
               />
             </CardContent>
           </Card>
 
           {/* Role Info Banner */}
-          <div className="mb-8 p-4 rounded-xl border border-border bg-muted/30 flex items-start gap-3">
+          <div className="p-4 rounded-xl border border-border bg-muted/30 flex items-start gap-3">
             <Info className="w-5 h-5 text-muted-foreground mt-0.5" />
             <div>
               <p className="font-medium text-foreground">
                 Your Role: <span className="text-primary">{userRole.toUpperCase()}</span> • Channel: Online & Offline
               </p>
               <p className="text-sm text-muted-foreground">
-                บทบาทของท่านถูกกำหนดจาก Demo Role ด้านบน สินค้าจะถูกจำหน่ายทั้งช่องทางออนไลน์และออฟไลน์
+                บทบาทของท่านถูกกำหนดจาก Demo Role ด้านบน
               </p>
             </div>
           </div>
-
-          {/* Start Button */}
-          <div className="flex justify-center">
-            <Button
-              size="lg"
-              onClick={() => setSetupComplete(true)}
-              disabled={!selectedDivision}
-              className="px-8 bg-accent hover:bg-accent/90 text-accent-foreground"
-            >
-              Start Form Entry
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </div>
         </div>
+
+        {/* Confirmation Dialog */}
+        <AlertDialog open={!!pendingDivision} onOpenChange={(open) => !open && handleCancelDivision()}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirm Division Selection</AlertDialogTitle>
+              <AlertDialogDescription>
+                {pendingDivision && (
+                  <>
+                    You are about to create a new product for{' '}
+                    <span className="font-semibold text-foreground">
+                      {DIVISIONS[pendingDivision].label} - {DIVISIONS[pendingDivision].fullName}
+                    </span>
+                    {' '}as a{' '}
+                    <span className="font-semibold text-foreground">{userRole.toUpperCase()}</span>.
+                    <br /><br />
+                    ยืนยันการเลือกประเภทสินค้านี้?
+                  </>
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmDivision}>
+                Continue
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     );
   }
