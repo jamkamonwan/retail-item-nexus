@@ -8,12 +8,11 @@ import { WorkflowDashboard } from './WorkflowDashboard';
 import { SubmissionView } from './SubmissionView';
 import { NPDForm } from './NPDForm';
 import { FieldApprovalConfigScreen } from './FieldApprovalConfigScreen';
-import { UserMenu, ChangePasswordDialog } from '@/components/auth';
-import { RoleSimulator } from './RoleSimulator';
+import { ChangePasswordDialog } from '@/components/auth';
+import { BigCHeader } from '@/components/layout/BigCHeader';
 import { SupplierDashboard, ApproverDashboard, AdminDashboard } from './dashboards';
 import { UserManagement } from '@/components/admin';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card } from '@/components/ui/card';
 import { LayoutDashboard, FileText, Settings2, ListChecks, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -227,40 +226,23 @@ export function AuthenticatedWorkflowApp() {
         open={mustChangePassword && !passwordCheckLoading} 
         onPasswordChanged={clearPasswordChangeFlag} 
       />
-      {/* Top Navigation */}
-      <header className="sticky top-0 z-50 bg-card border-b border-border">
-        <div className="container max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <h1 className="text-xl font-bold text-foreground">NPD System</h1>
-              <div className="h-6 w-px bg-border" />
-              <Tabs 
-                value={currentView === 'submission' ? 'dashboard' : currentView} 
-                onValueChange={(v) => setCurrentView(v as View)}
-              >
-                <TabsList>
-                  {getNavigationTabs()}
-                </TabsList>
-              </Tabs>
-            </div>
+      
+      {/* Big C Branded Header */}
+      <BigCHeader demoRole={demoRole} onRoleChange={setDemoRole} />
 
-            <div className="flex items-center gap-3">
-              {/* Demo Role Switcher */}
-              <Card className="py-2 px-3 bg-card border-border">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-muted-foreground">Demo Role:</span>
-                  <RoleSimulator 
-                    selectedRole={demoRole} 
-                    onRoleChange={setDemoRole}
-                  />
-                </div>
-              </Card>
-              
-              <UserMenu />
-            </div>
-          </div>
+      {/* Navigation Tabs - Below header */}
+      <div className="bg-card border-b border-border sticky top-[104px] z-40">
+        <div className="container max-w-7xl mx-auto px-4">
+          <Tabs 
+            value={currentView === 'submission' ? 'dashboard' : currentView} 
+            onValueChange={(v) => setCurrentView(v as View)}
+          >
+            <TabsList className="bg-transparent border-0 h-12">
+              {getNavigationTabs()}
+            </TabsList>
+          </Tabs>
         </div>
-      </header>
+      </div>
 
       {/* Main Content */}
       <main className="container max-w-7xl mx-auto px-4 py-6">

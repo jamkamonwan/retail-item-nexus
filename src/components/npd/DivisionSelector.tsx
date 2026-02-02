@@ -19,9 +19,22 @@ const DIVISION_ICONS: Record<Division, React.ReactNode> = {
   PH: <Pill className="w-6 h-6" />,
 };
 
+// Big C style colorful backgrounds for each division
+const DIVISION_COLORS: Record<Division, string> = {
+  HL: 'bg-blue-500',
+  HOL: 'bg-teal-500',
+  DF: 'bg-orange-500',
+  NF: 'bg-purple-500',
+  SL: 'bg-pink-500',
+  FF: 'bg-green-500',
+  GS: 'bg-slate-500',
+  HB: 'bg-rose-500',
+  PH: 'bg-red-500',
+};
+
 export function DivisionSelector({ selected, onSelect }: DivisionSelectorProps) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+    <div className="grid grid-cols-3 sm:grid-cols-5 gap-4">
       {(Object.entries(DIVISIONS) as [Division, typeof DIVISIONS[Division]][]).map(([key, div]) => {
         const isSelected = selected === key;
         return (
@@ -29,42 +42,38 @@ export function DivisionSelector({ selected, onSelect }: DivisionSelectorProps) 
             key={key}
             onClick={() => onSelect(key)}
             className={cn(
-              'group relative flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all duration-200',
-              'hover:border-primary/50 hover:shadow-md',
+              'group relative flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200',
+              'hover:scale-105 hover:shadow-lg',
               isSelected
-                ? 'border-primary bg-primary/5 shadow-md'
-                : 'border-border bg-card hover:bg-muted/30'
+                ? 'ring-2 ring-primary ring-offset-2 shadow-lg'
+                : 'hover:ring-2 hover:ring-accent/50'
             )}
           >
+            {/* Colorful circular icon - Big C retail style */}
             <div
               className={cn(
-                'mb-2 p-2 rounded-full transition-colors',
-                isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary'
+                'w-14 h-14 rounded-full flex items-center justify-center mb-2 text-white shadow-md transition-transform',
+                DIVISION_COLORS[key],
+                isSelected && 'scale-110'
               )}
             >
               {DIVISION_ICONS[key]}
             </div>
             <span
               className={cn(
-                'font-semibold text-lg transition-colors',
+                'font-semibold text-sm transition-colors text-center',
                 isSelected ? 'text-primary' : 'text-foreground'
               )}
             >
               {div.label}
             </span>
-            <span className="text-xs text-muted-foreground text-center mt-1">
+            <span className="text-[10px] text-muted-foreground text-center line-clamp-1">
               {div.fullName}
             </span>
-            <span className={cn(
-              'text-[10px] px-1.5 py-0.5 rounded mt-1',
-              div.category === 'food' ? 'bg-success/10 text-success' : 
-              div.category === 'health' ? 'bg-warning/10 text-warning' :
-              'bg-muted text-muted-foreground'
-            )}>
-              {div.category}
-            </span>
             {isSelected && (
-              <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-primary animate-pulse" />
+              <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                <span className="text-primary-foreground text-xs">✓</span>
+              </div>
             )}
           </button>
         );

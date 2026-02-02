@@ -67,15 +67,15 @@ export function AuthForm() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-accent via-accent/90 to-success flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Logo Header */}
+        {/* Logo Header - Big C Style */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary mb-4">
-            <FileDown className="w-8 h-8 text-primary-foreground" />
+          <div className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-primary shadow-lg mb-4">
+            <span className="text-3xl font-bold text-primary-foreground">NPD</span>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">NPD System</h1>
-          <p className="text-muted-foreground">New Product Development Workflow</p>
+          <h1 className="text-2xl font-bold text-accent-foreground">ระบบสินค้าใหม่</h1>
+          <p className="text-accent-foreground/80">New Product Development Workflow</p>
         </div>
 
         <Card>
