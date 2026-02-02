@@ -1134,6 +1134,123 @@ export const LOGISTICS_FIELDS: NPDFormField[] = [
 ];
 
 // ============================================================
+// SECTION 7: System Fields (9 fields) - NEW from Excel Spec
+// ============================================================
+export const SYSTEM_FIELDS: NPDFormField[] = [
+  {
+    id: 'lv',
+    name: 'LV (Level)',
+    nameTh: 'ระดับ',
+    section: 'system_fields',
+    channel: 'both',
+    requirement: 'optional',
+    inputType: 'dropdown',
+    applicableDivisions: 'all',
+    assignedTo: ['buyer', 'im'],
+    dropdownOptions: ['1', '2', '3', '4', '5'],
+    helpText: 'Product level classification',
+  },
+  {
+    id: 'pog_round',
+    name: 'POG Round',
+    nameTh: 'รอบ POG',
+    section: 'system_fields',
+    channel: 'both',
+    requirement: 'optional',
+    inputType: 'text',
+    applicableDivisions: 'all',
+    assignedTo: ['buyer', 'im'],
+    placeholder: 'e.g., Q1-2025',
+    helpText: 'Planogram round assignment',
+  },
+  {
+    id: 'new_join_reactivate',
+    name: 'New Item / Join Item / Re-Activate',
+    nameTh: 'สินค้าใหม่ / เข้าร่วม / เปิดใหม่',
+    section: 'system_fields',
+    channel: 'both',
+    requirement: 'mandatory',
+    inputType: 'dropdown',
+    applicableDivisions: 'all',
+    assignedTo: ['supplier'],
+    dropdownOptions: ['New Item', 'Join Item', 'Re-Activate'],
+  },
+  {
+    id: 'extra_info',
+    name: 'Extra Info',
+    nameTh: 'ข้อมูลเพิ่มเติม',
+    section: 'system_fields',
+    channel: 'both',
+    requirement: 'optional',
+    inputType: 'textarea',
+    applicableDivisions: 'all',
+    assignedTo: ['supplier'],
+    placeholder: 'Additional information about the product',
+  },
+  {
+    id: 'import_product_type',
+    name: 'Import Product Type',
+    nameTh: 'ประเภทสินค้านำเข้า',
+    section: 'system_fields',
+    channel: 'both',
+    requirement: 'optional',
+    inputType: 'dropdown',
+    applicableDivisions: 'all',
+    assignedTo: ['supplier', 'buyer'],
+    dropdownOptions: ['Local', 'Import', 'Local+Import'],
+    helpText: 'Indicate if product is imported',
+  },
+  {
+    id: 'plm_import',
+    name: 'PLM/Import',
+    nameTh: 'PLM/นำเข้า',
+    section: 'system_fields',
+    channel: 'both',
+    requirement: 'optional',
+    inputType: 'text',
+    applicableDivisions: 'all',
+    assignedTo: ['buyer'],
+    placeholder: 'PLM or Import reference',
+  },
+  {
+    id: 'remark_online',
+    name: 'Remark (Online)',
+    nameTh: 'หมายเหตุ (ออนไลน์)',
+    section: 'system_fields',
+    channel: 'online',
+    requirement: 'optional',
+    inputType: 'textarea',
+    applicableDivisions: 'all',
+    assignedTo: ['supplier', 'buyer'],
+    placeholder: 'Notes specific to online channel',
+  },
+  {
+    id: 'remark_offline',
+    name: 'Remark (Offline)',
+    nameTh: 'หมายเหตุ (ออฟไลน์)',
+    section: 'system_fields',
+    channel: 'offline',
+    requirement: 'optional',
+    inputType: 'textarea',
+    applicableDivisions: 'all',
+    assignedTo: ['supplier', 'buyer'],
+    placeholder: 'Notes specific to offline channel',
+  },
+  {
+    id: 'condition_remark',
+    name: 'Condition/Remark',
+    nameTh: 'เงื่อนไข/หมายเหตุ',
+    section: 'system_fields',
+    channel: 'both',
+    requirement: 'optional',
+    inputType: 'textarea',
+    applicableDivisions: 'all',
+    assignedTo: ['buyer', 'commercial'],
+    placeholder: 'Special conditions or remarks',
+  },
+];
+
+// ============================================================
 // Combined Exports
 // ============================================================
 export const ALL_SUPPLIER_FIELDS: NPDFormField[] = [
@@ -1143,6 +1260,7 @@ export const ALL_SUPPLIER_FIELDS: NPDFormField[] = [
   ...COMPLIANCE_FIELDS,
   ...PRICING_FIELDS,
   ...LOGISTICS_FIELDS,
+  ...SYSTEM_FIELDS,
 ];
 
 // Helper to get fields by section
@@ -1160,6 +1278,8 @@ export const getSupplierFieldsBySection = (section: SupplierFormSection): NPDFor
       return PRICING_FIELDS;
     case 'logistics':
       return LOGISTICS_FIELDS;
+    case 'system_fields':
+      return SYSTEM_FIELDS;
     default:
       return [];
   }
