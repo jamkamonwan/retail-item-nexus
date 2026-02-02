@@ -13,6 +13,7 @@ import {
   COMPLIANCE_FIELDS,
   PRICING_FIELDS,
   LOGISTICS_FIELDS,
+  SYSTEM_FIELDS,
 } from './npd-fields-supplier';
 
 // Re-export supplier fields
@@ -27,6 +28,7 @@ export {
   COMPLIANCE_FIELDS,
   PRICING_FIELDS,
   LOGISTICS_FIELDS,
+  SYSTEM_FIELDS,
 };
 
 // Helper function to check if a field applies to a division

@@ -24,7 +24,8 @@ import {
   List,
   ShieldCheck,
   DollarSign,
-  Truck
+  Truck,
+  Settings
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -108,6 +109,8 @@ const getSectionIcon = (section: SupplierFormSection) => {
       return DollarSign;
     case 'logistics':
       return Truck;
+    case 'system_fields':
+      return Settings;
     default:
       return Package;
   }

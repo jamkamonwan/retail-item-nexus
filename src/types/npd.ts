@@ -57,14 +57,15 @@ export type FormSection =
   | 'store_allocation'
   | 'additional';
 
-// NEW: Supplier Registration Form Sections (6 sections, 80 fields)
+// NEW: Supplier Registration Form Sections (7 sections, 286 fields per Excel spec)
 export type SupplierFormSection = 
-  | 'product_identification'  // 15 fields
-  | 'product_images'          // 7 fields
-  | 'basic_attributes'        // 20 fields
-  | 'compliance'              // 10 fields
-  | 'pricing'                 // 8 fields
-  | 'logistics';              // 20 fields
+  | 'product_identification'  // 24 fields
+  | 'product_images'          // 10 fields
+  | 'basic_attributes'        // 109 fields
+  | 'compliance'              // 17 fields
+  | 'pricing'                 // 10 fields
+  | 'logistics'               // 107 fields
+  | 'system_fields';          // 9 fields
 
 export const SUPPLIER_FORM_SECTIONS: Record<SupplierFormSection, { 
   title: string; 
@@ -76,37 +77,43 @@ export const SUPPLIER_FORM_SECTIONS: Record<SupplierFormSection, {
     title: 'Product Identification', 
     titleTh: 'ข้อมูลระบุสินค้า', 
     icon: 'package',
-    fieldCount: 15,
+    fieldCount: 24,
   },
   product_images: { 
     title: 'Product Images', 
     titleTh: 'รูปภาพสินค้า', 
     icon: 'image',
-    fieldCount: 7,
+    fieldCount: 10,
   },
   basic_attributes: { 
     title: 'Basic Attributes', 
     titleTh: 'คุณสมบัติพื้นฐาน', 
     icon: 'list',
-    fieldCount: 20,
+    fieldCount: 109,
   },
   compliance: { 
     title: 'Compliance & Certification', 
     titleTh: 'การรับรองและใบอนุญาต', 
     icon: 'shield-check',
-    fieldCount: 10,
+    fieldCount: 17,
   },
   pricing: { 
     title: 'Pricing Basics', 
     titleTh: 'ราคาและต้นทุน', 
     icon: 'dollar-sign',
-    fieldCount: 8,
+    fieldCount: 10,
   },
   logistics: { 
     title: 'Logistics & Supply Chain', 
     titleTh: 'โลจิสติกส์และซัพพลายเชน', 
     icon: 'truck',
-    fieldCount: 20,
+    fieldCount: 107,
+  },
+  system_fields: { 
+    title: 'System Fields', 
+    titleTh: 'ระบบและการจัดการ', 
+    icon: 'settings',
+    fieldCount: 9,
   },
 };
 
@@ -178,4 +185,5 @@ export const SUPPLIER_FORM_STEPS: SupplierFormSection[] = [
   'compliance',
   'pricing',
   'logistics',
+  'system_fields',
 ];
