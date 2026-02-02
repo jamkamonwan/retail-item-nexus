@@ -8,9 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ProgressStepper } from './ProgressStepper';
 import { 
-  ArrowLeft, 
+  ArrowLeft,
+  ArrowRight,
   CheckCircle2, 
   XCircle, 
   RotateCcw, 
@@ -120,6 +121,9 @@ export function SubmissionView({
   onReject,
   onRequestRevision,
 }: SubmissionViewProps) {
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
+  const currentSection = SUPPLIER_FORM_STEPS[currentSectionIndex];
+  
   const canApprove = canTakeAction(currentUserRole, submission.status);
   const nextAction = getNextAction(currentUserRole, submission.status);
   
@@ -136,6 +140,34 @@ export function SubmissionView({
   const getSectionFieldCount = (section: SupplierFormSection): number => {
     return fieldsBySection[section]?.length || 0;
   };
+
+  // Handle section navigation
+  const handleSectionClick = (stepIndex: number) => {
+    setCurrentSectionIndex(stepIndex);
+  };
+
+  const handlePrevious = () => {
+    setCurrentSectionIndex(prev => Math.max(0, prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentSectionIndex(prev => Math.min(SUPPLIER_FORM_STEPS.length - 1, prev + 1));
+  };
+
+  // Build section info with dynamic field counts
+  const sectionInfo = useMemo(() => {
+    const info: Record<string, { title: string; titleTh: string; icon?: string; fieldCount?: number }> = {};
+    SUPPLIER_FORM_STEPS.forEach(section => {
+      info[section] = {
+        ...SUPPLIER_FORM_SECTIONS[section],
+        fieldCount: getSectionFieldCount(section),
+      };
+    });
+    return info;
+  }, [fieldsBySection]);
+
+  const SectionIcon = getSectionIcon(currentSection);
+  const currentFields = fieldsBySection[currentSection] || [];
 
   return (
     <div className="space-y-6">
@@ -222,148 +254,181 @@ export function SubmissionView({
         </CardContent>
       </Card>
 
-      {/* Tabbed Form View - Using SUPPLIER_FORM_STEPS */}
-      <Tabs defaultValue="product_identification">
-        <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1.5 rounded-lg">
-          {SUPPLIER_FORM_STEPS.map(section => {
-            const SectionIcon = getSectionIcon(section);
-            const fieldCount = getSectionFieldCount(section);
-            return (
-              <TabsTrigger 
-                key={section} 
-                value={section}
-                className="flex items-center gap-2 text-xs px-3 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm"
-              >
-                <SectionIcon className="w-4 h-4" />
-                <span className="hidden sm:inline">{SUPPLIER_FORM_SECTIONS[section].title}</span>
-                <span className="sm:hidden">{SUPPLIER_FORM_SECTIONS[section].title.split(' ')[0]}</span>
-                <span className="ml-1 text-[10px] bg-muted px-1.5 py-0.5 rounded-full">
-                  {fieldCount}
-                </span>
-              </TabsTrigger>
-            );
-          })}
-        </TabsList>
+      {/* Two-Column Layout: Sidebar + Content */}
+      <div className="flex gap-6">
+        {/* Sidebar - Desktop */}
+        <aside className="hidden lg:block w-72 shrink-0">
+          <div className="sticky top-24 bg-card rounded-xl border border-border p-4">
+            <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-4">
+              Form Sections ({SUPPLIER_FORM_STEPS.length})
+            </h3>
+            <ProgressStepper
+              steps={SUPPLIER_FORM_STEPS}
+              currentStep={currentSectionIndex}
+              completedSteps={[]}
+              onStepClick={handleSectionClick}
+              sectionInfo={sectionInfo}
+            />
+          </div>
+        </aside>
 
-        {SUPPLIER_FORM_STEPS.map(section => (
-          <TabsContent key={section} value={section} className="mt-6">
-            <Card>
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-3">
-                  {(() => {
-                    const SectionIcon = getSectionIcon(section);
-                    return <SectionIcon className="w-5 h-5 text-primary" />;
-                  })()}
-                  <div>
-                    <CardTitle className="text-lg">{SUPPLIER_FORM_SECTIONS[section].title}</CardTitle>
-                    <CardDescription>{SUPPLIER_FORM_SECTIONS[section].titleTh}</CardDescription>
+        {/* Main Content */}
+        <main className="flex-1 min-w-0">
+          {/* Mobile Section Stepper */}
+          <div className="lg:hidden mb-6">
+            <ProgressStepper
+              steps={SUPPLIER_FORM_STEPS}
+              currentStep={currentSectionIndex}
+              completedSteps={[]}
+              onStepClick={handleSectionClick}
+              sectionInfo={sectionInfo}
+            />
+          </div>
+
+          {/* Section Content Card */}
+          <Card>
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                <SectionIcon className="w-5 h-5 text-primary" />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-lg">{SUPPLIER_FORM_SECTIONS[currentSection].title}</CardTitle>
+                    <Badge variant="secondary" className="text-xs">
+                      {currentFields.length} fields
+                    </Badge>
                   </div>
+                  <CardDescription>{SUPPLIER_FORM_SECTIONS[currentSection].titleTh}</CardDescription>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {fieldsBySection[section]?.map(field => {
-                    const permission = getFieldPermission(
-                      field.assignedTo,
-                      currentUserRole,
-                      submission.status
-                    );
-                    const isEditable = permission === 'edit';
-                    const ownerClass = getFieldOwnerClass(field.assignedTo);
-                    const ownerLabel = getFieldOwnerLabel(field.assignedTo);
+                <span className="text-sm text-muted-foreground">
+                  Section {currentSectionIndex + 1} of {SUPPLIER_FORM_STEPS.length}
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {currentFields.map(field => {
+                  const permission = getFieldPermission(
+                    field.assignedTo,
+                    currentUserRole,
+                    submission.status
+                  );
+                  const isEditable = permission === 'edit';
+                  const ownerClass = getFieldOwnerClass(field.assignedTo);
+                  const ownerLabel = getFieldOwnerLabel(field.assignedTo);
 
-                    // Mock value for demo
-                    const mockValue = submission.formData[field.id] || '';
+                  // Mock value for demo
+                  const mockValue = submission.formData[field.id] || '';
 
-                    return (
-                      <div 
-                        key={field.id}
-                        className={cn(
-                          'p-4 rounded-lg bg-card border shadow-sm',
-                          ownerClass
-                        )}
-                      >
-                        {/* Field Header */}
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex-1">
-                            <Label className="text-sm font-medium leading-tight">
-                              {field.name}
-                              {field.requirement === 'mandatory' && (
-                                <span className="text-destructive ml-1">*</span>
-                              )}
-                            </Label>
-                            {field.nameTh && (
-                              <p className="text-xs text-muted-foreground mt-0.5">
-                                {field.nameTh}
-                              </p>
+                  return (
+                    <div 
+                      key={field.id}
+                      className={cn(
+                        'p-4 rounded-lg bg-card border shadow-sm',
+                        ownerClass
+                      )}
+                    >
+                      {/* Field Header */}
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <Label className="text-sm font-medium leading-tight">
+                            {field.name}
+                            {field.requirement === 'mandatory' && (
+                              <span className="text-destructive ml-1">*</span>
                             )}
-                          </div>
-                          {isEditable ? (
-                            <Edit3 className="w-4 h-4 text-muted-foreground shrink-0 ml-2" />
-                          ) : (
-                            <Lock className="w-4 h-4 text-muted-foreground shrink-0 ml-2" />
+                          </Label>
+                          {field.nameTh && (
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {field.nameTh}
+                            </p>
                           )}
                         </div>
-                        
-                        {/* Field Value/Input */}
-                        <div className="mt-3">
-                          {field.inputType === 'file' ? (
-                            // Render image preview for file fields
-                            mockValue instanceof File ? (
-                              <ImagePreview file={mockValue} fieldName={field.name} />
-                            ) : (
-                              <div className="w-full h-40 bg-muted/30 rounded-lg flex flex-col items-center justify-center border border-dashed border-border">
-                                <ImageIcon className="w-10 h-10 text-muted-foreground mb-2" />
-                                <span className="text-xs text-muted-foreground">No image uploaded</span>
-                              </div>
-                            )
-                          ) : field.inputType === 'textarea' ? (
-                            <Textarea
-                              value={mockValue as string}
-                              readOnly
-                              placeholder={field.placeholder || `Enter ${field.name.toLowerCase()}`}
-                              className={cn(
-                                'resize-none',
-                                !isEditable && 'bg-muted/50 cursor-not-allowed'
-                              )}
-                              rows={3}
-                            />
-                          ) : (
-                            <Input
-                              type={field.inputType === 'number' ? 'number' : field.inputType === 'date' ? 'date' : 'text'}
-                              value={mockValue as string}
-                              readOnly
-                              placeholder={field.placeholder || `Enter ${field.name.toLowerCase()}`}
-                              className={cn(
-                                !isEditable && 'bg-muted/50 cursor-not-allowed'
-                              )}
-                            />
-                          )}
-                        </div>
-                        
-                        {/* Role Badge */}
-                        <div className="flex items-center gap-2 mt-3">
-                          <Badge 
-                            variant="outline" 
-                            className="text-[10px] font-semibold uppercase tracking-wide"
-                          >
-                            {ownerLabel}
-                          </Badge>
-                          {field.channel !== 'both' && (
-                            <Badge variant="secondary" className="text-[10px]">
-                              {field.channel === 'online' ? 'Online' : 'Offline'}
-                            </Badge>
-                          )}
-                        </div>
+                        {isEditable ? (
+                          <Edit3 className="w-4 h-4 text-muted-foreground shrink-0 ml-2" />
+                        ) : (
+                          <Lock className="w-4 h-4 text-muted-foreground shrink-0 ml-2" />
+                        )}
                       </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        ))}
-      </Tabs>
+                      
+                      {/* Field Value/Input */}
+                      <div className="mt-3">
+                        {field.inputType === 'file' ? (
+                          // Render image preview for file fields
+                          mockValue instanceof File ? (
+                            <ImagePreview file={mockValue} fieldName={field.name} />
+                          ) : (
+                            <div className="w-full h-40 bg-muted/30 rounded-lg flex flex-col items-center justify-center border border-dashed border-border">
+                              <ImageIcon className="w-10 h-10 text-muted-foreground mb-2" />
+                              <span className="text-xs text-muted-foreground">No image uploaded</span>
+                            </div>
+                          )
+                        ) : field.inputType === 'textarea' ? (
+                          <Textarea
+                            value={mockValue as string}
+                            readOnly
+                            placeholder={field.placeholder || `Enter ${field.name.toLowerCase()}`}
+                            className={cn(
+                              'resize-none',
+                              !isEditable && 'bg-muted/50 cursor-not-allowed'
+                            )}
+                            rows={3}
+                          />
+                        ) : (
+                          <Input
+                            type={field.inputType === 'number' ? 'number' : field.inputType === 'date' ? 'date' : 'text'}
+                            value={mockValue as string}
+                            readOnly
+                            placeholder={field.placeholder || `Enter ${field.name.toLowerCase()}`}
+                            className={cn(
+                              !isEditable && 'bg-muted/50 cursor-not-allowed'
+                            )}
+                          />
+                        )}
+                      </div>
+                      
+                      {/* Role Badge */}
+                      <div className="flex items-center gap-2 mt-3">
+                        <Badge 
+                          variant="outline" 
+                          className="text-[10px] font-semibold uppercase tracking-wide"
+                        >
+                          {ownerLabel}
+                        </Badge>
+                        {field.channel !== 'both' && (
+                          <Badge variant="secondary" className="text-[10px]">
+                            {field.channel === 'online' ? 'Online' : 'Offline'}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Section Navigation */}
+          <div className="flex items-center justify-between mt-6">
+            <Button
+              variant="outline"
+              onClick={handlePrevious}
+              disabled={currentSectionIndex === 0}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Previous
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              {currentSectionIndex + 1} / {SUPPLIER_FORM_STEPS.length}
+            </span>
+            <Button
+              onClick={handleNext}
+              disabled={currentSectionIndex === SUPPLIER_FORM_STEPS.length - 1}
+            >
+              Next
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
+        </main>
+      </div>
 
       {/* Workflow History */}
       <Card>
@@ -426,13 +491,16 @@ export function SubmissionView({
                   </div>
                   <div>
                     <p className="text-sm">
-                      <span className="font-medium">Buyer</span> approved
+                      <span className="font-medium">Buyer</span> approved and forwarded to Commercial
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {format(submission.updatedAt, 'dd MMM yyyy HH:mm')}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
-                    <CheckCircle2 className="w-4 h-4 text-orange-600" />
+                  <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="w-4 h-4 text-amber-600" />
                   </div>
                   <div>
                     <p className="text-sm">
@@ -444,21 +512,6 @@ export function SubmissionView({
                   </div>
                 </div>
               </>
-            )}
-            {submission.approvedAt && (
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-success/20 flex items-center justify-center shrink-0">
-                  <CheckCircle2 className="w-4 h-4 text-success" />
-                </div>
-                <div>
-                  <p className="text-sm">
-                    <span className="font-medium">Finance</span> gave final approval
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {format(submission.approvedAt, 'dd MMM yyyy HH:mm')}
-                  </p>
-                </div>
-              </div>
             )}
           </div>
         </CardContent>
