@@ -1,191 +1,168 @@
 
-# Update Field Definitions and Column Layout Based on Excel Spec
+
+# Apply Big C Retail Theme to NPD Application
 
 ## Overview
 
-Update the NPD form field definitions and section structure to align with the **Field_Spec_List_Grouped.xlsx** specification. This includes restructuring from 6 sections to 7 sections and updating field counts based on the Excel data.
+Transform the current NPD application's visual design to match the Big C Thailand retail website theme. This involves updating the color scheme, adding a branded header with search functionality, and applying the characteristic green/red/yellow color palette throughout the application.
 
 ---
 
-## Key Changes from Excel Analysis
+## Visual Analysis of Big C Theme
 
-### Section Structure Comparison
+Based on the reference image, the Big C design features:
 
-| Section | Current Code | Excel Spec | Change |
-|---------|-------------|------------|--------|
-| 1. Product Identification | 15 fields | 24 fields | +9 fields |
-| 2. Product Images | 7 fields | 10 fields | +3 fields |
-| 3. Basic Attributes | 20 fields | 109 fields | +89 fields |
-| 4. Compliance & Certification | 10 fields | 17 fields | +7 fields |
-| 5. Pricing Basics | 8 fields | 10 fields | +2 fields |
-| 6. Logistics & Supply Chain | 20 fields | 107 fields | +87 fields |
-| 7. System Fields | ❌ Missing | 9 fields | **NEW** |
-| **Total** | 80 fields | 286 fields | +206 fields |
+| Element | Description | Color Values |
+|---------|-------------|--------------|
+| Primary Green | Bright lime green background | `hsl(100, 80%, 50%)` |
+| Red Accent | Big C logo red, promotional highlights | `hsl(0, 80%, 50%)` |
+| Yellow/Orange | Promotional badges, CTAs | `hsl(45, 100%, 50%)` |
+| White | Cards, clean surfaces | `hsl(0, 0%, 100%)` |
+| Dark Text | High contrast text | `hsl(0, 0%, 15%)` |
 
 ---
 
-## Phase 1: Update Types Definition
+## Phase 1: Update CSS Variables in `src/index.css`
 
-Add the new "System Fields" section to `src/types/npd.ts`:
+Update the `:root` color scheme to match Big C branding:
 
-```typescript
-export type SupplierFormSection = 
-  | 'product_identification'
-  | 'product_images'
-  | 'basic_attributes'
-  | 'compliance'
-  | 'pricing'
-  | 'logistics'
-  | 'system_fields';  // NEW
+```css
+:root {
+  /* Core Background - Light off-white */
+  --background: 100 20% 98%;
+  --foreground: 0 0% 15%;
 
-export const SUPPLIER_FORM_SECTIONS: Record<SupplierFormSection, {...}> = {
-  // ... existing sections ...
-  system_fields: {
-    title: 'System Fields',
-    titleTh: 'ระบบและการจัดการ',
-    icon: 'settings',
-    fieldCount: 9,
-  },
-};
+  /* Primary - Big C Red */
+  --primary: 0 80% 50%;
+  --primary-foreground: 0 0% 100%;
 
-export const SUPPLIER_FORM_STEPS: SupplierFormSection[] = [
-  'product_identification',
-  'product_images',
-  'basic_attributes',
-  'compliance',
-  'pricing',
-  'logistics',
-  'system_fields',  // NEW
-];
+  /* Secondary - Light green tint */
+  --secondary: 100 40% 95%;
+  --secondary-foreground: 100 60% 25%;
+
+  /* Accent - Big C Green (for CTAs, highlights) */
+  --accent: 100 70% 45%;
+  --accent-foreground: 0 0% 100%;
+
+  /* Success - Promotional Green */
+  --success: 100 70% 45%;
+  --success-foreground: 0 0% 100%;
+
+  /* Warning - Yellow promotional badges */
+  --warning: 45 100% 50%;
+  --warning-foreground: 0 0% 15%;
+
+  /* Sidebar - Big C Green theme */
+  --sidebar-background: 100 70% 40%;
+  --sidebar-foreground: 0 0% 100%;
+  --sidebar-primary: 0 80% 50%;
+  --sidebar-accent: 100 70% 50%;
+}
 ```
 
 ---
 
-## Phase 2: Column Layout Adjustment
+## Phase 2: Create Branded Header Component
 
-The Excel shows that sections have varying field counts:
-- Small sections (10-24 fields): 2 columns works well
-- Large sections (100+ fields): Consider sub-grouping
+Create new header component `src/components/layout/BigCHeader.tsx`:
 
-**Recommended column layout strategy:**
+```text
+Layout Structure:
+┌─────────────────────────────────────────────────────────────────────┐
+│ [Location Bar - Gray]  Address • Links • Language Toggle           │
+├─────────────────────────────────────────────────────────────────────┤
+│ [LOGO]  [Category ▼]  [────── Search Bar ──────] [🔍] [Account] [Cart] │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
-| Section | Field Count | Recommended Layout |
-|---------|-------------|-------------------|
-| Product Identification | 24 | 2 columns |
-| Product Images | 10 | 2 columns (images full-width) |
-| Basic Attributes | 109 | 2 columns with sub-groups |
-| Compliance | 17 | 2 columns |
-| Pricing | 10 | 2 columns |
-| Logistics | 107 | 2 columns with sub-groups |
-| System Fields | 9 | 2 columns |
-
-The current 2-column layout (`grid-cols-1 md:grid-cols-2`) is appropriate for consistency between Supplier and Reviewer views.
-
----
-
-## Phase 3: Add New Fields from Excel
-
-Key new fields to add per section based on Excel analysis:
-
-### Section 1: Product Identification (+9 fields)
-- Article (IM)
-- Brand Code (Auto)
-- Product Group HALAL/LOCAL/HEALTHY/TOURIST (Buyer)
-- Seller (Supplier/Buyer Review)
-- Group By (Supplier)
-- Group Name (Supplier, conditional)
-- SKU Reference (Supplier, conditional)
-- Group Barcode (Buyer, conditional)
-- Quantity Coeff / Barcode (PH/DF only)
-
-### Section 2: Product Images (+3 fields)
-- YouTube Link
-- Picture+image name
-- Link to additional data and images
-
-### Section 3: Basic Attributes (+89 fields)
-Large section with filters, dimensions, pack info, etc.
-Key sub-groups:
-- Dimensions (Piece, Pack, Inner)
-- Filters (Watt, BTU, Capacity, etc.)
-- Clothing attributes (Size, Waist, etc.)
-- Food attributes (Ingredients, Allergens)
-
-### Section 4: Compliance (+7 fields)
-- FDA/อย. numbers
-- TISI/มอก. numbers
-- Size standards
-- Safety Stock
-
-### Section 5: Pricing (+2 fields)
-- POSA Gift Card
-- POSA Commission
-
-### Section 6: Logistics (+87 fields)
-Large section with:
-- DC allowances per format
-- Forecast sales per format
-- Attribute codes per format
-- DC delivery settings
-
-### Section 7: System Fields (NEW - 9 fields)
-- LV
-- Pog_Round
-- New Item / Join Item / Re-Active
-- Extra Info
-- Import Product Type
-- PLM/Import
-- Remark (Online/Offline)
-- Condition/Remark
+Key elements:
+1. Top utility bar (location, links, language)
+2. Main header with:
+   - NPD System logo (styled like Big C logo - red background, white text)
+   - Category dropdown
+   - Full-width search bar with yellow search button
+   - User account menu
+   - Additional navigation icons
 
 ---
 
-## Phase 4: Files to Modify
+## Phase 3: Update Components with New Theme
+
+### 3.1 AuthForm.tsx
+- Update logo styling to use red background with white text
+- Apply green gradient background to the page
+- Use yellow/orange for primary CTA buttons
+
+### 3.2 AuthenticatedWorkflowApp.tsx
+- Replace current header with BigCHeader component
+- Update navigation tabs to use Big C color scheme
+- Add green gradient accents to the main content area
+
+### 3.3 Card Components
+- Add subtle green left border or shadow to match Big C style
+- Update badge colors to use yellow/orange for promotions/status
+
+---
+
+## Phase 4: Category Icons Section (Optional Enhancement)
+
+Based on Big C's category icons row, add colorful category/division icons:
+
+```text
+┌────────────────────────────────────────────────────────────────────┐
+│  หมวดหมู่ (Categories)                                            │
+│  [🏥] [🤝] [👨‍👩‍👧] [C] [🛒] [🎄] [🏪] [👩] [👨‍👩‍👧‍👦] [SME]               │
+│  ร้านขายยา  รวมพลัง  สินค้า...  บิ๊กซี  ชวนช้อป  สินค้าตาม  Only@  ดีลเด็ด  สินค้าเด็ด  SME │
+└────────────────────────────────────────────────────────────────────┘
+```
+
+Apply this pattern to division selector with colorful circular icons.
+
+---
+
+## Phase 5: Files to Modify
 
 | File | Changes |
 |------|---------|
-| `src/types/npd.ts` | Add `system_fields` section, update `SUPPLIER_FORM_STEPS` |
-| `src/data/npd-fields-supplier.ts` | Add new fields for all sections based on Excel |
-| `src/components/npd/SubmissionView.tsx` | Add Settings icon for system_fields section |
+| `src/index.css` | Update all CSS variables to Big C color scheme |
+| `tailwind.config.ts` | Add Big C specific color extensions if needed |
+| `src/components/layout/BigCHeader.tsx` | NEW - Branded header component |
+| `src/components/auth/AuthForm.tsx` | Update styling to match theme |
+| `src/components/npd/AuthenticatedWorkflowApp.tsx` | Integrate new header, update colors |
+| `src/components/npd/DivisionSelector.tsx` | Update with colorful circular icons |
 
 ---
 
-## Phase 5: SubmissionView Icon Update
+## Phase 6: Dark Mode Adjustments
 
-Add icon for new system_fields section:
+Update dark mode CSS variables to maintain readability:
 
-```typescript
-import { Settings } from 'lucide-react';
-
-const getSectionIcon = (section: SupplierFormSection) => {
-  switch (section) {
-    // ... existing cases ...
-    case 'system_fields':
-      return Settings;
-    default:
-      return Package;
-  }
-};
+```css
+.dark {
+  --background: 0 0% 10%;
+  --primary: 0 70% 55%;
+  --accent: 100 60% 50%;
+  --sidebar-background: 100 60% 25%;
+}
 ```
 
 ---
 
-## Implementation Priority
+## Technical Considerations
 
-Given the large number of new fields (206+), I recommend a phased approach:
-
-1. **Immediate**: Add `system_fields` section structure and 9 fields
-2. **Next**: Add critical missing fields per section (priority fields)
-3. **Later**: Complete all 286 fields from Excel
+1. **Font**: Keep IBM Plex Sans for readability, or consider adding Thai-optimized fonts
+2. **Bilingual Support**: The theme already supports Thai language - ensure all new elements have Thai labels
+3. **Responsive Design**: Header must collapse properly on mobile
+4. **Contrast Ratios**: Ensure WCAG AA compliance with bright green/red combinations
 
 ---
 
-## Summary
+## Summary of Changes
 
-This update will:
-1. Add new "System Fields" section (7 sections total)
-2. Keep consistent 2-column layout for both Supplier and Reviewer views
-3. Add field definitions from Excel specification
-4. Update section icons and navigation
+1. **Color Scheme**: Transform from navy/coral to Big C green/red/yellow
+2. **Header**: Create branded header with search bar and Big C styling
+3. **Buttons**: Primary buttons use red, accent buttons use green
+4. **Badges**: Status badges use yellow/orange for highlights
+5. **Backgrounds**: Subtle green gradients for main content areas
+6. **Icons**: Colorful circular icons for divisions/categories
 
-Should I proceed with the full implementation or start with just the structural changes (adding the 7th section)?
