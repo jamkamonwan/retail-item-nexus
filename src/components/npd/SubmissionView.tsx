@@ -390,15 +390,17 @@ export function SubmissionView({
                         )}
                       </div>
                       
-                      {/* Role Badge */}
+                      {/* Badges - Only show role if NOT supplier (since most are supplier fields) */}
                       <div className="flex items-center gap-2 mt-3">
-                        <Badge 
-                          variant="outline" 
-                          className="text-[10px] font-semibold uppercase tracking-wide"
-                        >
-                          {ownerLabel}
-                        </Badge>
-                      {field.channelColumn === 'online' && (
+                        {!field.assignedTo.includes('supplier') && (
+                          <Badge 
+                            variant="outline" 
+                            className="text-[10px] font-semibold uppercase tracking-wide bg-warning/10 text-warning border-warning/30"
+                          >
+                            {ownerLabel}
+                          </Badge>
+                        )}
+                        {field.channelColumn === 'online' && (
                           <Badge variant="outline" className="bg-success/10 text-success border-success/30 text-[10px]">
                             <Globe className="w-3 h-3 mr-1" />
                             Online
