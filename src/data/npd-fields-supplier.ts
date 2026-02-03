@@ -59,6 +59,7 @@ export const PRODUCT_IDENTIFICATION_FIELDS: NPDFormField[] = [
     nameTh: 'รหัสบาร์โค้ด',
     section: 'product_identification',
     channel: 'both',
+    channelColumn: 'both', // Offline/Online Column
     requirement: 'mandatory',
     inputType: 'text',
     applicableDivisions: 'all',
@@ -73,6 +74,7 @@ export const PRODUCT_IDENTIFICATION_FIELDS: NPDFormField[] = [
     nameTh: 'ชื่อสินค้า (ไทย)',
     section: 'product_identification',
     channel: 'both',
+    channelColumn: 'both', // Offline/Online Column
     requirement: 'mandatory',
     inputType: 'text',
     applicableDivisions: 'all',
@@ -86,6 +88,7 @@ export const PRODUCT_IDENTIFICATION_FIELDS: NPDFormField[] = [
     nameTh: 'ชื่อสินค้า (อังกฤษ)',
     section: 'product_identification',
     channel: 'both',
+    channelColumn: 'both', // Offline/Online Column
     requirement: 'mandatory',
     inputType: 'text',
     applicableDivisions: 'all',
@@ -99,6 +102,7 @@ export const PRODUCT_IDENTIFICATION_FIELDS: NPDFormField[] = [
     nameTh: 'หมวดหมู่สินค้า',
     section: 'product_identification',
     channel: 'both',
+    channelColumn: 'online', // Online Column - Category selection
     requirement: 'mandatory',
     inputType: 'dropdown',
     applicableDivisions: 'all',
@@ -111,6 +115,7 @@ export const PRODUCT_IDENTIFICATION_FIELDS: NPDFormField[] = [
     nameTh: 'หมวดหมู่ย่อย',
     section: 'product_identification',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'dropdown',
     applicableDivisions: 'all',
@@ -123,6 +128,7 @@ export const PRODUCT_IDENTIFICATION_FIELDS: NPDFormField[] = [
     nameTh: 'แบรนด์',
     section: 'product_identification',
     channel: 'both',
+    channelColumn: 'both', // Offline/Online Column
     requirement: 'mandatory',
     inputType: 'text',
     applicableDivisions: 'all',
@@ -135,6 +141,7 @@ export const PRODUCT_IDENTIFICATION_FIELDS: NPDFormField[] = [
     nameTh: 'รุ่น/รหัสสินค้า',
     section: 'product_identification',
     channel: 'both',
+    channelColumn: 'both', // Offline/Online Column
     requirement: 'optional',
     inputType: 'text',
     applicableDivisions: 'all',
@@ -147,6 +154,7 @@ export const PRODUCT_IDENTIFICATION_FIELDS: NPDFormField[] = [
     nameTh: 'รหัสสินค้าซัพพลายเออร์',
     section: 'product_identification',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'text',
     applicableDivisions: 'all',
@@ -159,6 +167,7 @@ export const PRODUCT_IDENTIFICATION_FIELDS: NPDFormField[] = [
     nameTh: 'ชื่อซัพพลายเออร์',
     section: 'product_identification',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'readonly',
     applicableDivisions: 'all',
@@ -171,6 +180,7 @@ export const PRODUCT_IDENTIFICATION_FIELDS: NPDFormField[] = [
     nameTh: 'แผนก',
     section: 'product_identification',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'dropdown',
     applicableDivisions: 'all',
@@ -183,6 +193,7 @@ export const PRODUCT_IDENTIFICATION_FIELDS: NPDFormField[] = [
     nameTh: 'ประเภทรายการ',
     section: 'product_identification',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'dropdown',
     applicableDivisions: 'all',
@@ -195,6 +206,7 @@ export const PRODUCT_IDENTIFICATION_FIELDS: NPDFormField[] = [
     nameTh: 'ประเภทสินค้า',
     section: 'product_identification',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'dropdown',
     applicableDivisions: 'all',
@@ -207,6 +219,7 @@ export const PRODUCT_IDENTIFICATION_FIELDS: NPDFormField[] = [
     nameTh: 'ช่องทางการขาย',
     section: 'product_identification',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'dropdown',
     applicableDivisions: 'all',
@@ -219,7 +232,8 @@ export const PRODUCT_IDENTIFICATION_FIELDS: NPDFormField[] = [
     nameTh: 'รหัสฤดูกาล',
     section: 'product_identification',
     channel: 'both',
-    requirement: 'optional', // Changed from conditional to optional
+    channelColumn: 'offline', // Offline Column
+    requirement: 'optional',
     inputType: 'text',
     applicableDivisions: ['SL'],
     assignedTo: ['supplier'],
@@ -231,6 +245,7 @@ export const PRODUCT_IDENTIFICATION_FIELDS: NPDFormField[] = [
     nameTh: 'เลขที่ Article',
     section: 'product_identification',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'optional',
     inputType: 'text',
     applicableDivisions: 'all',
@@ -244,6 +259,7 @@ export const PRODUCT_IDENTIFICATION_FIELDS: NPDFormField[] = [
     nameTh: 'จัดกลุ่มโดย',
     section: 'product_identification',
     channel: 'both',
+    channelColumn: 'online', // Online Column
     requirement: 'optional',
     inputType: 'dropdown',
     applicableDivisions: ['HL', 'HOL', 'SL', 'NF'],
@@ -258,6 +274,7 @@ export const PRODUCT_IDENTIFICATION_FIELDS: NPDFormField[] = [
     nameTh: 'ชื่อกลุ่ม',
     section: 'product_identification',
     channel: 'both',
+    channelColumn: 'online', // Online Column
     requirement: 'conditional',
     inputType: 'text',
     applicableDivisions: ['HL', 'HOL', 'SL', 'NF'],
@@ -271,6 +288,7 @@ export const PRODUCT_IDENTIFICATION_FIELDS: NPDFormField[] = [
     nameTh: 'อ้างอิง SKU',
     section: 'product_identification',
     channel: 'both',
+    channelColumn: 'online', // Online Column
     requirement: 'conditional',
     inputType: 'text',
     applicableDivisions: ['HL', 'HOL', 'SL', 'NF'],
@@ -284,12 +302,26 @@ export const PRODUCT_IDENTIFICATION_FIELDS: NPDFormField[] = [
     nameTh: 'บาร์โค้ดกลุ่ม',
     section: 'product_identification',
     channel: 'both',
+    channelColumn: 'online', // Online Column
     requirement: 'conditional',
     inputType: 'text',
     applicableDivisions: ['HL', 'HOL', 'SL', 'NF'],
     assignedTo: ['supplier'],
     placeholder: 'Group barcode (optional)',
     conditionalOn: 'group_by:!None',
+  },
+  {
+    id: 'seller',
+    name: 'Seller',
+    nameTh: 'ผู้ขาย',
+    section: 'product_identification',
+    channel: 'both',
+    channelColumn: 'online', // Online Column
+    requirement: 'mandatory',
+    inputType: 'text',
+    applicableDivisions: 'all',
+    assignedTo: ['supplier'],
+    placeholder: 'Seller name',
   },
 ];
 
@@ -299,10 +331,11 @@ export const PRODUCT_IDENTIFICATION_FIELDS: NPDFormField[] = [
 export const PRODUCT_IMAGES_FIELDS: NPDFormField[] = [
   {
     id: 'image_front',
-    name: 'Front View',
+    name: 'Front View (Images 1)',
     nameTh: 'รูปด้านหน้า',
     section: 'product_images',
     channel: 'both',
+    channelColumn: 'online', // Online Column - All images are online
     requirement: 'mandatory',
     inputType: 'file',
     applicableDivisions: 'all',
@@ -311,10 +344,11 @@ export const PRODUCT_IMAGES_FIELDS: NPDFormField[] = [
   },
   {
     id: 'image_back',
-    name: 'Back View',
+    name: 'Back View (Images 2)',
     nameTh: 'รูปด้านหลัง',
     section: 'product_images',
     channel: 'both',
+    channelColumn: 'online', // Online Column
     requirement: 'mandatory',
     inputType: 'file',
     applicableDivisions: 'all',
@@ -323,69 +357,117 @@ export const PRODUCT_IMAGES_FIELDS: NPDFormField[] = [
   },
   {
     id: 'image_side',
-    name: 'Side View',
+    name: 'Side View (Images 3)',
     nameTh: 'รูปด้านข้าง',
     section: 'product_images',
     channel: 'both',
-    requirement: 'optional',
+    channelColumn: 'online', // Online Column
+    requirement: 'mandatory',
     inputType: 'file',
     applicableDivisions: 'all',
     assignedTo: ['supplier'],
+    helpText: '1400x1400px, white background',
   },
   {
     id: 'image_detail',
-    name: 'Detail/Zoom',
+    name: 'Detail/Zoom (Images 4)',
     nameTh: 'รูปรายละเอียด',
     section: 'product_images',
     channel: 'online',
-    requirement: 'optional',
+    channelColumn: 'online', // Online Column
+    requirement: 'mandatory',
     inputType: 'file',
     applicableDivisions: 'all',
     assignedTo: ['supplier'],
-    helpText: 'Close-up of key features',
+    helpText: 'Close-up of key features, 1400x1400px',
   },
   {
     id: 'image_tisi',
-    name: 'TISI Certificate',
+    name: 'TISI Certificate (Images 5)',
     nameTh: 'รูป มอก.',
     section: 'product_images',
     channel: 'both',
+    channelColumn: 'online', // Online Column
     requirement: 'conditional',
     inputType: 'file',
-    applicableDivisions: ['HL', 'GS'],
+    applicableDivisions: ['HL', 'HOL'],
     assignedTo: ['supplier'],
     conditionalOn: 'tisi_number',
-    helpText: 'Required for products with TISI certification',
+    helpText: 'TISI mark on product label, 1400x1400px',
   },
   {
     id: 'image_fda',
-    name: 'FDA Registration',
+    name: 'FDA Registration (Images 6)',
     nameTh: 'รูป อย.',
     section: 'product_images',
     channel: 'both',
+    channelColumn: 'online', // Online Column
     requirement: 'conditional',
     inputType: 'file',
-    applicableDivisions: ['DF', 'FF', 'HB', 'PH'],
+    applicableDivisions: ['NF', 'PH'],
     assignedTo: ['supplier'],
     conditionalOn: 'fda_number',
-    helpText: 'Required for food and health products',
+    helpText: 'FDA mark on product, 1400x1400px',
   },
   {
     id: 'image_size_chart',
-    name: 'Size Chart',
+    name: 'Size Chart (Images 7)',
     nameTh: 'ตารางไซส์',
     section: 'product_images',
     channel: 'both',
+    channelColumn: 'online', // Online Column
     requirement: 'conditional',
     inputType: 'file',
     applicableDivisions: ['SL'],
     assignedTo: ['supplier'],
-    helpText: 'Required for clothing and footwear',
+    helpText: 'Size chart for clothing/footwear, 1400x1400px',
+  },
+  {
+    id: 'youtube_link',
+    name: 'YouTube Link',
+    nameTh: 'ลิงก์ YouTube',
+    section: 'product_images',
+    channel: 'online',
+    channelColumn: 'online', // Online Column
+    requirement: 'optional',
+    inputType: 'text',
+    applicableDivisions: 'all',
+    assignedTo: ['supplier'],
+    placeholder: 'https://youtube.com/watch?v=...',
+    helpText: 'Product video link',
+  },
+  {
+    id: 'picture_image_name',
+    name: 'Picture + Image Name',
+    nameTh: 'ชื่อไฟล์รูปภาพ',
+    section: 'product_images',
+    channel: 'online',
+    channelColumn: 'online', // Online Column
+    requirement: 'mandatory',
+    inputType: 'text',
+    applicableDivisions: 'all',
+    assignedTo: ['supplier'],
+    placeholder: 'product_001.jpg',
+    helpText: 'Image filename for reference',
+  },
+  {
+    id: 'additional_images_link',
+    name: 'Link to Additional Images',
+    nameTh: 'ลิงก์รูปภาพเพิ่มเติม',
+    section: 'product_images',
+    channel: 'online',
+    channelColumn: 'online', // Online Column
+    requirement: 'optional',
+    inputType: 'text',
+    applicableDivisions: 'all',
+    assignedTo: ['supplier'],
+    placeholder: 'https://drive.google.com/...',
+    helpText: 'Link to additional product images',
   },
 ];
 
 // ============================================================
-// SECTION 3: Basic Attributes (20 fields)
+// SECTION 3: Basic Attributes (Fields with channelColumn)
 // ============================================================
 export const BASIC_ATTRIBUTES_FIELDS: NPDFormField[] = [
   {
@@ -394,6 +476,7 @@ export const BASIC_ATTRIBUTES_FIELDS: NPDFormField[] = [
     nameTh: 'ขนาด',
     section: 'basic_attributes',
     channel: 'both',
+    channelColumn: 'online', // Online Column - Size Number
     requirement: 'mandatory',
     inputType: 'text',
     applicableDivisions: 'all',
@@ -402,50 +485,54 @@ export const BASIC_ATTRIBUTES_FIELDS: NPDFormField[] = [
   },
   {
     id: 'color',
-    name: 'Color',
-    nameTh: 'สี',
+    name: 'Color / Shade',
+    nameTh: 'สี / เฉดสี',
     section: 'basic_attributes',
     channel: 'both',
-    requirement: 'optional', // Changed from conditional to optional
+    channelColumn: 'online', // Online Column
+    requirement: 'optional',
     inputType: 'text',
-    applicableDivisions: ['SL', 'HL', 'GS', 'HB'],
+    applicableDivisions: ['SL', 'HL', 'GS', 'HB', 'HOL', 'NF'],
     assignedTo: ['supplier'],
     placeholder: 'Product color',
   },
-  // NEW: Hex Color Code - conditional on color field
   {
     id: 'hex_color_code',
     name: 'Hex Color Code',
-    nameTh: 'รหัสสี Hex',
+    nameTh: 'รหัสสี Hex (#000000)',
     section: 'basic_attributes',
     channel: 'both',
+    channelColumn: 'online', // Online Column
     requirement: 'conditional',
     inputType: 'text',
-    applicableDivisions: ['SL', 'HL', 'GS', 'HB'],
+    applicableDivisions: ['NF'],
     assignedTo: ['supplier'],
     placeholder: '#FFFFFF',
     conditionalOn: 'color',
-    helpText: 'Enter hex color code for exact color matching',
+    helpText: 'For beauty products with special shades',
   },
   {
     id: 'weight_net',
     name: 'Net Weight (g)',
-    nameTh: 'น้ำหนักสุทธิ (ก.)',
+    nameTh: 'น้ำหนักสุทธิ',
     section: 'basic_attributes',
     channel: 'both',
-    requirement: 'mandatory',
+    channelColumn: 'online', // Online Column
+    requirement: 'conditional',
     inputType: 'number',
-    applicableDivisions: 'all',
+    applicableDivisions: ['NF', 'PH'],
     assignedTo: ['supplier'],
     placeholder: '0',
+    helpText: 'For products with contents in container',
   },
   {
     id: 'weight_gross',
-    name: 'Gross Weight (g)',
-    nameTh: 'น้ำหนักรวม (ก.)',
+    name: 'Gross Weight (kg)',
+    nameTh: 'น้ำหนักรวม (กก.)',
     section: 'basic_attributes',
     channel: 'both',
-    requirement: 'mandatory',
+    channelColumn: 'both', // Offline/Online Column
+    requirement: 'optional',
     inputType: 'number',
     applicableDivisions: 'all',
     assignedTo: ['supplier'],
@@ -457,6 +544,7 @@ export const BASIC_ATTRIBUTES_FIELDS: NPDFormField[] = [
     nameTh: 'ความยาว (ซม.)',
     section: 'basic_attributes',
     channel: 'both',
+    channelColumn: 'both', // Offline/Online Column
     requirement: 'mandatory',
     inputType: 'number',
     applicableDivisions: 'all',
@@ -469,6 +557,7 @@ export const BASIC_ATTRIBUTES_FIELDS: NPDFormField[] = [
     nameTh: 'ความกว้าง (ซม.)',
     section: 'basic_attributes',
     channel: 'both',
+    channelColumn: 'both', // Offline/Online Column
     requirement: 'mandatory',
     inputType: 'number',
     applicableDivisions: 'all',
@@ -481,6 +570,20 @@ export const BASIC_ATTRIBUTES_FIELDS: NPDFormField[] = [
     nameTh: 'ความสูง (ซม.)',
     section: 'basic_attributes',
     channel: 'both',
+    channelColumn: 'both', // Offline/Online Column
+    requirement: 'mandatory',
+    inputType: 'number',
+    applicableDivisions: 'all',
+    assignedTo: ['supplier'],
+    placeholder: '0',
+  },
+  {
+    id: 'dimension_depth',
+    name: 'Depth (cm)',
+    nameTh: 'ความลึก (ซม.)',
+    section: 'basic_attributes',
+    channel: 'both',
+    channelColumn: 'online', // Online Column
     requirement: 'mandatory',
     inputType: 'number',
     applicableDivisions: 'all',
@@ -493,26 +596,28 @@ export const BASIC_ATTRIBUTES_FIELDS: NPDFormField[] = [
     nameTh: 'วัสดุ',
     section: 'basic_attributes',
     channel: 'both',
-    requirement: 'optional', // Changed from conditional to optional
+    channelColumn: 'online', // Online Column
+    requirement: 'mandatory',
     inputType: 'text',
-    applicableDivisions: ['SL', 'HL', 'GS'],
+    applicableDivisions: ['SL', 'HL', 'GS', 'HOL'],
     assignedTo: ['supplier'],
     placeholder: 'e.g., Cotton 100%, Stainless Steel',
   },
-  // NEW: Size Standard - conditional on size field (SL only)
+  // Size Standard - conditional on size field
   {
     id: 'size_standard',
     name: 'Size Standard',
     nameTh: 'มาตรฐานไซส์',
     section: 'basic_attributes',
     channel: 'both',
+    channelColumn: 'online', // Online Column
     requirement: 'conditional',
     inputType: 'dropdown',
-    applicableDivisions: ['SL'],
+    applicableDivisions: 'all',
     assignedTo: ['supplier'],
     dropdownOptions: ['Thai Standard', 'US Standard', 'EU Standard', 'UK Standard', 'Asian Standard'],
     conditionalOn: 'size',
-    helpText: 'Select the size standard used for this product',
+    helpText: 'Size standard for clothing/footwear',
   },
   {
     id: 'country_origin',
@@ -520,6 +625,7 @@ export const BASIC_ATTRIBUTES_FIELDS: NPDFormField[] = [
     nameTh: 'ประเทศผู้ผลิต',
     section: 'basic_attributes',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'dropdown',
     applicableDivisions: 'all',
@@ -532,6 +638,7 @@ export const BASIC_ATTRIBUTES_FIELDS: NPDFormField[] = [
     nameTh: 'ผู้ผลิต',
     section: 'basic_attributes',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'text',
     applicableDivisions: 'all',
@@ -544,6 +651,7 @@ export const BASIC_ATTRIBUTES_FIELDS: NPDFormField[] = [
     nameTh: 'ขนาดบรรจุ',
     section: 'basic_attributes',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'text',
     applicableDivisions: 'all',
@@ -556,6 +664,7 @@ export const BASIC_ATTRIBUTES_FIELDS: NPDFormField[] = [
     nameTh: 'ประเภทบรรจุภัณฑ์',
     section: 'basic_attributes',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'dropdown',
     applicableDivisions: 'all',
@@ -568,7 +677,8 @@ export const BASIC_ATTRIBUTES_FIELDS: NPDFormField[] = [
     nameTh: 'อายุสินค้า (วัน)',
     section: 'basic_attributes',
     channel: 'both',
-    requirement: 'optional', // Changed from conditional to optional
+    channelColumn: 'offline', // Offline Column
+    requirement: 'optional',
     inputType: 'number',
     applicableDivisions: ['DF', 'FF', 'HB', 'PH'],
     assignedTo: ['supplier'],
@@ -576,16 +686,30 @@ export const BASIC_ATTRIBUTES_FIELDS: NPDFormField[] = [
     helpText: 'Number of days from production date',
   },
   {
-    id: 'storage_condition',
-    name: 'Storage Condition',
-    nameTh: 'สภาพการเก็บรักษา',
+    id: 'shelf_life_consumer',
+    name: 'Shelf Life % Consumer',
+    nameTh: 'อายุสินค้า % ผู้บริโภค',
     section: 'basic_attributes',
     channel: 'both',
-    requirement: 'optional', // Changed from conditional to optional
-    inputType: 'dropdown',
-    applicableDivisions: ['DF', 'FF', 'HB', 'PH'],
+    channelColumn: 'both', // Offline/Online Column
+    requirement: 'mandatory',
+    inputType: 'text',
+    applicableDivisions: 'all',
     assignedTo: ['supplier'],
-    dropdownOptions: STORAGE_CONDITIONS,
+    placeholder: '70%',
+  },
+  {
+    id: 'storage_condition',
+    name: 'Storage Condition',
+    nameTh: 'วิธีการเก็บรักษา',
+    section: 'basic_attributes',
+    channel: 'both',
+    channelColumn: 'online', // Online Column - Care Instruction
+    requirement: 'mandatory',
+    inputType: 'text',
+    applicableDivisions: 'all',
+    assignedTo: ['supplier'],
+    placeholder: 'Storage instructions',
   },
   {
     id: 'storage_temp',
@@ -593,9 +717,10 @@ export const BASIC_ATTRIBUTES_FIELDS: NPDFormField[] = [
     nameTh: 'อุณหภูมิเก็บรักษา',
     section: 'basic_attributes',
     channel: 'both',
-    requirement: 'optional', // Changed from conditional to optional
+    channelColumn: 'both', // Offline/Online Column
+    requirement: 'mandatory',
     inputType: 'dropdown',
-    applicableDivisions: ['DF', 'FF'],
+    applicableDivisions: 'all',
     assignedTo: ['supplier'],
     dropdownOptions: STORAGE_TEMPS,
   },
@@ -605,64 +730,173 @@ export const BASIC_ATTRIBUTES_FIELDS: NPDFormField[] = [
     nameTh: 'ส่วนประกอบ',
     section: 'basic_attributes',
     channel: 'both',
-    requirement: 'optional', // Changed from conditional to optional
+    channelColumn: 'online', // Online Column
+    requirement: 'mandatory',
     inputType: 'textarea',
-    applicableDivisions: ['DF', 'FF', 'HB', 'PH'],
+    applicableDivisions: ['DF', 'NF', 'FF', 'PH'],
     assignedTo: ['supplier'],
     placeholder: 'List all ingredients in descending order by weight',
   },
   {
     id: 'allergen_info',
     name: 'Allergen Information',
-    nameTh: 'ข้อมูลสารก่อภูมิแพ้',
+    nameTh: 'ข้อมูลสำหรับผู้แพ้อาหาร',
     section: 'basic_attributes',
     channel: 'both',
-    requirement: 'optional', // Changed from conditional to optional
+    channelColumn: 'online', // Online Column
+    requirement: 'conditional',
     inputType: 'textarea',
     applicableDivisions: ['DF', 'FF'],
     assignedTo: ['supplier'],
     placeholder: 'Contains: Milk, Wheat, Soy, etc.',
   },
   {
-    id: 'nutrition_info',
-    name: 'Nutrition Facts',
-    nameTh: 'ข้อมูลโภชนาการ',
+    id: 'warranty_th',
+    name: 'Warranty (Thai)',
+    nameTh: 'การรับประกัน (ไทย)',
     section: 'basic_attributes',
     channel: 'both',
-    requirement: 'optional', // Changed from conditional to optional
-    inputType: 'textarea',
-    applicableDivisions: ['DF', 'FF'],
+    channelColumn: 'online', // Online Column
+    requirement: 'mandatory',
+    inputType: 'text',
+    applicableDivisions: 'all',
     assignedTo: ['supplier'],
-    placeholder: 'Calories, Fat, Carbohydrates, Protein per serving',
+    placeholder: 'e.g., 1 ปี',
   },
   {
-    id: 'usage_instructions',
-    name: 'Usage Instructions',
-    nameTh: 'วิธีใช้',
+    id: 'warranty_en',
+    name: 'Warranty (English)',
+    nameTh: 'การรับประกัน (อังกฤษ)',
     section: 'basic_attributes',
     channel: 'both',
+    channelColumn: 'online', // Online Column
+    requirement: 'mandatory',
+    inputType: 'text',
+    applicableDivisions: 'all',
+    assignedTo: ['supplier'],
+    placeholder: 'e.g., 1 Year',
+  },
+  {
+    id: 'condition_remark_en',
+    name: 'Condition/Remark (English)',
+    nameTh: 'เงื่อนไข/หมายเหตุ (อังกฤษ)',
+    section: 'basic_attributes',
+    channel: 'both',
+    channelColumn: 'online', // Online Column
     requirement: 'optional',
     inputType: 'textarea',
     applicableDivisions: 'all',
     assignedTo: ['supplier'],
-    placeholder: 'How to use this product',
+    placeholder: 'Additional conditions or remarks',
   },
   {
-    id: 'warning_text',
-    name: 'Warning/Caution',
-    nameTh: 'คำเตือน',
+    id: 'gender',
+    name: 'Gender',
+    nameTh: 'เพศ',
     section: 'basic_attributes',
     channel: 'both',
-    requirement: 'optional', // Changed from conditional to optional
-    inputType: 'textarea',
-    applicableDivisions: ['DF', 'FF', 'HB', 'PH', 'HL'],
+    channelColumn: 'online', // Online Column
+    requirement: 'mandatory',
+    inputType: 'dropdown',
+    applicableDivisions: ['SL', 'NF'],
     assignedTo: ['supplier'],
-    placeholder: 'Safety warnings and precautions',
+    dropdownOptions: ['Unisex', 'Male', 'Female', 'Kids'],
+  },
+  {
+    id: 'age_range',
+    name: 'Age Range',
+    nameTh: 'ช่วงอายุ',
+    section: 'basic_attributes',
+    channel: 'both',
+    channelColumn: 'online', // Online Column - Filter Age Range
+    requirement: 'optional',
+    inputType: 'dropdown',
+    applicableDivisions: ['DF', 'NF', 'SL'],
+    assignedTo: ['supplier'],
+    dropdownOptions: ['0-6 months', '6-12 months', '1-3 years', '3-6 years', '6-12 years', 'Teen', 'Adult', 'Senior'],
+  },
+  {
+    id: 'product_detail_th',
+    name: 'Product Detail (Thai)',
+    nameTh: 'คุณสมบัติ (ภาษาไทย)',
+    section: 'basic_attributes',
+    channel: 'both',
+    channelColumn: 'online', // Online Column
+    requirement: 'mandatory',
+    inputType: 'textarea',
+    applicableDivisions: 'all',
+    assignedTo: ['supplier'],
+    placeholder: 'Product features and benefits in Thai',
+  },
+  {
+    id: 'product_detail_en',
+    name: 'Product Detail (English)',
+    nameTh: 'คุณสมบัติ (ภาษาอังกฤษ)',
+    section: 'basic_attributes',
+    channel: 'both',
+    channelColumn: 'online', // Online Column
+    requirement: 'mandatory',
+    inputType: 'textarea',
+    applicableDivisions: 'all',
+    assignedTo: ['supplier'],
+    placeholder: 'Product features and benefits in English',
+  },
+  {
+    id: 'unit_measure_name',
+    name: 'Unit of Measure Name',
+    nameTh: 'หน่วยของสินค้า',
+    section: 'basic_attributes',
+    channel: 'both',
+    channelColumn: 'both', // Offline/Online Column
+    requirement: 'mandatory',
+    inputType: 'dropdown',
+    applicableDivisions: 'all',
+    assignedTo: ['supplier'],
+    dropdownOptions: UNIT_MEASURES,
+  },
+  {
+    id: 'dimension_unit',
+    name: 'Dimension Unit',
+    nameTh: 'หน่วย Dimension',
+    section: 'basic_attributes',
+    channel: 'both',
+    channelColumn: 'online', // Online Column
+    requirement: 'mandatory',
+    inputType: 'dropdown',
+    applicableDivisions: 'all',
+    assignedTo: ['supplier'],
+    dropdownOptions: ['cm', 'mm', 'inch', 'm'],
+  },
+  {
+    id: 'package_dimension',
+    name: 'Package Dimension',
+    nameTh: 'ขนาดหีบห่อ',
+    section: 'basic_attributes',
+    channel: 'both',
+    channelColumn: 'online', // Online Column
+    requirement: 'mandatory',
+    inputType: 'dropdown',
+    applicableDivisions: 'all',
+    assignedTo: ['supplier'],
+    dropdownOptions: ['Small', 'Medium', 'Large', 'Extra Large'],
+  },
+  {
+    id: 'package_weight',
+    name: 'Package Weight (kg)',
+    nameTh: 'น้ำหนักหีบห่อ (กก.)',
+    section: 'basic_attributes',
+    channel: 'both',
+    channelColumn: 'online', // Online Column
+    requirement: 'mandatory',
+    inputType: 'number',
+    applicableDivisions: 'all',
+    assignedTo: ['supplier'],
+    placeholder: '0',
   },
 ];
 
 // ============================================================
-// SECTION 4: Compliance & Certification (10 fields)
+// SECTION 4: Compliance & Certification (Fields with channelColumn)
 // ============================================================
 export const COMPLIANCE_FIELDS: NPDFormField[] = [
   {
@@ -671,225 +905,256 @@ export const COMPLIANCE_FIELDS: NPDFormField[] = [
     nameTh: 'เลข มอก.',
     section: 'compliance',
     channel: 'both',
-    requirement: 'conditional',
+    channelColumn: 'online', // Online Column
+    requirement: 'mandatory',
     inputType: 'text',
-    applicableDivisions: ['HL', 'GS'],
+    applicableDivisions: ['HL', 'HOL', 'SL', 'NF'],
     assignedTo: ['supplier'],
     placeholder: 'มอก. XXXX-XXXX',
   },
   {
-    id: 'tisi_expiry',
-    name: 'TISI Expiry Date',
-    nameTh: 'วันหมดอายุ มอก.',
-    section: 'compliance',
-    channel: 'both',
-    requirement: 'conditional',
-    inputType: 'date',
-    applicableDivisions: ['HL', 'GS'],
-    assignedTo: ['supplier'],
-    conditionalOn: 'tisi_number',
-  },
-  {
     id: 'fda_number',
     name: 'FDA Number',
-    nameTh: 'เลข อย.',
+    nameTh: 'เลข อย. / ใบจดแจ้ง',
     section: 'compliance',
     channel: 'both',
-    requirement: 'conditional',
+    channelColumn: 'online', // Online Column
+    requirement: 'mandatory',
     inputType: 'text',
-    applicableDivisions: ['DF', 'FF', 'HB', 'PH'],
+    applicableDivisions: ['DF', 'NF', 'PH', 'FF'],
     assignedTo: ['supplier'],
     placeholder: 'XX-X-XXXXX-X-XXXX',
   },
   {
-    id: 'fda_expiry',
-    name: 'FDA Expiry Date',
-    nameTh: 'วันหมดอายุ อย.',
+    id: 'kho_pho_number',
+    name: 'Kho Pho / Kho Ao Number',
+    nameTh: 'เลข ฆพ / ฆอ',
     section: 'compliance',
     channel: 'both',
+    channelColumn: 'online', // Online Column
+    requirement: 'mandatory',
+    inputType: 'text',
+    applicableDivisions: ['PH'],
+    assignedTo: ['supplier'],
+    placeholder: 'ฆพ./ฆอ. number',
+  },
+  {
+    id: 'wos_number',
+    name: 'WOS Number',
+    nameTh: 'วอส.',
+    section: 'compliance',
+    channel: 'both',
+    channelColumn: 'online', // Online Column
+    requirement: 'mandatory',
+    inputType: 'text',
+    applicableDivisions: ['NF'],
+    assignedTo: ['supplier'],
+    placeholder: 'WOS number',
+  },
+  {
+    id: 'pet_food_license',
+    name: 'Pet Food License',
+    nameTh: 'เลขทะเบียนอาหารสัตว์',
+    section: 'compliance',
+    channel: 'both',
+    channelColumn: 'online', // Online Column
     requirement: 'conditional',
-    inputType: 'date',
-    applicableDivisions: ['DF', 'FF', 'HB', 'PH'],
+    inputType: 'text',
+    applicableDivisions: ['NF'],
     assignedTo: ['supplier'],
-    conditionalOn: 'fda_number',
+    placeholder: 'Pet food registration number',
   },
   {
-    id: 'halal_cert',
-    name: 'Halal Certification',
-    nameTh: 'การรับรองฮาลาล',
+    id: 'safety_stock',
+    name: 'Safety Stock',
+    nameTh: 'Safety Stock',
     section: 'compliance',
     channel: 'both',
-    requirement: 'optional', // Changed from conditional to optional
-    inputType: 'dropdown',
-    applicableDivisions: ['DF', 'FF', 'HB'],
-    assignedTo: ['supplier'],
-    dropdownOptions: HALAL_OPTIONS,
-  },
-  {
-    id: 'organic_cert',
-    name: 'Organic Certification',
-    nameTh: 'การรับรองออร์แกนิค',
-    section: 'compliance',
-    channel: 'both',
-    requirement: 'optional',
-    inputType: 'dropdown',
-    applicableDivisions: ['DF', 'FF', 'HB'],
-    assignedTo: ['supplier'],
-    dropdownOptions: ORGANIC_OPTIONS,
-  },
-  {
-    id: 'iso_cert',
-    name: 'ISO Certification',
-    nameTh: 'การรับรอง ISO',
-    section: 'compliance',
-    channel: 'both',
+    channelColumn: 'online', // Online Column
     requirement: 'optional',
     inputType: 'text',
     applicableDivisions: 'all',
     assignedTo: ['supplier'],
-    placeholder: 'ISO 9001, ISO 22000, etc.',
+    placeholder: 'Safety stock quantity',
   },
   {
-    id: 'other_cert',
-    name: 'Other Certifications',
-    nameTh: 'การรับรองอื่นๆ',
+    id: 'inner_pack_qty',
+    name: 'Qty piece per Inner Pack',
+    nameTh: 'จำนวนชิ้นในแพ็คย่อย',
     section: 'compliance',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'optional',
-    inputType: 'textarea',
+    inputType: 'number',
     applicableDivisions: 'all',
     assignedTo: ['supplier'],
-    placeholder: 'List any other certifications',
+    placeholder: '0',
   },
   {
-    id: 'product_license',
-    name: 'Product License',
-    nameTh: 'ใบอนุญาตสินค้า',
+    id: 'inner_per_purchase',
+    name: 'Qty Inner Pack per Purchase Pack',
+    nameTh: 'จำนวนแพ็คย่อยใน 1 ลัง',
     section: 'compliance',
     channel: 'both',
-    requirement: 'optional', // Changed from conditional to optional
-    inputType: 'file',
-    applicableDivisions: ['HB', 'PH'],
-    assignedTo: ['supplier'],
-    helpText: 'Upload product license document',
-  },
-  {
-    id: 'test_report',
-    name: 'Test Report',
-    nameTh: 'รายงานการทดสอบ',
-    section: 'compliance',
-    channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'optional',
-    inputType: 'file',
+    inputType: 'number',
     applicableDivisions: 'all',
     assignedTo: ['supplier'],
-    helpText: 'Upload lab test report if available',
+    placeholder: '0',
+  },
+  {
+    id: 'inner_dimension_l',
+    name: 'Inner Pack Length (cm)',
+    nameTh: 'ขนาดแพ็คย่อย - ยาว (ซม.)',
+    section: 'compliance',
+    channel: 'both',
+    channelColumn: 'offline', // Offline Column
+    requirement: 'optional',
+    inputType: 'number',
+    applicableDivisions: 'all',
+    assignedTo: ['supplier'],
+    placeholder: '0',
+  },
+  {
+    id: 'inner_dimension_w',
+    name: 'Inner Pack Width (cm)',
+    nameTh: 'ขนาดแพ็คย่อย - กว้าง (ซม.)',
+    section: 'compliance',
+    channel: 'both',
+    channelColumn: 'offline', // Offline Column
+    requirement: 'optional',
+    inputType: 'number',
+    applicableDivisions: 'all',
+    assignedTo: ['supplier'],
+    placeholder: '0',
+  },
+  {
+    id: 'inner_dimension_h',
+    name: 'Inner Pack Height (cm)',
+    nameTh: 'ขนาดแพ็คย่อย - สูง (ซม.)',
+    section: 'compliance',
+    channel: 'both',
+    channelColumn: 'offline', // Offline Column
+    requirement: 'optional',
+    inputType: 'number',
+    applicableDivisions: 'all',
+    assignedTo: ['supplier'],
+    placeholder: '0',
+  },
+  {
+    id: 'inner_weight',
+    name: 'Inner Pack Weight (kg)',
+    nameTh: 'น้ำหนักแพ็คย่อย (กก.)',
+    section: 'compliance',
+    channel: 'both',
+    channelColumn: 'offline', // Offline Column
+    requirement: 'optional',
+    inputType: 'number',
+    applicableDivisions: 'all',
+    assignedTo: ['supplier'],
+    placeholder: '0',
   },
 ];
 
 // ============================================================
-// SECTION 5: Pricing Basics (8 fields)
+// SECTION 5: Pricing Basics (Fields with channelColumn)
 // ============================================================
 export const PRICING_FIELDS: NPDFormField[] = [
   {
+    id: 'vat_status',
+    name: 'VAT Status',
+    nameTh: 'สถานะ VAT ซื้อ',
+    section: 'pricing',
+    channel: 'both',
+    channelColumn: 'offline', // Offline Column
+    requirement: 'mandatory',
+    inputType: 'dropdown',
+    applicableDivisions: 'all',
+    assignedTo: ['buyer'],
+    dropdownOptions: ['VAT', 'Non VAT'],
+  },
+  {
     id: 'cost_price',
     name: 'Cost Price (excl. VAT)',
-    nameTh: 'ราคาทุน (ไม่รวม VAT)',
+    nameTh: 'ราคาทุนปกติ (ไม่รวม VAT)',
     section: 'pricing',
     channel: 'both',
-    requirement: 'mandatory',
+    channelColumn: 'offline', // Offline Column
+    requirement: 'optional',
     inputType: 'number',
     applicableDivisions: 'all',
-    assignedTo: ['supplier'],
+    assignedTo: ['buyer'],
     placeholder: '0.00',
   },
   {
-    id: 'cost_price_vat',
-    name: 'Cost Price (incl. VAT)',
-    nameTh: 'ราคาทุน (รวม VAT)',
+    id: 'cost_price_promo',
+    name: 'Promotion Cost (excl. VAT)',
+    nameTh: 'ราคาทุนจัดรายการ (ไม่รวม VAT)',
     section: 'pricing',
     channel: 'both',
-    requirement: 'mandatory',
+    channelColumn: 'offline', // Offline Column
+    requirement: 'optional',
     inputType: 'number',
     applicableDivisions: 'all',
-    assignedTo: ['supplier'],
+    assignedTo: ['buyer'],
     placeholder: '0.00',
   },
   {
-    id: 'srp',
-    name: 'Suggested Retail Price',
-    nameTh: 'ราคาขายปลีกแนะนำ',
+    id: 'sales_price',
+    name: 'Sales Price (incl. VAT)',
+    nameTh: 'ราคาขาย (รวม VAT)',
     section: 'pricing',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'number',
     applicableDivisions: 'all',
-    assignedTo: ['supplier'],
+    assignedTo: ['buyer'],
     placeholder: '0.00',
   },
   {
-    id: 'unit_measure',
-    name: 'Unit of Measure',
-    nameTh: 'หน่วยวัด',
+    id: 'normal_gp',
+    name: 'Normal GP%',
+    nameTh: 'GP% ปกติ',
     section: 'pricing',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column - Auto calculated
+    requirement: 'optional',
+    inputType: 'calculated',
+    applicableDivisions: 'all',
+    assignedTo: ['buyer'],
+  },
+  {
+    id: 'gp_for_bas',
+    name: 'GP% for BAS/Con',
+    nameTh: 'GP% สำหรับ BAS/Con',
+    section: 'pricing',
+    channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'dropdown',
     applicableDivisions: 'all',
-    assignedTo: ['supplier'],
-    dropdownOptions: UNIT_MEASURES,
+    assignedTo: ['buyer'],
+    dropdownOptions: ['5%', '10%', '15%', '20%', '25%', '30%'],
   },
   {
-    id: 'qty_per_pack',
-    name: 'Quantity per Pack',
-    nameTh: 'จำนวนต่อแพ็ค',
+    id: 'promo_period',
+    name: 'Promotion Period',
+    nameTh: 'วันที่ทุนจัดรายการ เริ่ม-สิ้นสุด',
     section: 'pricing',
     channel: 'both',
-    requirement: 'mandatory',
-    inputType: 'number',
-    applicableDivisions: 'all',
-    assignedTo: ['supplier'],
-    placeholder: '1',
-  },
-  {
-    id: 'vat_type',
-    name: 'VAT Type',
-    nameTh: 'ประเภท VAT',
-    section: 'pricing',
-    channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'dropdown',
     applicableDivisions: 'all',
-    assignedTo: ['supplier'],
-    dropdownOptions: VAT_TYPES,
-  },
-  {
-    id: 'price_effective_date',
-    name: 'Price Effective Date',
-    nameTh: 'วันที่ราคามีผล',
-    section: 'pricing',
-    channel: 'both',
-    requirement: 'optional',
-    inputType: 'date',
-    applicableDivisions: 'all',
-    assignedTo: ['supplier'],
-  },
-  {
-    id: 'promo_remarks',
-    name: 'Promotion Remarks',
-    nameTh: 'หมายเหตุโปรโมชั่น',
-    section: 'pricing',
-    channel: 'both',
-    requirement: 'optional',
-    inputType: 'textarea',
-    applicableDivisions: 'all',
-    assignedTo: ['supplier'],
-    placeholder: 'Any promotional pricing notes',
+    assignedTo: ['buyer'],
+    dropdownOptions: ['Q1', 'Q2', 'Q3', 'Q4', 'Full Year'],
   },
 ];
 
 // ============================================================
-// SECTION 6: Logistics & Supply Chain (20 fields)
+// SECTION 6: Logistics & Supply Chain (Fields with channelColumn)
 // ============================================================
 export const LOGISTICS_FIELDS: NPDFormField[] = [
   {
@@ -898,6 +1163,7 @@ export const LOGISTICS_FIELDS: NPDFormField[] = [
     nameTh: 'จำนวนสั่งซื้อขั้นต่ำ',
     section: 'logistics',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'number',
     applicableDivisions: 'all',
@@ -910,6 +1176,7 @@ export const LOGISTICS_FIELDS: NPDFormField[] = [
     nameTh: 'ระยะเวลาจัดส่ง (วัน)',
     section: 'logistics',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'number',
     applicableDivisions: 'all',
@@ -922,6 +1189,7 @@ export const LOGISTICS_FIELDS: NPDFormField[] = [
     nameTh: 'จำนวนต่อชั้น',
     section: 'logistics',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'number',
     applicableDivisions: 'all',
@@ -934,6 +1202,7 @@ export const LOGISTICS_FIELDS: NPDFormField[] = [
     nameTh: 'จำนวนชั้นต่อ Pallet',
     section: 'logistics',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'number',
     applicableDivisions: 'all',
@@ -946,6 +1215,7 @@ export const LOGISTICS_FIELDS: NPDFormField[] = [
     nameTh: 'จำนวนต่อลัง',
     section: 'logistics',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'number',
     applicableDivisions: 'all',
@@ -958,6 +1228,7 @@ export const LOGISTICS_FIELDS: NPDFormField[] = [
     nameTh: 'ความยาวลัง (ซม.)',
     section: 'logistics',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'number',
     applicableDivisions: 'all',
@@ -970,6 +1241,7 @@ export const LOGISTICS_FIELDS: NPDFormField[] = [
     nameTh: 'ความกว้างลัง (ซม.)',
     section: 'logistics',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'number',
     applicableDivisions: 'all',
@@ -982,6 +1254,7 @@ export const LOGISTICS_FIELDS: NPDFormField[] = [
     nameTh: 'ความสูงลัง (ซม.)',
     section: 'logistics',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'number',
     applicableDivisions: 'all',
@@ -994,6 +1267,7 @@ export const LOGISTICS_FIELDS: NPDFormField[] = [
     nameTh: 'น้ำหนักลัง (กก.)',
     section: 'logistics',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'number',
     applicableDivisions: 'all',
@@ -1006,6 +1280,7 @@ export const LOGISTICS_FIELDS: NPDFormField[] = [
     nameTh: 'ปริมาตรต่อลัง',
     section: 'logistics',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column - Auto calculated
     requirement: 'optional',
     inputType: 'calculated',
     applicableDivisions: 'all',
@@ -1018,6 +1293,7 @@ export const LOGISTICS_FIELDS: NPDFormField[] = [
     nameTh: 'จุดส่งมอบ',
     section: 'logistics',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'dropdown',
     applicableDivisions: 'all',
@@ -1030,6 +1306,7 @@ export const LOGISTICS_FIELDS: NPDFormField[] = [
     nameTh: 'เงื่อนไขการส่งมอบ',
     section: 'logistics',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'dropdown',
     applicableDivisions: 'all',
@@ -1042,6 +1319,7 @@ export const LOGISTICS_FIELDS: NPDFormField[] = [
     nameTh: 'วิธีจัดส่ง DC',
     section: 'logistics',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'dropdown',
     applicableDivisions: 'all',
@@ -1054,6 +1332,7 @@ export const LOGISTICS_FIELDS: NPDFormField[] = [
     nameTh: 'ต้องการ Cross Dock',
     section: 'logistics',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'optional',
     inputType: 'dropdown',
     applicableDivisions: 'all',
@@ -1066,6 +1345,7 @@ export const LOGISTICS_FIELDS: NPDFormField[] = [
     nameTh: 'นโยบายคืนสินค้า',
     section: 'logistics',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'dropdown',
     applicableDivisions: 'all',
@@ -1078,6 +1358,7 @@ export const LOGISTICS_FIELDS: NPDFormField[] = [
     nameTh: 'เปอร์เซ็นต์ความเสียหาย',
     section: 'logistics',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'optional',
     inputType: 'number',
     applicableDivisions: 'all',
@@ -1090,6 +1371,7 @@ export const LOGISTICS_FIELDS: NPDFormField[] = [
     nameTh: 'จำนวนทวีคูณการสั่ง',
     section: 'logistics',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'number',
     applicableDivisions: 'all',
@@ -1102,6 +1384,7 @@ export const LOGISTICS_FIELDS: NPDFormField[] = [
     nameTh: 'สต็อกสำรอง (วัน)',
     section: 'logistics',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'optional',
     inputType: 'number',
     applicableDivisions: 'all',
@@ -1114,6 +1397,7 @@ export const LOGISTICS_FIELDS: NPDFormField[] = [
     nameTh: 'วันส่งมอบครั้งแรก',
     section: 'logistics',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'optional',
     inputType: 'date',
     applicableDivisions: 'all',
@@ -1125,6 +1409,7 @@ export const LOGISTICS_FIELDS: NPDFormField[] = [
     nameTh: 'หมายเหตุซัพพลายเออร์',
     section: 'logistics',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'optional',
     inputType: 'textarea',
     applicableDivisions: 'all',
@@ -1134,7 +1419,7 @@ export const LOGISTICS_FIELDS: NPDFormField[] = [
 ];
 
 // ============================================================
-// SECTION 7: System Fields (9 fields) - NEW from Excel Spec
+// SECTION 7: System Fields (Fields with channelColumn)
 // ============================================================
 export const SYSTEM_FIELDS: NPDFormField[] = [
   {
@@ -1143,6 +1428,7 @@ export const SYSTEM_FIELDS: NPDFormField[] = [
     nameTh: 'ระดับ',
     section: 'system_fields',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'optional',
     inputType: 'dropdown',
     applicableDivisions: 'all',
@@ -1156,6 +1442,7 @@ export const SYSTEM_FIELDS: NPDFormField[] = [
     nameTh: 'รอบ POG',
     section: 'system_fields',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'optional',
     inputType: 'text',
     applicableDivisions: 'all',
@@ -1169,6 +1456,7 @@ export const SYSTEM_FIELDS: NPDFormField[] = [
     nameTh: 'สินค้าใหม่ / เข้าร่วม / เปิดใหม่',
     section: 'system_fields',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'mandatory',
     inputType: 'dropdown',
     applicableDivisions: 'all',
@@ -1181,6 +1469,7 @@ export const SYSTEM_FIELDS: NPDFormField[] = [
     nameTh: 'ข้อมูลเพิ่มเติม',
     section: 'system_fields',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'optional',
     inputType: 'textarea',
     applicableDivisions: 'all',
@@ -1193,6 +1482,7 @@ export const SYSTEM_FIELDS: NPDFormField[] = [
     nameTh: 'ประเภทสินค้านำเข้า',
     section: 'system_fields',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'optional',
     inputType: 'dropdown',
     applicableDivisions: 'all',
@@ -1206,6 +1496,7 @@ export const SYSTEM_FIELDS: NPDFormField[] = [
     nameTh: 'PLM/นำเข้า',
     section: 'system_fields',
     channel: 'both',
+    channelColumn: 'offline', // Offline Column
     requirement: 'optional',
     inputType: 'text',
     applicableDivisions: 'all',
@@ -1218,6 +1509,7 @@ export const SYSTEM_FIELDS: NPDFormField[] = [
     nameTh: 'หมายเหตุ (ออนไลน์)',
     section: 'system_fields',
     channel: 'online',
+    channelColumn: 'online', // Online Column
     requirement: 'optional',
     inputType: 'textarea',
     applicableDivisions: 'all',
@@ -1230,6 +1522,7 @@ export const SYSTEM_FIELDS: NPDFormField[] = [
     nameTh: 'หมายเหตุ (ออฟไลน์)',
     section: 'system_fields',
     channel: 'offline',
+    channelColumn: 'offline', // Offline Column
     requirement: 'optional',
     inputType: 'textarea',
     applicableDivisions: 'all',
@@ -1237,16 +1530,17 @@ export const SYSTEM_FIELDS: NPDFormField[] = [
     placeholder: 'Notes specific to offline channel',
   },
   {
-    id: 'condition_remark',
-    name: 'Condition/Remark',
-    nameTh: 'เงื่อนไข/หมายเหตุ',
+    id: 'condition_remark_th',
+    name: 'Condition/Remark (Thai)',
+    nameTh: 'เงื่อนไข/หมายเหตุ (ไทย)',
     section: 'system_fields',
     channel: 'both',
+    channelColumn: 'online', // Online Column
     requirement: 'optional',
     inputType: 'textarea',
     applicableDivisions: 'all',
     assignedTo: ['buyer', 'commercial'],
-    placeholder: 'Special conditions or remarks',
+    placeholder: 'Special conditions or remarks in Thai',
   },
 ];
 
