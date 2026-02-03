@@ -25,7 +25,9 @@ import {
   ShieldCheck,
   DollarSign,
   Truck,
-  Settings
+  Settings,
+  Globe,
+  ShoppingCart
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -396,9 +398,16 @@ export function SubmissionView({
                         >
                           {ownerLabel}
                         </Badge>
-                        {field.channel !== 'both' && (
-                          <Badge variant="secondary" className="text-[10px]">
-                            {field.channel === 'online' ? 'Online' : 'Offline'}
+                      {field.channelColumn === 'online' && (
+                          <Badge variant="outline" className="bg-success/10 text-success border-success/30 text-[10px]">
+                            <Globe className="w-3 h-3 mr-1" />
+                            Online
+                          </Badge>
+                        )}
+                        {field.channelColumn === 'both' && (
+                          <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-[10px]">
+                            <ShoppingCart className="w-3 h-3 mr-1" />
+                            All Channels
                           </Badge>
                         )}
                       </div>
