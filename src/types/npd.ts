@@ -35,6 +35,9 @@ export const USER_TYPES: Record<UserType, { label: string; description: string }
 // Channel Type - Online vs Offline
 export type ChannelType = 'online' | 'offline' | 'both';
 
+// Channel Column Type - Indicates which column/channel the field belongs to in Excel spec
+export type ChannelColumn = 'offline' | 'online' | 'both';
+
 // Field Requirement Type
 export type FieldRequirement = 'mandatory' | 'optional' | 'conditional';
 
@@ -137,6 +140,7 @@ export interface NPDFormField {
   nameTh?: string;
   section: FormSection | SupplierFormSection;
   channel: ChannelType;
+  channelColumn?: ChannelColumn; // Indicates field's channel classification (Online/Offline/Both)
   requirement: FieldRequirement;
   inputType: FieldInputType;
   applicableDivisions: Division[] | 'all';

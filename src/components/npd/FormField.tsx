@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { NPDFormField } from '@/types/npd';
+import { NPDFormField, ChannelColumn } from '@/types/npd';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,8 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { Upload, AlertCircle, HelpCircle, X, Calendar, Lock, Calculator } from 'lucide-react';
+import { Upload, AlertCircle, HelpCircle, X, Calendar, Lock, Calculator, Globe, ShoppingCart } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -21,6 +22,31 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
+
+// Channel Badge Component - Shows which channel the field belongs to
+const ChannelBadge = ({ channel }: { channel?: ChannelColumn }) => {
+  if (!channel || channel === 'offline') return null; // No badge for offline-only (default)
+  
+  if (channel === 'online') {
+    return (
+      <Badge variant="outline" className="bg-success/10 text-success border-success/30 text-xs px-1.5 py-0">
+        <Globe className="w-3 h-3 mr-1" />
+        Online
+      </Badge>
+    );
+  }
+  
+  if (channel === 'both') {
+    return (
+      <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-xs px-1.5 py-0">
+        <ShoppingCart className="w-3 h-3 mr-1" />
+        All Channels
+      </Badge>
+    );
+  }
+  
+  return null;
+};
 
 interface FormFieldProps {
   field: NPDFormField;
@@ -239,7 +265,7 @@ export function FormField({ field, value, onChange, error, disabled, calculatedV
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         <Label htmlFor={field.id} className={labelClasses}>
           {field.name}
           {field.nameTh && (
@@ -248,6 +274,7 @@ export function FormField({ field, value, onChange, error, disabled, calculatedV
             </span>
           )}
         </Label>
+        <ChannelBadge channel={field.channelColumn} />
         {(isReadonly || isCalculated) && (
           <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
             {isCalculated ? 'Auto' : 'Read-only'}
