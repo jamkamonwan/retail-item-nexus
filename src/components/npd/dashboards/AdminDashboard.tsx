@@ -7,6 +7,7 @@ import {
   Eye, 
   Settings2, 
   Users, 
+  Layers,
   BarChart3, 
   FileText,
   CheckCircle,
@@ -23,6 +24,7 @@ interface AdminDashboardProps {
   onViewSubmission: (submission: NPDSubmission) => void;
   onNavigateToConfig: () => void;
   onNavigateToUsers: () => void;
+  onNavigateToTiers: () => void;
 }
 
 export function AdminDashboard({
@@ -31,6 +33,7 @@ export function AdminDashboard({
   onViewSubmission,
   onNavigateToConfig,
   onNavigateToUsers,
+  onNavigateToTiers,
 }: AdminDashboardProps) {
   // Calculate status counts
   const statusCounts = submissions.reduce((acc, s) => {
@@ -182,15 +185,14 @@ export function AdminDashboard({
           </CardHeader>
         </Card>
         
-        <Card className="opacity-60">
+        <Card className="hover:bg-accent/50 cursor-pointer transition-colors" onClick={onNavigateToTiers}>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-muted-foreground" />
-              Analytics
-              <Badge variant="outline" className="ml-auto">Coming Soon</Badge>
+              <Layers className="w-5 h-5 text-primary" />
+              Tier & Module Config
             </CardTitle>
             <CardDescription>
-              View submission and approval analytics
+              Define service tiers and map modules to each tier
             </CardDescription>
           </CardHeader>
         </Card>
