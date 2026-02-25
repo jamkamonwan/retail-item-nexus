@@ -1,71 +1,102 @@
 
 
-# Redesign Tier Display: Grid Cards to Row-Based List with Detail Page
+# Tier Detail: Edit Dialog + Supplier Assignment
 
-## Problem
+## Overview
 
-With many tiers (e.g., 10+), the current grid card layout becomes overwhelming vertically. The Module Access Matrix table also becomes too wide with many tier columns.
+Enhance the Tier detail page with two features:
+1. **Edit icon** opens a popup to edit tier name/description and add modules
+2. **Suppliers column** is clickable to view/add/remove suppliers assigned to that tier
 
-## Solution
+---
 
-Replace the tier cards grid and module matrix with a **tier list table** on the main page. Each tier row is clickable to navigate to a **Tier Detail page** showing that tier's module configuration.
+## Data Changes
 
-### Main Page Layout (Tier List)
+### `src/data/mock/tiers.ts`
 
-```text
-+--------------------------------------------------------------+
-| <- Back   Tier & Module Configuration        [+ New Tier]     |
-+--------------------------------------------------------------+
-| Name       | Description          | Modules | Suppliers | Actions |
-|------------|----------------------|---------|-----------|---------|
-| Tier A     | Premium - Full access|    8    |    12     | Edit Del|
-| Tier B     | Standard - Core ops  |    5    |    25     | Edit Del|
-| Tier C     | Basic - Essential    |    2    |     8     | Edit Del|
-+--------------------------------------------------------------+
+Add a `assignedSuppliers` field to `MockTier` to track which supplier IDs belong to each tier:
+
+```typescript
+export interface MockTier {
+  // ... existing fields
+  assignedSuppliers: string[]; // supplier IDs
+}
 ```
 
-- Each row is clickable -- navigates to a detail view for that tier
-- Compact, scales well to 10+ tiers
-- Edit/Delete actions remain inline
+Update the mock data to pre-assign suppliers to tiers (using IDs from `mockSuppliers`).
 
-### Tier Detail Page (New)
+### `src/data/mock/suppliers.ts`
 
-When a tier row is clicked, show a detail view with:
+Add two more suppliers to make the demo richer (e.g., "DKSH Thailand", "Thainamthip Co.").
+
+---
+
+## UI Changes
+
+### 1. Tier Detail Page -- Edit Button (already exists, refine behavior)
+
+The existing "Edit Tier" button already opens `TierFormDialog`. No major change needed here -- just ensure it works correctly for editing name, description, color, and modules.
+
+### 2. Tier Detail Page -- Supplier Assignment Section
+
+Replace the static "X suppliers assigned" text with an interactive **Supplier Assignment Card**:
 
 ```text
-+--------------------------------------------------------------+
-| <- Back to Tiers    Tier A - Premium         [Edit Tier]      |
-| Full access to all modules                                    |
-+--------------------------------------------------------------+
-| Module Access (8 of 8 active)                                |
-|--------------------------------------------------------------|
-| [x] New Item Creation        - Create and manage products    |
-| [x] Supply Chain Management  - Track supply chain ops        |
-| [x] Pricing & Promotions     - Manage pricing rules         |
-| [x] Compliance & Cert.       - Regulatory compliance        |
-| ...                                                          |
-+--------------------------------------------------------------+
-| 12 suppliers assigned to this tier                           |
-+--------------------------------------------------------------+
++----------------------------------------------------------+
+| Assigned Suppliers (3)                    [+ Add Supplier] |
+|----------------------------------------------------------|
+| DKSH Thailand          DKSH       [x Remove]             |
+| Thainamthip Co.        TNAM       [x Remove]             |
+| ACME Corporation       ACME       [x Remove]             |
++----------------------------------------------------------+
 ```
 
-- Toggle modules directly on this page
-- Shows tier summary info (description, supplier count)
+- Shows list of assigned supplier names and codes
+- "Add Supplier" button opens a dialog/popover with unassigned suppliers to pick from
+- "Remove" button removes a supplier from the tier (with confirmation)
 
-## Technical Changes
+### 3. List View -- Clickable Suppliers Column
 
-### File: `src/components/admin/TierManagement.tsx`
+In the tier list table, make the Suppliers cell clickable:
+- Clicking the supplier count navigates to the tier detail page (same as clicking the row)
+- The supplier count badge gets a hover style to indicate it's interactive
 
-1. Add a `selectedTier` state for navigating between list and detail views
-2. Replace the grid card section (lines 77-115) with a **Table** showing tiers as rows
-3. Replace the Module Matrix section (lines 117-161) with a **Tier Detail view** shown when a tier is selected
-4. Each row: tier name (colored badge), description, module count, supplier count, edit/delete buttons
-5. Click on row navigates to detail view with back button
+### 4. New Component: `TierSupplierDialog.tsx`
 
-### No new files needed
+A dialog to add/remove suppliers for a tier:
+- Shows currently assigned suppliers with remove buttons
+- Shows unassigned (available) suppliers with add buttons
+- Search/filter for supplier name
 
-The `TierManagement.tsx` component handles both views internally using state (`selectedTier: MockTier | null`):
-- `null` = show tier list table
-- set = show detail page for that tier with module toggles
+---
 
-This keeps the existing dialog, delete confirmation, and hook logic unchanged.
+## Hook Changes
+
+### `src/hooks/useTiers.ts`
+
+Add two new functions:
+- `assignSupplier(tierId: string, supplierId: string)` -- adds supplier to tier, updates supplierCount
+- `removeSupplier(tierId: string, supplierId: string)` -- removes supplier from tier, updates supplierCount
+
+---
+
+## Files to Create/Modify
+
+| File | Action | Description |
+|------|--------|-------------|
+| `src/data/mock/tiers.ts` | Modify | Add `assignedSuppliers` to MockTier interface and mock data |
+| `src/data/mock/suppliers.ts` | Modify | Add DKSH and Thainamthip suppliers |
+| `src/hooks/useTiers.ts` | Modify | Add `assignSupplier` and `removeSupplier` functions |
+| `src/components/admin/TierSupplierDialog.tsx` | **Create** | Dialog to manage supplier assignments per tier |
+| `src/components/admin/TierManagement.tsx` | Modify | Add supplier assignment card in detail view, make supplier column interactive |
+| `src/components/admin/index.ts` | Modify | Export new component |
+
+---
+
+## Technical Details
+
+- The `assignedSuppliers` array on each tier stores supplier IDs
+- The supplier list is sourced from `mockSuppliers` (active only)
+- A supplier can only be assigned to one tier at a time (adding to a new tier removes from old)
+- `supplierCount` is derived from `assignedSuppliers.length` (replace the static number)
+
