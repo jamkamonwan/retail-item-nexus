@@ -11,7 +11,7 @@ export interface MockTier {
   description: string;
   color: string;
   activeModules: string[];
-  supplierCount: number;
+  assignedSuppliers: string[];
   createdAt: Date;
 }
 
@@ -33,7 +33,7 @@ export const mockTiers: MockTier[] = [
     description: 'Premium — Full access to all modules',
     color: 'bg-primary/10 text-primary border-primary/30',
     activeModules: ['new_item', 'supply_chain', 'pricing', 'compliance', 'analytics', 'ecommerce', 'inventory', 'dc_ops'],
-    supplierCount: 12,
+    assignedSuppliers: ['supplier-001', 'supplier-007'],
     createdAt: new Date('2025-01-15'),
   },
   {
@@ -42,7 +42,7 @@ export const mockTiers: MockTier[] = [
     description: 'Standard — Core operational modules',
     color: 'bg-secondary/80 text-secondary-foreground border-secondary/30',
     activeModules: ['new_item', 'supply_chain', 'pricing', 'ecommerce', 'inventory'],
-    supplierCount: 25,
+    assignedSuppliers: ['supplier-002', 'supplier-004', 'supplier-008'],
     createdAt: new Date('2025-02-01'),
   },
   {
@@ -51,7 +51,7 @@ export const mockTiers: MockTier[] = [
     description: 'Basic — Essential modules only',
     color: 'bg-muted text-muted-foreground border-border',
     activeModules: ['new_item', 'ecommerce'],
-    supplierCount: 8,
+    assignedSuppliers: ['supplier-003'],
     createdAt: new Date('2025-03-10'),
   },
 ];
