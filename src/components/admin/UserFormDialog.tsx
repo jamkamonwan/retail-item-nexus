@@ -166,16 +166,13 @@ export function UserFormDialog({
 
   const handleAutoFill = () => {
     const dummyData = generateDummyUser();
+    // Always demo supplier_admin with pre-selected suppliers
+    dummyData.role = 'supplier_admin';
+    dummyData.userType = 'external';
     form.reset(dummyData);
-    if (dummyData.role === 'supplier_admin') {
-      // Pre-select a few random suppliers
-      const activeSuppliers = suppliers.filter(s => s.isActive);
-      const count = Math.min(3, activeSuppliers.length);
-      const shuffled = [...activeSuppliers].sort(() => 0.5 - Math.random());
-      setSelectedSupplierIds(shuffled.slice(0, count).map(s => s.id));
-    } else {
-      setSelectedSupplierIds([]);
-    }
+    const count = Math.min(3, suppliers.length);
+    const shuffled = [...suppliers].sort(() => 0.5 - Math.random());
+    setSelectedSupplierIds(shuffled.slice(0, count).map(s => s.id));
   };
 
   return (
