@@ -1,72 +1,42 @@
 
 
-# Tier Detail: Edit Dialog + Supplier Assignment
+# User Story 2: Tier-Based Headcount Limits
 
 ## Overview
 
-Enhance the Tier detail page with two features:
-1. **Edit icon** opens a popup to edit tier name/description and add modules
-2. **Suppliers column** is clickable to view/add/remove suppliers assigned to that tier
+Add a "Max User Limit" field to each Tier that controls how many Normal Supplier users a Supplier Admin can create under that tier. This limit is displayed across the tier list, detail page, and enforced in the create/edit dialog.
 
 ---
 
-## Data Changes
+## Data Model Changes
 
 ### `src/data/mock/tiers.ts`
 
-Add a `assignedSuppliers` field to `MockTier` to track which supplier IDs belong to each tier:
+Add `maxUsers: number` to the `MockTier` interface and set defaults in mock data:
 
-```typescript
-export interface MockTier {
-  // ... existing fields
-  assignedSuppliers: string[]; // supplier IDs
-}
-```
-
-Update the mock data to pre-assign suppliers to tiers (using IDs from `mockSuppliers`).
-
-### `src/data/mock/suppliers.ts`
-
-Add two more suppliers to make the demo richer (e.g., "DKSH Thailand", "Thainamthip Co.").
+- Tier A: `maxUsers: 20`
+- Tier B: `maxUsers: 10`
+- Tier C: `maxUsers: 5`
 
 ---
 
 ## UI Changes
 
-### 1. Tier Detail Page -- Edit Button (already exists, refine behavior)
+### 1. Tier List Table (`TierManagement.tsx`)
 
-The existing "Edit Tier" button already opens `TierFormDialog`. No major change needed here -- just ensure it works correctly for editing name, description, color, and modules.
+Add a new **Max Users** column between Suppliers and Actions showing the limit (e.g., "20 users"). Uses a `Users` icon for consistency.
 
-### 2. Tier Detail Page -- Supplier Assignment Section
+### 2. Tier Detail Page (`TierManagement.tsx`)
 
-Replace the static "X suppliers assigned" text with an interactive **Supplier Assignment Card**:
+Display the max user limit in a summary card or inline info row beneath the tier header, e.g.:
 
-```text
-+----------------------------------------------------------+
-| Assigned Suppliers (3)                    [+ Add Supplier] |
-|----------------------------------------------------------|
-| DKSH Thailand          DKSH       [x Remove]             |
-| Thainamthip Co.        TNAM       [x Remove]             |
-| ACME Corporation       ACME       [x Remove]             |
-+----------------------------------------------------------+
+```
+Max User Limit: 20 normal supplier users per supplier
 ```
 
-- Shows list of assigned supplier names and codes
-- "Add Supplier" button opens a dialog/popover with unassigned suppliers to pick from
-- "Remove" button removes a supplier from the tier (with confirmation)
+### 3. Create/Edit Dialog (`TierFormDialog.tsx`)
 
-### 3. List View -- Clickable Suppliers Column
-
-In the tier list table, make the Suppliers cell clickable:
-- Clicking the supplier count navigates to the tier detail page (same as clicking the row)
-- The supplier count badge gets a hover style to indicate it's interactive
-
-### 4. New Component: `TierSupplierDialog.tsx`
-
-A dialog to add/remove suppliers for a tier:
-- Shows currently assigned suppliers with remove buttons
-- Shows unassigned (available) suppliers with add buttons
-- Search/filter for supplier name
+Add a **Max User Limit** number input field between the Description and Color fields. The submit payload will include `maxUsers`.
 
 ---
 
@@ -74,29 +44,16 @@ A dialog to add/remove suppliers for a tier:
 
 ### `src/hooks/useTiers.ts`
 
-Add two new functions:
-- `assignSupplier(tierId: string, supplierId: string)` -- adds supplier to tier, updates supplierCount
-- `removeSupplier(tierId: string, supplierId: string)` -- removes supplier from tier, updates supplierCount
+Update `createTier` to accept `maxUsers` in the input type, and `updateTier` to allow partial updates including `maxUsers`.
 
 ---
 
-## Files to Create/Modify
+## Files to Modify
 
-| File | Action | Description |
-|------|--------|-------------|
-| `src/data/mock/tiers.ts` | Modify | Add `assignedSuppliers` to MockTier interface and mock data |
-| `src/data/mock/suppliers.ts` | Modify | Add DKSH and Thainamthip suppliers |
-| `src/hooks/useTiers.ts` | Modify | Add `assignSupplier` and `removeSupplier` functions |
-| `src/components/admin/TierSupplierDialog.tsx` | **Create** | Dialog to manage supplier assignments per tier |
-| `src/components/admin/TierManagement.tsx` | Modify | Add supplier assignment card in detail view, make supplier column interactive |
-| `src/components/admin/index.ts` | Modify | Export new component |
-
----
-
-## Technical Details
-
-- The `assignedSuppliers` array on each tier stores supplier IDs
-- The supplier list is sourced from `mockSuppliers` (active only)
-- A supplier can only be assigned to one tier at a time (adding to a new tier removes from old)
-- `supplierCount` is derived from `assignedSuppliers.length` (replace the static number)
+| File | Change |
+|------|--------|
+| `src/data/mock/tiers.ts` | Add `maxUsers` to interface and mock data |
+| `src/hooks/useTiers.ts` | Include `maxUsers` in create/update types |
+| `src/components/admin/TierFormDialog.tsx` | Add Max User Limit number input and include in submit |
+| `src/components/admin/TierManagement.tsx` | Show Max Users column in list table and info in detail view |
 
