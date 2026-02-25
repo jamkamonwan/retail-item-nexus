@@ -28,6 +28,9 @@ export function TierManagement({ onBack }: TierManagementProps) {
   const [formOpen, setFormOpen] = useState(false);
   const [editingTier, setEditingTier] = useState<MockTier | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<MockTier | null>(null);
+  const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
+
+  const selectedTier = tiers.find(t => t.id === selectedTierId) ?? null;
 
   const handleCreate = () => {
     setEditingTier(null);
@@ -54,9 +57,73 @@ export function TierManagement({ onBack }: TierManagementProps) {
     }
   };
 
+  // ── Detail View ──
+  if (selectedTier) {
+    const activeCount = selectedTier.activeModules.length;
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => setSelectedTierId(null)}>
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-2xl font-bold text-foreground">{selectedTier.name}</h2>
+                <Badge variant="outline" className={selectedTier.color + ' text-xs'}>
+                  {selectedTier.name}
+                </Badge>
+              </div>
+              <p className="text-muted-foreground">{selectedTier.description}</p>
+            </div>
+          </div>
+          <Button variant="outline" className="gap-2" onClick={() => handleEdit(selectedTier)}>
+            <Pencil className="w-4 h-4" />
+            Edit Tier
+          </Button>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Module Access ({activeCount} of {SYSTEM_MODULES.length} active)</CardTitle>
+            <CardDescription>Toggle modules for this tier. Changes apply to all {selectedTier.supplierCount} assigned suppliers.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-1">
+            {SYSTEM_MODULES.map(mod => {
+              const checked = selectedTier.activeModules.includes(mod.id);
+              return (
+                <label
+                  key={mod.id}
+                  className="flex items-center gap-3 rounded-md px-3 py-2.5 hover:bg-muted/50 cursor-pointer transition-colors"
+                >
+                  <Checkbox
+                    checked={checked}
+                    onCheckedChange={() => toggleModule(selectedTier.id, mod.id)}
+                  />
+                  <div>
+                    <p className="text-sm font-medium">{mod.name}</p>
+                    <p className="text-xs text-muted-foreground">{mod.description}</p>
+                  </div>
+                </label>
+              );
+            })}
+          </CardContent>
+        </Card>
+
+        <div className="flex items-center gap-2 text-sm text-muted-foreground px-1">
+          <Users className="w-4 h-4" />
+          {selectedTier.supplierCount} suppliers assigned to this tier
+        </div>
+
+        {/* Dialogs */}
+        <TierFormDialog open={formOpen} onOpenChange={setFormOpen} tier={editingTier} onSubmit={handleFormSubmit} />
+      </div>
+    );
+  }
+
+  // ── List View ──
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={onBack}>
@@ -73,102 +140,68 @@ export function TierManagement({ onBack }: TierManagementProps) {
         </Button>
       </div>
 
-      {/* Tier Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {tiers.map(tier => (
-          <Card key={tier.id} className="relative">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <Badge variant="outline" className={tier.color + ' text-sm font-semibold'}>
-                  {tier.name}
-                </Badge>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleEdit(tier)}>
-                    <Pencil className="w-3.5 h-3.5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-destructive hover:text-destructive"
-                    onClick={() => setDeleteTarget(tier)}
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
-                </div>
-              </div>
-              <CardDescription className="text-xs mt-1">{tier.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="flex items-center gap-4 text-sm">
-                <span className="flex items-center gap-1.5 text-muted-foreground">
-                  <Package className="w-4 h-4" />
-                  {tier.activeModules.length} modules
-                </span>
-                <span className="flex items-center gap-1.5 text-muted-foreground">
-                  <Users className="w-4 h-4" />
-                  {tier.supplierCount} suppliers
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Module Matrix */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Module Access Matrix</CardTitle>
-          <CardDescription>Toggle module access per tier. Changes apply immediately to all assigned suppliers.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="min-w-[200px]">Module</TableHead>
-                  {tiers.map(tier => (
-                    <TableHead key={tier.id} className="text-center min-w-[100px]">
-                      <Badge variant="outline" className={tier.color + ' text-xs'}>
-                        {tier.name}
-                      </Badge>
-                    </TableHead>
-                  ))}
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead className="text-center">Modules</TableHead>
+                <TableHead className="text-center">Suppliers</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {tiers.map(tier => (
+                <TableRow
+                  key={tier.id}
+                  className="cursor-pointer"
+                  onClick={() => setSelectedTierId(tier.id)}
+                >
+                  <TableCell>
+                    <Badge variant="outline" className={tier.color + ' text-xs font-semibold'}>
+                      {tier.name}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{tier.description}</TableCell>
+                  <TableCell className="text-center">
+                    <span className="flex items-center justify-center gap-1 text-sm">
+                      <Package className="w-3.5 h-3.5 text-muted-foreground" />
+                      {tier.activeModules.length}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <span className="flex items-center justify-center gap-1 text-sm">
+                      <Users className="w-3.5 h-3.5 text-muted-foreground" />
+                      {tier.supplierCount}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-1" onClick={e => e.stopPropagation()}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(tier)}>
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        onClick={() => setDeleteTarget(tier)}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {SYSTEM_MODULES.map(mod => (
-                  <TableRow key={mod.id}>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium text-sm">{mod.name}</p>
-                        <p className="text-xs text-muted-foreground">{mod.description}</p>
-                      </div>
-                    </TableCell>
-                    {tiers.map(tier => (
-                      <TableCell key={tier.id} className="text-center">
-                        <Checkbox
-                          checked={tier.activeModules.includes(mod.id)}
-                          onCheckedChange={() => toggleModule(tier.id, mod.id)}
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 
-      {/* Form Dialog */}
-      <TierFormDialog
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        tier={editingTier}
-        onSubmit={handleFormSubmit}
-      />
+      {/* Dialogs */}
+      <TierFormDialog open={formOpen} onOpenChange={setFormOpen} tier={editingTier} onSubmit={handleFormSubmit} />
 
-      {/* Delete Confirmation */}
       <AlertDialog open={!!deleteTarget} onOpenChange={v => !v && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
