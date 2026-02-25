@@ -11,7 +11,7 @@ interface TierFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   tier?: MockTier | null;
-  onSubmit: (data: { name: string; description: string; color: string; activeModules: string[] }) => void;
+  onSubmit: (data: { name: string; description: string; color: string; maxUsers: number; activeModules: string[] }) => void;
 }
 
 const COLOR_OPTIONS = [
@@ -27,6 +27,7 @@ export function TierFormDialog({ open, onOpenChange, tier, onSubmit }: TierFormD
   const [name, setName] = useState(tier?.name || '');
   const [description, setDescription] = useState(tier?.description || '');
   const [color, setColor] = useState(tier?.color || COLOR_OPTIONS[0].value);
+  const [maxUsers, setMaxUsers] = useState(tier?.maxUsers ?? 10);
   const [activeModules, setActiveModules] = useState<string[]>(tier?.activeModules || []);
 
   const isEditing = !!tier;
@@ -36,6 +37,7 @@ export function TierFormDialog({ open, onOpenChange, tier, onSubmit }: TierFormD
       setName(tier?.name || '');
       setDescription(tier?.description || '');
       setColor(tier?.color || COLOR_OPTIONS[0].value);
+      setMaxUsers(tier?.maxUsers ?? 10);
       setActiveModules(tier?.activeModules || []);
     }
     onOpenChange(v);
@@ -49,7 +51,7 @@ export function TierFormDialog({ open, onOpenChange, tier, onSubmit }: TierFormD
 
   const handleSubmit = () => {
     if (!name.trim()) return;
-    onSubmit({ name: name.trim(), description: description.trim(), color, activeModules });
+    onSubmit({ name: name.trim(), description: description.trim(), color, maxUsers, activeModules });
     onOpenChange(false);
   };
 
@@ -72,6 +74,19 @@ export function TierFormDialog({ open, onOpenChange, tier, onSubmit }: TierFormD
           <div className="space-y-2">
             <Label htmlFor="tier-desc">Description</Label>
             <Input id="tier-desc" value={description} onChange={e => setDescription(e.target.value)} placeholder="e.g. Enterprise — full access" />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="tier-max-users">Max User Limit</Label>
+            <Input
+              id="tier-max-users"
+              type="number"
+              min={1}
+              value={maxUsers}
+              onChange={e => setMaxUsers(Math.max(1, parseInt(e.target.value) || 1))}
+              placeholder="e.g. 10"
+            />
+            <p className="text-xs text-muted-foreground">Maximum normal supplier users per supplier</p>
           </div>
 
           <div className="space-y-2">

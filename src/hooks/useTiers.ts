@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 export function useTiers() {
   const [tiers, setTiers] = useState<MockTier[]>([...mockTiers]);
 
-  const createTier = useCallback((tier: Omit<MockTier, 'id' | 'createdAt' | 'assignedSuppliers'>) => {
+  const createTier = useCallback((tier: Omit<MockTier, 'id' | 'createdAt' | 'assignedSuppliers'> & { maxUsers?: number }) => {
     const newTier: MockTier = {
       ...tier,
       id: `tier_${Date.now()}`,
