@@ -11,12 +11,12 @@ import { FieldApprovalConfigScreen } from './FieldApprovalConfigScreen';
 import { ChangePasswordDialog } from '@/components/auth';
 import { BigCHeader } from '@/components/layout/BigCHeader';
 import { SupplierDashboard, ApproverDashboard, AdminDashboard } from './dashboards';
-import { UserManagement } from '@/components/admin';
+import { UserManagement, TierManagement } from '@/components/admin';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LayoutDashboard, FileText, Settings2, ListChecks, Users } from 'lucide-react';
+import { LayoutDashboard, FileText, Settings2, ListChecks, Users, Layers } from 'lucide-react';
 import { toast } from 'sonner';
 
-type View = 'dashboard' | 'form' | 'submission' | 'config' | 'all-items' | 'users';
+type View = 'dashboard' | 'form' | 'submission' | 'config' | 'all-items' | 'users' | 'tiers';
 
 // Map roles to their pending status for approver dashboard
 const ROLE_PENDING_STATUS: Partial<Record<UserType, WorkflowStatus>> = {
@@ -68,6 +68,10 @@ export function AuthenticatedWorkflowApp() {
 
   const handleNavigateToUsers = () => {
     setCurrentView('users');
+  };
+
+  const handleNavigateToTiers = () => {
+    setCurrentView('tiers');
   };
 
   const handleApprove = async (submission: NPDSubmission) => {
@@ -149,6 +153,10 @@ export function AuthenticatedWorkflowApp() {
               <Users className="w-4 h-4" />
               Users
             </TabsTrigger>
+            <TabsTrigger value="tiers" className="gap-2">
+              <Layers className="w-4 h-4" />
+              Tiers
+            </TabsTrigger>
             <TabsTrigger value="config" className="gap-2">
               <Settings2 className="w-4 h-4" />
               Config
@@ -194,6 +202,7 @@ export function AuthenticatedWorkflowApp() {
             onViewSubmission={handleViewSubmission}
             onNavigateToConfig={handleNavigateToConfig}
             onNavigateToUsers={handleNavigateToUsers}
+            onNavigateToTiers={handleNavigateToTiers}
           />
         );
       case 'buyer':
@@ -277,6 +286,10 @@ export function AuthenticatedWorkflowApp() {
 
         {currentView === 'users' && (
           <UserManagement onBack={handleBackToList} />
+        )}
+
+        {currentView === 'tiers' && (
+          <TierManagement onBack={handleBackToList} />
         )}
 
         {currentView === 'submission' && selectedSubmission && (
