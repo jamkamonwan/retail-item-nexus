@@ -1,7 +1,13 @@
 import { useState, useMemo } from 'react';
 import { useFieldApprovalConfig } from '@/hooks/useFieldApprovalConfig';
 import { ALL_NPD_FIELDS } from '@/data/npd-fields';
-import { UserType, USER_TYPES, Division, DIVISIONS, FORM_SECTIONS, FormSection } from '@/types/npd';
+import { UserType, USER_TYPES, Division, DIVISIONS, FORM_SECTIONS, SUPPLIER_FORM_SECTIONS, FormSection, SupplierFormSection } from '@/types/npd';
+
+const getSectionTitle = (section: string): string => {
+  if (section in FORM_SECTIONS) return FORM_SECTIONS[section as FormSection].title;
+  if (section in SUPPLIER_FORM_SECTIONS) return SUPPLIER_FORM_SECTIONS[section as SupplierFormSection].title;
+  return section;
+};
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -323,7 +329,7 @@ export function FieldApprovalConfigScreen() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">{FORM_SECTIONS[field.section].title}</Badge>
+                      <Badge variant="outline">{getSectionTitle(field.section)}</Badge>
                     </TableCell>
                     <TableCell>
                       {hasConfigs ? (
