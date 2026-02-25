@@ -21,6 +21,7 @@ export interface CreateUserData {
   userType: 'internal' | 'external';
   department?: string;
   supplierId?: string;
+  supplierIds?: string[];
 }
 
 export interface UpdateUserData {
@@ -30,6 +31,7 @@ export interface UpdateUserData {
   status?: 'active' | 'inactive' | 'locked';
   department?: string;
   supplierId?: string;
+  supplierIds?: string[];
 }
 
 export function useUsers() {
@@ -89,13 +91,20 @@ export function useUsers() {
       status: 'active',
       department: data.department,
       supplierId: data.supplierId,
+      supplierIds: data.supplierIds,
       permissions: [],
       createdAt: new Date(),
     };
 
     setUsers(prev => [newUser, ...prev]);
-    toast.success('User created successfully');
-    toast.info('Temporary password: TempPass123!', { duration: 10000 });
+    
+    if (data.role === 'supplier_admin') {
+      toast.success(`Supplier Admin provisioned. Welcome email sent to ${data.email}`);
+      toast.info('Temporary password link sent via email', { duration: 10000 });
+    } else {
+      toast.success('User created successfully');
+      toast.info('Temporary password: TempPass123!', { duration: 10000 });
+    }
     return newUser;
   };
 
