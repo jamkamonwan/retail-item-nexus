@@ -32,7 +32,7 @@ export function TierManagement({ onBack }: TierManagementProps) {
   const handleCreate = () => { setEditingTier(null); setFormOpen(true); };
   const handleEdit = (tier: MockTier) => { setEditingTier(tier); setFormOpen(true); };
 
-  const handleFormSubmit = (data: { name: string; description: string; color: string; activeModules: string[] }) => {
+  const handleFormSubmit = (data: { name: string; description: string; color: string; maxUsers: number; activeModules: string[] }) => {
     if (editingTier) updateTier(editingTier.id, data);
     else createTier(data);
   };
@@ -60,6 +60,10 @@ export function TierManagement({ onBack }: TierManagementProps) {
                 <Badge variant="outline" className={selectedTier.color + ' text-xs'}>{selectedTier.name}</Badge>
               </div>
               <p className="text-muted-foreground">{selectedTier.description}</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                <Users className="w-3.5 h-3.5 inline mr-1" />
+                Max User Limit: <span className="font-medium text-foreground">{selectedTier.maxUsers}</span> normal supplier users per supplier
+              </p>
             </div>
           </div>
           <Button variant="outline" className="gap-2" onClick={() => handleEdit(selectedTier)}>
@@ -171,6 +175,7 @@ export function TierManagement({ onBack }: TierManagementProps) {
                 <TableHead>Description</TableHead>
                 <TableHead className="text-center">Modules</TableHead>
                 <TableHead className="text-center">Suppliers</TableHead>
+                <TableHead className="text-center">Max Users</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -190,6 +195,9 @@ export function TierManagement({ onBack }: TierManagementProps) {
                     <span className="flex items-center justify-center gap-1 text-sm">
                       <Users className="w-3.5 h-3.5 text-muted-foreground" /> {tier.assignedSuppliers.length}
                     </span>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <span className="text-sm">{tier.maxUsers}</span>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1" onClick={e => e.stopPropagation()}>
