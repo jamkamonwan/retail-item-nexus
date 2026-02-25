@@ -90,6 +90,36 @@ export const mockSuppliers: MockSupplier[] = [
     address: 'Pathum Thani, Thailand',
     createdAt: new Date('2023-07-15'),
   },
+  {
+    id: 'supplier-009',
+    name: 'Unilever - Hardline',
+    code: '83790',
+    isActive: true,
+    contactEmail: 'hardline@unilever.com',
+    contactPhone: '+66-2-890-1234',
+    address: 'Bangkok, Thailand',
+    createdAt: new Date('2023-08-01'),
+  },
+  {
+    id: 'supplier-010',
+    name: 'Unilever - Homeline',
+    code: '34355',
+    isActive: true,
+    contactEmail: 'homeline@unilever.com',
+    contactPhone: '+66-2-901-2345',
+    address: 'Bangkok, Thailand',
+    createdAt: new Date('2023-08-15'),
+  },
+  {
+    id: 'supplier-011',
+    name: 'Unilever - Personal Care',
+    code: '34443',
+    isActive: true,
+    contactEmail: 'personalcare@unilever.com',
+    contactPhone: '+66-2-012-3456',
+    address: 'Bangkok, Thailand',
+    createdAt: new Date('2023-09-01'),
+  },
 ];
 
 export const getActiveSuppliers = (): MockSupplier[] => {

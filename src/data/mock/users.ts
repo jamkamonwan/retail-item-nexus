@@ -1,5 +1,5 @@
 // Mock user data for design-first development
-export type MockRole = 'supplier' | 'buyer' | 'commercial' | 'finance' | 'scm' | 'im' | 'dc_income' | 'admin' | 'nsd';
+export type MockRole = 'supplier' | 'supplier_admin' | 'buyer' | 'commercial' | 'finance' | 'scm' | 'im' | 'dc_income' | 'admin' | 'nsd';
 export type MockUserType = 'internal' | 'external';
 export type MockUserStatus = 'active' | 'inactive' | 'locked';
 
@@ -14,6 +14,7 @@ export interface MockUser {
   department?: string;
   supplierId?: string;
   supplierName?: string;
+  supplierIds?: string[];
   permissions: string[];
   createdAt: Date;
   lastLoginAt?: Date;

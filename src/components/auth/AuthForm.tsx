@@ -20,6 +20,7 @@ const ROLE_ICONS: Record<UserType, React.ReactNode> = {
   dc_income: <DollarSign className="w-4 h-4" />,
   admin: <ShieldCheck className="w-4 h-4" />,
   nsd: <FileDown className="w-4 h-4" />,
+  supplier_admin: <Building2 className="w-4 h-4" />,
 };
 
 export function AuthForm() {

@@ -18,10 +18,11 @@ export const DIVISIONS: Record<Division, { label: string; fullName: string; colo
 };
 
 // User Types - Who is using the system
-export type UserType = 'supplier' | 'buyer' | 'commercial' | 'finance' | 'scm' | 'im' | 'dc_income' | 'admin' | 'nsd';
+export type UserType = 'supplier' | 'supplier_admin' | 'buyer' | 'commercial' | 'finance' | 'scm' | 'im' | 'dc_income' | 'admin' | 'nsd';
 
 export const USER_TYPES: Record<UserType, { label: string; description: string }> = {
   supplier: { label: 'Supplier', description: 'External supplier/vendor' },
+  supplier_admin: { label: 'Supplier Admin', description: 'Primary supplier administrator' },
   buyer: { label: 'Buyer', description: 'Internal buyer/merchandiser' },
   commercial: { label: 'Commercial', description: 'Commercial team' },
   finance: { label: 'Finance', description: 'Finance department' },

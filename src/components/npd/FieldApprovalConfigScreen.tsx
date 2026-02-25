@@ -112,6 +112,7 @@ export function FieldApprovalConfigScreen() {
       dc_income: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
       admin: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
       nsd: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
+      supplier_admin: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
     };
     return colors[role] || 'bg-muted text-muted-foreground';
   };
