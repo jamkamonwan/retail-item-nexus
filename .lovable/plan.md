@@ -1,88 +1,141 @@
 
-# Fix Channel Badges on Non-Supplier Role Screens
 
-## Problem Identified
+# Multi-Tier Package & Module Configuration (Mock-up)
 
-The SubmissionView (reviewer/approver screen) is using the wrong property for channel badges:
+## Overview
 
-| Component | Property Used | Correct Property |
-|-----------|--------------|-----------------|
-| FormField.tsx (Supplier) | `field.channelColumn` ✓ | `channelColumn` |
-| SubmissionView.tsx (Reviewer) | `field.channel` ✗ | Should use `channelColumn` |
-
-The `field.channel` property represents which sales channel the user selected (online/offline/both), while `field.channelColumn` represents the Excel specification's column classification for the field.
+Add a new admin screen for managing service tiers and mapping system modules to each tier. This controls which functional modules are available to suppliers based on their assigned tier level.
 
 ---
 
-## Current Code in SubmissionView (Lines 399-403)
+## Data Model (Mock Data)
+
+### New file: `src/data/mock/tiers.ts`
 
 ```typescript
-{field.channel !== 'both' && (
-  <Badge variant="secondary" className="text-[10px]">
-    {field.channel === 'online' ? 'Online' : 'Offline'}
-  </Badge>
-)}
+export interface MockModule {
+  id: string;
+  name: string;
+  description: string;
+  icon: string; // lucide icon name
+}
+
+export interface MockTier {
+  id: string;
+  name: string;        // e.g. "Tier A", "Tier B"
+  description: string;
+  color: string;       // badge color
+  activeModules: string[]; // module IDs
+  supplierCount: number;   // how many suppliers assigned
+  createdAt: Date;
+}
 ```
 
-This shows plain text badges based on the wrong property.
+**Predefined modules:**
+- New Item Creation
+- Supply Chain Management
+- Pricing & Promotions
+- Compliance & Certification
+- Analytics & Reports
+- E-Commerce Integration
+- Inventory Management
+- DC Operations
+
+**Default tiers:**
+- Tier A (Premium) -- all modules active
+- Tier B (Standard) -- subset of modules
+- Tier C (Basic) -- minimal modules
 
 ---
 
-## Solution
+## New Components
 
-### Step 1: Import ChannelBadge Component
+### 1. `src/components/admin/TierManagement.tsx` (Main Screen)
 
-Extract `ChannelBadge` from FormField.tsx into a shared component, or import and reuse it in SubmissionView.tsx.
-
-### Step 2: Update SubmissionView Badge Rendering
-
-Replace the current channel badge logic with the proper `ChannelBadge` component using `field.channelColumn`:
-
-```typescript
-// Import
-import { Globe, ShoppingCart } from 'lucide-react';
-
-// In the field card section (around line 392-404)
-{/* Channel Badge - Shows Online/All Channels indicator */}
-{field.channelColumn === 'online' && (
-  <Badge variant="outline" className="bg-success/10 text-success border-success/30 text-xs">
-    <Globe className="w-3 h-3 mr-1" />
-    Online
-  </Badge>
-)}
-{field.channelColumn === 'both' && (
-  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-xs">
-    <ShoppingCart className="w-3 h-3 mr-1" />
-    All Channels
-  </Badge>
-)}
+Layout:
 ```
+┌─────────────────────────────────────────────────────┐
+│ ← Back    Tier & Module Configuration    [+ New Tier]│
+│ Manage service tiers and module access               │
+├─────────────────────────────────────────────────────┤
+│                                                      │
+│ ┌──────────┐  ┌──────────┐  ┌──────────┐            │
+│ │ Tier A   │  │ Tier B   │  │ Tier C   │            │
+│ │ Premium  │  │ Standard │  │ Basic    │            │
+│ │ 8 modules│  │ 5 modules│  │ 3 modules│            │
+│ │ 12 suppl.│  │ 25 suppl.│  │ 8 suppl. │            │
+│ │ [Edit]   │  │ [Edit]   │  │ [Delete] │            │
+│ └──────────┘  └──────────┘  └──────────┘            │
+│                                                      │
+│ ┌────────────────────────────────────────────────┐   │
+│ │ Module Matrix                                   │  │
+│ ├────────────────────┬───────┬───────┬───────────┤  │
+│ │ Module             │Tier A │Tier B │Tier C     │  │
+│ ├────────────────────┼───────┼───────┼───────────┤  │
+│ │ New Item Creation  │  ✓    │  ✓    │  ✓        │  │
+│ │ Supply Chain Mgmt  │  ✓    │  ✓    │  -        │  │
+│ │ Pricing & Promos   │  ✓    │  ✓    │  -        │  │
+│ │ Compliance         │  ✓    │  -    │  -        │  │
+│ │ Analytics          │  ✓    │  -    │  -        │  │
+│ │ E-Commerce         │  ✓    │  ✓    │  ✓        │  │
+│ │ Inventory Mgmt     │  ✓    │  ✓    │  -        │  │
+│ │ DC Operations      │  ✓    │  -    │  -        │  │
+│ └────────────────────┴───────┴───────┴───────────┘  │
+└─────────────────────────────────────────────────────┘
+```
+
+### 2. `src/components/admin/TierFormDialog.tsx` (Create/Edit Dialog)
+
+- Name, Description, Color selection
+- Checklist of all available modules with toggles
+- Save/Cancel buttons
+
+### 3. `src/hooks/useTiers.ts` (State Management)
+
+- CRUD operations on mock tier data
+- `createTier`, `updateTier`, `deleteTier`
+- `toggleModule(tierId, moduleId)` for quick matrix toggling
+- Toast notifications for all actions
 
 ---
 
-## Files to Modify
+## Integration Points
 
-| File | Changes |
-|------|---------|
-| `src/components/npd/SubmissionView.tsx` | Replace `field.channel` with `field.channelColumn` and use styled badges with icons |
+### Admin Navigation
 
----
+Add a new tab "Tiers" in `AuthenticatedWorkflowApp.tsx` for the admin role, and a new View type `'tiers'`.
 
-## Visual Result
+### Admin Dashboard Quick Action
 
-Before:
-```
-[SUPPLIER] [Online]  ← Plain text, based on wrong property
-```
+Add a new quick action card in `AdminDashboard.tsx` linking to the tier config screen (replacing the "Coming Soon" Analytics card or adding alongside it).
 
-After:
-```
-[SUPPLIER] [🌐 Online]  ← Styled badge with globe icon
-[BUYER] [🛒 All Channels]  ← Styled badge with cart icon
-```
+### Mock Data Export
+
+Update `src/data/mock/index.ts` to export tier and module data.
 
 ---
 
-## Summary
+## Files to Create/Modify
 
-This is a simple fix to ensure consistency between the Supplier form view and the Reviewer/Approver view. Both will now display the same styled channel badges (🌐 Online, 🛒 All Channels) using the `channelColumn` property from the field definitions.
+| File | Action | Description |
+|------|--------|-------------|
+| `src/data/mock/tiers.ts` | **Create** | Mock tier and module definitions |
+| `src/data/mock/index.ts` | Modify | Export new tier types and data |
+| `src/hooks/useTiers.ts` | **Create** | Hook for tier CRUD operations |
+| `src/components/admin/TierManagement.tsx` | **Create** | Main tier config screen with matrix view |
+| `src/components/admin/TierFormDialog.tsx` | **Create** | Create/Edit tier dialog with module toggles |
+| `src/components/admin/index.ts` | Modify | Export new components |
+| `src/components/npd/AuthenticatedWorkflowApp.tsx` | Modify | Add "Tiers" tab and route for admin |
+| `src/components/npd/dashboards/AdminDashboard.tsx` | Modify | Add quick action card for Tiers |
+
+---
+
+## Key UI Features
+
+- **Tier cards** with color-coded badges showing module count and supplier count
+- **Module matrix table** with checkbox toggles for quick assignment
+- **Create/Edit dialog** with module checklist and tier metadata
+- **Delete confirmation** with warning about affected suppliers
+- **Toast notifications** for all CRUD actions
+- Follows existing admin screen patterns (UserManagement style with back button, cards, tables)
+
