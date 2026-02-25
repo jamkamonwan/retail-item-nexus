@@ -70,6 +70,26 @@ export const mockSuppliers: MockSupplier[] = [
     contactEmail: 'contact@oldsupplier.com',
     createdAt: new Date('2022-01-01'),
   },
+  {
+    id: 'supplier-007',
+    name: 'DKSH Thailand',
+    code: 'DKSH',
+    isActive: true,
+    contactEmail: 'contact@dksh.co.th',
+    contactPhone: '+66-2-678-9012',
+    address: 'Bangkok, Thailand',
+    createdAt: new Date('2023-06-01'),
+  },
+  {
+    id: 'supplier-008',
+    name: 'Thainamthip Co.',
+    code: 'TNAM',
+    isActive: true,
+    contactEmail: 'info@thainamthip.com',
+    contactPhone: '+66-2-789-0123',
+    address: 'Pathum Thani, Thailand',
+    createdAt: new Date('2023-07-15'),
+  },
 ];
 
 export const getActiveSuppliers = (): MockSupplier[] => {

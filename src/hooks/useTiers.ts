@@ -5,11 +5,11 @@ import { toast } from 'sonner';
 export function useTiers() {
   const [tiers, setTiers] = useState<MockTier[]>([...mockTiers]);
 
-  const createTier = useCallback((tier: Omit<MockTier, 'id' | 'createdAt' | 'supplierCount'>) => {
+  const createTier = useCallback((tier: Omit<MockTier, 'id' | 'createdAt' | 'assignedSuppliers'>) => {
     const newTier: MockTier = {
       ...tier,
       id: `tier_${Date.now()}`,
-      supplierCount: 0,
+      assignedSuppliers: [],
       createdAt: new Date(),
     };
     setTiers(prev => [...prev, newTier]);
@@ -23,8 +23,8 @@ export function useTiers() {
 
   const deleteTier = useCallback((id: string) => {
     const tier = tiers.find(t => t.id === id);
-    if (tier && tier.supplierCount > 0) {
-      toast.error(`Cannot delete "${tier.name}" — ${tier.supplierCount} suppliers are assigned`);
+    if (tier && tier.assignedSuppliers.length > 0) {
+      toast.error(`Cannot delete "${tier.name}" — ${tier.assignedSuppliers.length} suppliers are assigned`);
       return;
     }
     setTiers(prev => prev.filter(t => t.id !== id));
@@ -44,5 +44,25 @@ export function useTiers() {
     }));
   }, []);
 
-  return { tiers, createTier, updateTier, deleteTier, toggleModule };
+  const assignSupplier = useCallback((tierId: string, supplierId: string) => {
+    setTiers(prev => prev.map(t => {
+      // Remove supplier from any other tier first
+      const without = t.assignedSuppliers.filter(s => s !== supplierId);
+      if (t.id === tierId) {
+        return { ...t, assignedSuppliers: [...without, supplierId] };
+      }
+      return without.length !== t.assignedSuppliers.length ? { ...t, assignedSuppliers: without } : t;
+    }));
+    toast.success('Supplier assigned');
+  }, []);
+
+  const removeSupplier = useCallback((tierId: string, supplierId: string) => {
+    setTiers(prev => prev.map(t => {
+      if (t.id !== tierId) return t;
+      return { ...t, assignedSuppliers: t.assignedSuppliers.filter(s => s !== supplierId) };
+    }));
+    toast.success('Supplier removed');
+  }, []);
+
+  return { tiers, createTier, updateTier, deleteTier, toggleModule, assignSupplier, removeSupplier };
 }
