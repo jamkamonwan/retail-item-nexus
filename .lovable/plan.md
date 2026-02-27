@@ -1,58 +1,32 @@
 
 
-# Tier Management: 2-Column Split Layout
+# Show Assigned Tier on Supplier Group Screen
 
 ## Overview
 
-Replace the current separate list view / detail view pattern with a persistent **2-column split layout** so the admin always sees the Tier list on the left and the selected tier's details (modules + groups) on the right. This eliminates page transitions and gives instant visual mapping of Tier -> Modules -> Groups.
+Display the assigned Tier name next to each Supplier Group -- both in the list view table and the detail view header. If no tier is assigned, show nothing (blank).
 
-## Layout
+## How It Works
 
-```text
-+-------------------+------------------------------------------+
-| Tier List (Left)  |  Tier Detail (Right)                     |
-|                   |                                          |
-| [+ Create Tier]   |  Tier: Premium                           |
-|                   |  Max Users: 10                           |
-|  * Basic          |                                          |
-|  > Premium  <--   |  Allowed Modules:                        |
-|  * Enterprise     |  [x] Item Review                         |
-|                   |  [x] Pricing                             |
-|                   |  [ ] Analytics                           |
-|                   |                                          |
-|                   |  Assigned Supplier Groups:               |
-|                   |  ACME Group  [Remove]                    |
-|                   |  Global Foods [Remove]                   |
-|                   |  [+ Add Supplier Group]                  |
-+-------------------+------------------------------------------+
-```
+The tier-to-group relationship already exists in `mockTiers` data (each tier has an `assignedGroups` array). We just need to look up which tier contains each group's ID and display it.
 
 ## Changes
 
-### 1. Rewrite `TierManagement.tsx` layout
+### 1. List View -- Add "Tier" column to the groups table
 
-**Current**: Two separate renders -- a table list view OR a detail view (conditionally rendered, full-page swap with back button).
+Add a new column between "Suppliers" and "Created" that shows the tier name as a colored badge if assigned, or leaves the cell empty if not.
 
-**New**: Single render with a 2-column flex layout:
-- **Left panel** (~300px, border-right): Scrollable list of tier cards/items. Each item shows tier name badge, module count, and group count. Clicking selects the tier (highlighted state). "Create Tier" button at top. Edit/Delete actions inline per item.
-- **Right panel** (flex-1): Shows the selected tier's detail -- module checkboxes and assigned supplier groups table. If no tier is selected, show an empty state prompt ("Select a tier to view details"). Edit Tier button in the right panel header.
-- Auto-select the first tier on mount so the right panel is never empty initially.
+### 2. Detail View -- Show Tier in the group header
 
-### 2. Keep all existing functionality intact
+Below the group name/description, display "Tier: Premium" (as a badge) when a tier is assigned. If no tier is assigned, show nothing.
 
-- Create/Edit tier dialog, Delete confirmation dialog, Module toggle, Group assign/remove, and TierSupplierDialog all remain unchanged.
-- Only the layout structure changes -- no logic or hook modifications needed.
+### 3. No data model changes needed
 
-## Technical Details
-
-- Use standard flexbox (`flex` with `w-80` left + `flex-1` right) rather than `ResizablePanelGroup` to keep it simple.
-- Left panel items use a vertical list with `cursor-pointer` and a highlighted background (`bg-accent`) for the selected tier.
-- The `onBack` prop still works -- the back arrow in the page header navigates back to the Admin Dashboard.
-- `selectedTierId` defaults to `tiers[0]?.id` instead of `null`.
+The mapping already exists in `mockTiers.assignedGroups`. We just import `mockTiers` and do a simple lookup.
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/components/admin/TierManagement.tsx` | Rewrite to 2-column split layout |
+| `src/components/admin/SupplierGroupManagement.tsx` | Import `mockTiers`, add helper to find tier for a group, add Tier column to list table, show tier badge in detail view |
 
