@@ -3,6 +3,7 @@ export interface MockSupplierGroup {
   name: string;
   description?: string;
   supplierIds: string[];
+  mainSupplierId?: string;
   createdAt: Date;
 }
 

@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Plus, Pencil, Trash2, UserPlus, X } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, Trash2, UserPlus, X, Star } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface SupplierGroupManagementProps {
@@ -18,7 +18,7 @@ interface SupplierGroupManagementProps {
 }
 
 export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps) {
-  const { groups, createGroup, updateGroup, deleteGroup, assignSupplier, removeSupplier } = useSupplierGroups();
+  const { groups, createGroup, updateGroup, deleteGroup, assignSupplier, removeSupplier, setMainSupplier } = useSupplierGroups();
   const [formOpen, setFormOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<MockSupplierGroup | null>(null);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
@@ -87,6 +87,7 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-[60px]">Main</TableHead>
                     <TableHead>Code</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Contact</TableHead>
@@ -96,8 +97,20 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
                 <TableBody>
                   {selectedGroup.supplierIds.map((sid) => {
                     const s = getSupplierInfo(sid);
+                    const isMain = selectedGroup.mainSupplierId === sid;
                     return (
                       <TableRow key={sid}>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => setMainSupplier(selectedGroup.id, isMain ? undefined : sid)}
+                            title={isMain ? 'Remove main supplier' : 'Set as main supplier'}
+                          >
+                            <Star className={`w-4 h-4 ${isMain ? 'fill-yellow-400 text-yellow-500' : 'text-muted-foreground'}`} />
+                          </Button>
+                        </TableCell>
                         <TableCell className="font-mono font-medium">{s?.code ?? sid}</TableCell>
                         <TableCell>{s?.name ?? '—'}</TableCell>
                         <TableCell className="text-muted-foreground text-sm">{s?.contactEmail ?? '—'}</TableCell>
