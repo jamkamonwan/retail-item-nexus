@@ -51,9 +51,9 @@ export function SupplierGroupFormDialog({ open, onOpenChange, group, onSubmit }:
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Edit Partner' : 'New Supplier Partner'}</DialogTitle>
+          <DialogTitle>{isEditing ? 'Edit Supplier Partner' : 'New Supplier Partner'}</DialogTitle>
           <DialogDescription>
-            {isEditing ? 'Update the partner details.' : 'Create a new supplier partner to organize supplier codes.'}
+            {isEditing ? 'Update the supplier partner details.' : 'Create a new supplier partner to organize supplier codes.'}
           </DialogDescription>
         </DialogHeader>
         {!isEditing && (
@@ -68,7 +68,7 @@ export function SupplierGroupFormDialog({ open, onOpenChange, group, onSubmit }:
         <div className="space-y-4 py-2">
           <div className="space-y-2">
             <Label htmlFor="group-name">Supplier Partner Name</Label>
-            <Input id="group-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Partner A DKSH" />
+            <Input id="group-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Supplier Partner A DKSH" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="group-desc">Description</Label>

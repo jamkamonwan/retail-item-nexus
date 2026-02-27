@@ -127,10 +127,10 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Supplier Partners</h2>
-          <p className="text-muted-foreground text-sm">Organize supplier codes into partners for portal access</p>
+          <p className="text-muted-foreground text-sm">Organize supplier codes into supplier partners for portal access</p>
         </div>
         <Button onClick={() => { setEditingGroup(null); setFormOpen(true); }}>
-          <Plus className="w-4 h-4 mr-1" /> New Partner
+          <Plus className="w-4 h-4 mr-1" /> New Supplier Partner
         </Button>
       </div>
 
@@ -149,7 +149,7 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
             <TableBody>
               {groups.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">No partners yet. Click "New Partner" to create one.</TableCell>
+                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">No supplier partners yet. Click "New Supplier Partner" to create one.</TableCell>
                 </TableRow>
               )}
               {groups.map((g) => (
