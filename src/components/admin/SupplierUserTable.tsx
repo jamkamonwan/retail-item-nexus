@@ -13,6 +13,7 @@ import { USER_TYPES } from '@/types/npd';
 import { format } from 'date-fns';
 import { mockSupplierGroups } from '@/data/mock/supplierGroups';
 import { mockSuppliers } from '@/data/mock/suppliers';
+import { mockTiers } from '@/data/mock/tiers';
 
 interface SupplierUserTableProps {
   users: UserProfile[];
@@ -41,6 +42,11 @@ function resolveGroup(supplierGroupId?: string) {
   return { groupName: group.name, codes: codes || '—' };
 }
 
+function getTierForGroup(groupId?: string) {
+  if (!groupId) return undefined;
+  return mockTiers.find(t => t.assignedGroups.includes(groupId));
+}
+
 export function SupplierUserTable({
   users, loading, onEdit, onView, onDeactivate, onActivate, onResetPassword,
 }: SupplierUserTableProps) {
@@ -67,8 +73,9 @@ export function SupplierUserTable({
           <TableRow>
             <TableHead>User</TableHead>
             <TableHead>Role</TableHead>
-            <TableHead>Supplier Group</TableHead>
+            <TableHead>Supplier Partner</TableHead>
             <TableHead>Supplier Codes</TableHead>
+            <TableHead>Access Plan</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Last Login</TableHead>
             <TableHead className="w-[70px]"></TableHead>
@@ -95,6 +102,12 @@ export function SupplierUserTable({
                 </TableCell>
                 <TableCell>
                   <span className="text-sm font-mono">{codes}</span>
+                </TableCell>
+                <TableCell>
+                  {(() => {
+                    const tier = getTierForGroup(user.supplierGroupId);
+                    return tier ? <Badge className={tier.color}>{tier.name}</Badge> : null;
+                  })()}
                 </TableCell>
                 <TableCell>
                   <Badge className={statusColors[user.status]}>{user.status}</Badge>

@@ -59,15 +59,15 @@ export function TierFormDialog({ open, onOpenChange, tier, onSubmit }: TierFormD
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Edit Tier' : 'Create New Tier'}</DialogTitle>
+          <DialogTitle>{isEditing ? 'Edit Access Plan' : 'Create New Access Plan'}</DialogTitle>
           <DialogDescription>
-            {isEditing ? 'Update tier details and module assignments.' : 'Define a new service tier with module access.'}
+            {isEditing ? 'Update access plan details and module assignments.' : 'Define a new access plan with module access.'}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label htmlFor="tier-name">Tier Name</Label>
+            <Label htmlFor="tier-name">Access Plan Name</Label>
             <Input id="tier-name" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Tier D" />
           </div>
 
@@ -131,7 +131,7 @@ export function TierFormDialog({ open, onOpenChange, tier, onSubmit }: TierFormD
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
           <Button onClick={handleSubmit} disabled={!name.trim()}>
-            {isEditing ? 'Update Tier' : 'Create Tier'}
+            {isEditing ? 'Update Access Plan' : 'Create Access Plan'}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -57,7 +57,7 @@ export function SupplierAdminDashboard({ userId, supplierGroupId }: SupplierAdmi
                 {group?.name ?? 'My Group'}
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                {tier ? `${tier.name} — ${tier.description}` : 'No tier assigned'}
+                Manage your team members and module access
               </p>
             </div>
             <TooltipProvider>
