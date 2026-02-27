@@ -1,53 +1,22 @@
 
 
-# Add Bulk Action Bar with Checkboxes to User Management
+## Simplify User Management Search Bar
 
-## Overview
+### What Changes
+Remove the **Department** and **Supplier** filter dropdowns from the search bar, keeping only **Search**, **Role**, and **Status** filters. The Role filter will naturally drive which tab shows results -- selecting Supplier or Supplier Admin roles populates the Supplier Users tab, while internal roles populate the Internal Users tab.
 
-Add row-level checkboxes and a persistent bulk action bar to both Supplier Users and Internal Users tables. When users are selected via checkboxes, the action bar shows with "Reset Password" and "Set Inactive" buttons.
+### Technical Details
 
-## Changes
+**File: `src/components/admin/UserFilters.tsx`**
+- Remove the `departments` and `suppliers` props from the component interface
+- Remove the Department filter `Select` dropdown (lines 87-102)
+- Remove the Supplier filter `Select` dropdown (lines 121-138)
+- Remove `handleDepartmentChange` and `handleSupplierChange` handlers
+- Update `hasActiveFilters` to exclude `department` and `supplierId`
+- Remove unused imports (`Department`, `Supplier`)
 
-### 1. Update `SupplierUserTable.tsx` -- Add checkboxes and selection state
-
-- Add `selectedIds` state (Set of user IDs) and a "select all" checkbox in the header
-- Add a Checkbox column as the first column in each row
-- When at least one user is selected, show a bulk action bar above the table with:
-  - "X selected" count label
-  - "Reset Password" button
-  - "Set Inactive" button
-- New props: `onBulkResetPassword(userIds: string[])` and `onBulkDeactivate(userIds: string[])`
-- Clear selection after bulk action completes
-
-### 2. Update `UserTable.tsx` -- Same checkbox and action bar pattern
-
-- Mirror the same checkbox + bulk action bar pattern as SupplierUserTable
-- Same new props: `onBulkResetPassword` and `onBulkDeactivate`
-
-### 3. Update `UserManagement.tsx` -- Wire up bulk handlers
-
-- Add `handleBulkResetPassword(userIds: string[])` -- shows confirmation dialog, then calls `resetPassword` for each user
-- Add `handleBulkDeactivate(userIds: string[])` -- shows confirmation dialog, then calls `deactivateUser` for each user
-- Pass these as new props to both table components
-
-## Action Bar Layout
-
-```text
-+------------------------------------------------------+
-| 3 selected    [Reset Password]   [Set Inactive]       |
-+------------------------------------------------------+
-| [ ] | User        | Role   | ...                      |
-| [x] | John Doe    | Admin  | ...                      |
-| [x] | Jane Smith  | Buyer  | ...                      |
-| [x] | Bob Lee     | SCM    | ...                      |
-+------------------------------------------------------+
-```
-
-## Files Modified
-
-| File | Change |
-|------|--------|
-| `src/components/admin/SupplierUserTable.tsx` | Add checkbox column, selection state, bulk action bar |
-| `src/components/admin/UserTable.tsx` | Add checkbox column, selection state, bulk action bar |
-| `src/components/admin/UserManagement.tsx` | Add bulk handler functions, pass to both tables |
+**File: `src/components/admin/UserManagement.tsx`**
+- Remove `departments` and `suppliers` props passed to `UserFiltersComponent`
+- Remove `useDepartments` and `useSuppliers` imports (if no longer needed elsewhere -- `useSuppliers` is still used for `UserFormDialog`, so keep that)
+- Remove `useDepartments` hook call since departments are no longer needed
 
