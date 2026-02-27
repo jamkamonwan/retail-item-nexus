@@ -30,7 +30,7 @@ const USER_TYPE_ICONS: Record<UserType, React.ReactNode> = {
   supplier_admin: <Building2 className="w-4 h-4" />,
 };
 
-const EXTERNAL_ROLES: UserType[] = ['supplier'];
+const EXTERNAL_ROLES: UserType[] = ['supplier', 'supplier_admin'];
 const INTERNAL_ROLES: UserType[] = ['buyer', 'commercial', 'finance', 'scm', 'im', 'dc_income', 'nsd'];
 const ADMIN_ROLES: UserType[] = ['admin'];
 
