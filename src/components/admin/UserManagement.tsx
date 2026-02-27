@@ -102,6 +102,30 @@ export function UserManagement({ onBack }: UserManagementProps) {
     });
   };
 
+  const handleBulkResetPassword = (userIds: string[]) => {
+    setConfirmDialog({
+      open: true,
+      title: 'Bulk Reset Password',
+      description: `Are you sure you want to reset passwords for ${userIds.length} user(s)? New temporary passwords will be generated.`,
+      action: async () => {
+        for (const id of userIds) await resetPassword(id);
+        setConfirmDialog((prev) => ({ ...prev, open: false }));
+      },
+    });
+  };
+
+  const handleBulkDeactivate = (userIds: string[]) => {
+    setConfirmDialog({
+      open: true,
+      title: 'Bulk Deactivate Users',
+      description: `Are you sure you want to deactivate ${userIds.length} user(s)? They will no longer be able to log in.`,
+      action: async () => {
+        for (const id of userIds) await deactivateUser(id);
+        setConfirmDialog((prev) => ({ ...prev, open: false }));
+      },
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -154,6 +178,8 @@ export function UserManagement({ onBack }: UserManagementProps) {
                 onDeactivate={handleDeactivate}
                 onActivate={handleActivate}
                 onResetPassword={handleResetPassword}
+                onBulkResetPassword={handleBulkResetPassword}
+                onBulkDeactivate={handleBulkDeactivate}
               />
             </CardContent>
           </Card>
@@ -173,6 +199,8 @@ export function UserManagement({ onBack }: UserManagementProps) {
                 onDeactivate={handleDeactivate}
                 onActivate={handleActivate}
                 onResetPassword={handleResetPassword}
+                onBulkResetPassword={handleBulkResetPassword}
+                onBulkDeactivate={handleBulkDeactivate}
               />
             </CardContent>
           </Card>
