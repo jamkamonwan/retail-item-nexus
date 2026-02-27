@@ -11,12 +11,12 @@ import { FieldApprovalConfigScreen } from './FieldApprovalConfigScreen';
 import { ChangePasswordDialog } from '@/components/auth';
 import { BigCHeader } from '@/components/layout/BigCHeader';
 import { SupplierDashboard, ApproverDashboard, AdminDashboard } from './dashboards';
-import { UserManagement, TierManagement } from '@/components/admin';
+import { UserManagement, TierManagement, SupplierGroupManagement } from '@/components/admin';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LayoutDashboard, FileText, Settings2, ListChecks, Users, Layers } from 'lucide-react';
+import { LayoutDashboard, FileText, Settings2, ListChecks, Users, Layers, FolderTree } from 'lucide-react';
 import { toast } from 'sonner';
 
-type View = 'dashboard' | 'form' | 'submission' | 'config' | 'all-items' | 'users' | 'tiers';
+type View = 'dashboard' | 'form' | 'submission' | 'config' | 'all-items' | 'users' | 'tiers' | 'supplier-groups';
 
 // Map roles to their pending status for approver dashboard
 const ROLE_PENDING_STATUS: Partial<Record<UserType, WorkflowStatus>> = {
@@ -157,6 +157,10 @@ export function AuthenticatedWorkflowApp() {
               <Layers className="w-4 h-4" />
               Tiers
             </TabsTrigger>
+            <TabsTrigger value="supplier-groups" className="gap-2">
+              <FolderTree className="w-4 h-4" />
+              Supplier Groups
+            </TabsTrigger>
             <TabsTrigger value="config" className="gap-2">
               <Settings2 className="w-4 h-4" />
               Config
@@ -290,6 +294,10 @@ export function AuthenticatedWorkflowApp() {
 
         {currentView === 'tiers' && (
           <TierManagement onBack={handleBackToList} />
+        )}
+
+        {currentView === 'supplier-groups' && (
+          <SupplierGroupManagement onBack={handleBackToList} />
         )}
 
         {currentView === 'submission' && selectedSubmission && (
