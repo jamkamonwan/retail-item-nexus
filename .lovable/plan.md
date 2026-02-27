@@ -1,72 +1,42 @@
 
 
-# Supplier Group Creation & Code Mapping
+# Change Tier Assignment from Individual Suppliers to Supplier Groups
 
 ## Overview
 
-Add a new **Supplier Groups** management screen under the Admin navigation. IT Admins can create Supplier Groups (e.g., "Group A DKSH"), search and assign multiple Supplier Codes to each group, with the constraint that one Supplier Code can only belong to one Group at a time.
+Currently, Tiers assign individual supplier codes (e.g., `supplier-001`). The user wants Tiers to assign **Supplier Groups** instead (e.g., "Group Unilever", "Group DKSH"), since groups are the primary entity.
 
----
+## Changes
 
-## New Files
+### 1. Data Model: `src/data/mock/tiers.ts`
+- Rename `assignedSuppliers: string[]` to `assignedGroups: string[]` in the `MockTier` interface
+- Update seed data to reference group IDs (`group-001`, `group-002`) instead of supplier IDs
 
-### 1. Mock Data: `src/data/mock/supplierGroups.ts`
-- Define `MockSupplierGroup` interface: `{ id, name, description?, supplierIds: string[], createdAt }`
-- Seed with 2 sample groups (e.g., "Group Unilever" with supplier codes 83790/34355/34443, "Group DKSH" with DKSH supplier)
-- Export helpers: `mockSupplierGroups` array
+### 2. Hook: `src/hooks/useTiers.ts`
+- Rename all `assignedSuppliers` references to `assignedGroups`
+- Update `assignSupplier` to `assignGroup` and `removeSupplier` to `removeGroup`
+- Deletion guard: check `assignedGroups.length` instead of `assignedSuppliers.length`
+- One-tier-per-group enforcement stays the same logic, just operating on group IDs
 
-### 2. Hook: `src/hooks/useSupplierGroups.ts`
-- In-memory CRUD over `mockSupplierGroups`
-- `createGroup(name, description)` -- creates new group
-- `updateGroup(id, data)` -- edit name/description
-- `deleteGroup(id)` -- only if no suppliers assigned
-- `assignSupplier(groupId, supplierId)` -- enforces one-group-per-supplier rule
-- `removeSupplier(groupId, supplierId)` -- unlinks a supplier code
-- Helper: `getSupplierGroup(supplierId)` -- returns which group a supplier belongs to (for conflict detection)
+### 3. Tier Detail View: `src/components/admin/TierManagement.tsx`
+- Replace the "Assigned Suppliers" card with "Assigned Supplier Groups"
+- Show group name, supplier count (from group's `supplierIds.length`), and description
+- Import `mockSupplierGroups` to look up group info instead of `mockSuppliers`
+- Update the list view column from "Suppliers" to "Groups" with group count
+- Update delete warning text to reference groups
 
-### 3. UI Component: `src/components/admin/SupplierGroupManagement.tsx`
-- **List View**: Table showing Group Name, Supplier Count, Created date, Edit/Delete actions
-- **Detail View** (click a row): Shows group info + assigned suppliers table (Code | Name | Remove) + "Add Supplier" button opening a search dialog
-- Reuses the same pattern as `TierManagement.tsx` (list view -> detail view)
+### 4. Tier Supplier Dialog: `src/components/admin/TierSupplierDialog.tsx`
+- Rename to `TierGroupDialog` (or keep file name, rename component)
+- Change props from supplier-based to group-based: search/assign/remove **Supplier Groups** instead of individual suppliers
+- Show group name + number of supplier codes in each group
+- Enforce one-tier-per-group: groups already assigned to another tier are shown disabled
 
-### 4. Group Form Dialog: `src/components/admin/SupplierGroupFormDialog.tsx`
-- Simple dialog with Name and Description fields for create/edit
+### Files Modified
 
-### 5. Group Supplier Dialog: `src/components/admin/GroupSupplierDialog.tsx`
-- Search input to filter suppliers by code or name
-- Shows unassigned suppliers (not in any group) as selectable
-- If a supplier is already in another group, show it grayed out with the group name label
-- Selected suppliers added via `assignSupplier(groupId, supplierId)`
-
----
-
-## Modified Files
-
-### 6. `src/data/mock/index.ts`
-- Add `export * from './supplierGroups'`
-
-### 7. `src/components/admin/index.ts`
-- Add `export { SupplierGroupManagement } from './SupplierGroupManagement'`
-
-### 8. `src/components/npd/AuthenticatedWorkflowApp.tsx`
-- Add `'supplier-groups'` to the `View` type
-- Add a new tab "Supplier Groups" (with a `FolderTree` icon) in the admin navigation tabs
-- Render `<SupplierGroupManagement>` when `currentView === 'supplier-groups'`
-
----
-
-## UI Behavior
-
-1. Admin clicks "Supplier Groups" tab in navigation
-2. Sees a table of existing groups with supplier counts
-3. Clicks "New Group" to create -- enters name and description
-4. Clicks a group row to open detail view
-5. In detail view, clicks "Add Supplier" to open search dialog
-6. Searches by code or name, clicks to assign -- system validates one-group-per-supplier rule
-7. Can remove suppliers from the group
-8. Can edit group name or delete empty groups
-
-## One-Group-Per-Supplier Enforcement
-
-When assigning a supplier, the system checks all existing groups. If the supplier code is already assigned to another group, it shows the supplier as disabled with a label like "Already in: Group DKSH" and prevents assignment.
+| File | Change |
+|------|--------|
+| `src/data/mock/tiers.ts` | Rename `assignedSuppliers` to `assignedGroups`, update seed data |
+| `src/hooks/useTiers.ts` | Rename methods and fields from supplier to group |
+| `src/components/admin/TierManagement.tsx` | Show groups instead of suppliers in detail and list views |
+| `src/components/admin/TierSupplierDialog.tsx` | Rewrite to search/assign/remove supplier groups |
 
