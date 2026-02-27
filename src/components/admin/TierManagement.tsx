@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTiers } from '@/hooks/useTiers';
 import { SYSTEM_MODULES, MockTier } from '@/data/mock/tiers';
-import { mockSuppliers } from '@/data/mock/suppliers';
+import { mockSupplierGroups } from '@/data/mock/supplierGroups';
 import { TierFormDialog } from './TierFormDialog';
 import { TierSupplierDialog } from './TierSupplierDialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,19 +13,19 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { ArrowLeft, Plus, Pencil, Trash2, Package, Users } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, Trash2, Package, Users, FolderTree } from 'lucide-react';
 
 interface TierManagementProps {
   onBack: () => void;
 }
 
 export function TierManagement({ onBack }: TierManagementProps) {
-  const { tiers, createTier, updateTier, deleteTier, toggleModule, assignSupplier, removeSupplier } = useTiers();
+  const { tiers, createTier, updateTier, deleteTier, toggleModule, assignGroup, removeGroup } = useTiers();
   const [formOpen, setFormOpen] = useState(false);
   const [editingTier, setEditingTier] = useState<MockTier | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<MockTier | null>(null);
   const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
-  const [supplierDialogOpen, setSupplierDialogOpen] = useState(false);
+  const [groupDialogOpen, setGroupDialogOpen] = useState(false);
 
   const selectedTier = tiers.find(t => t.id === selectedTierId) ?? null;
 
@@ -41,12 +41,12 @@ export function TierManagement({ onBack }: TierManagementProps) {
     if (deleteTarget) { deleteTier(deleteTarget.id); setDeleteTarget(null); }
   };
 
-  const getSupplierNames = (ids: string[]) =>
-    ids.map(id => mockSuppliers.find(s => s.id === id)).filter(Boolean);
+  const getGroupInfo = (ids: string[]) =>
+    ids.map(id => mockSupplierGroups.find(g => g.id === id)).filter(Boolean);
 
   // ── Detail View ──
   if (selectedTier) {
-    const assignedSuppliers = getSupplierNames(selectedTier.assignedSuppliers);
+    const assignedGroups = getGroupInfo(selectedTier.assignedGroups);
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -75,7 +75,7 @@ export function TierManagement({ onBack }: TierManagementProps) {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Module Access ({selectedTier.activeModules.length} of {SYSTEM_MODULES.length} active)</CardTitle>
-            <CardDescription>Toggle modules for this tier. Changes apply to all {selectedTier.assignedSuppliers.length} assigned suppliers.</CardDescription>
+            <CardDescription>Toggle modules for this tier. Changes apply to all {selectedTier.assignedGroups.length} assigned groups.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-1">
             {SYSTEM_MODULES.map(mod => {
@@ -93,37 +93,37 @@ export function TierManagement({ onBack }: TierManagementProps) {
           </CardContent>
         </Card>
 
-        {/* Assigned Suppliers */}
+        {/* Assigned Supplier Groups */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Assigned Suppliers ({assignedSuppliers.length})</CardTitle>
-              <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setSupplierDialogOpen(true)}>
-                <Plus className="w-3.5 h-3.5" /> Manage Suppliers
+              <CardTitle className="text-lg">Assigned Supplier Groups ({assignedGroups.length})</CardTitle>
+              <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setGroupDialogOpen(true)}>
+                <Plus className="w-3.5 h-3.5" /> Manage Groups
               </Button>
             </div>
           </CardHeader>
           <CardContent>
-            {assignedSuppliers.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No suppliers assigned to this tier.</p>
+            {assignedGroups.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No supplier groups assigned to this tier.</p>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Code</TableHead>
-                    <TableHead>Contact</TableHead>
+                    <TableHead>Group Name</TableHead>
+                    <TableHead>Supplier Codes</TableHead>
+                    <TableHead>Description</TableHead>
                     <TableHead className="text-right">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {assignedSuppliers.map(s => s && (
-                    <TableRow key={s.id}>
-                      <TableCell className="font-medium">{s.name}</TableCell>
-                      <TableCell><Badge variant="outline" className="text-xs">{s.code}</Badge></TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{s.contactEmail ?? '—'}</TableCell>
+                  {assignedGroups.map(g => g && (
+                    <TableRow key={g.id}>
+                      <TableCell className="font-medium">{g.name}</TableCell>
+                      <TableCell><Badge variant="outline" className="text-xs">{g.supplierIds.length} codes</Badge></TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{g.description ?? '—'}</TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive h-7 text-xs" onClick={() => removeSupplier(selectedTier.id, s.id)}>
+                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive h-7 text-xs" onClick={() => removeGroup(selectedTier.id, g.id)}>
                           Remove
                         </Button>
                       </TableCell>
@@ -137,12 +137,12 @@ export function TierManagement({ onBack }: TierManagementProps) {
 
         <TierFormDialog open={formOpen} onOpenChange={setFormOpen} tier={editingTier} onSubmit={handleFormSubmit} />
         <TierSupplierDialog
-          open={supplierDialogOpen}
-          onOpenChange={setSupplierDialogOpen}
+          open={groupDialogOpen}
+          onOpenChange={setGroupDialogOpen}
           tier={selectedTier}
           allTiers={tiers}
-          onAssign={assignSupplier}
-          onRemove={removeSupplier}
+          onAssign={assignGroup}
+          onRemove={removeGroup}
         />
       </div>
     );
@@ -174,7 +174,7 @@ export function TierManagement({ onBack }: TierManagementProps) {
                 <TableHead>Name</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead className="text-center">Modules</TableHead>
-                <TableHead className="text-center">Suppliers</TableHead>
+                <TableHead className="text-center">Groups</TableHead>
                 <TableHead className="text-center">Max Users</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -193,7 +193,7 @@ export function TierManagement({ onBack }: TierManagementProps) {
                   </TableCell>
                   <TableCell className="text-center">
                     <span className="flex items-center justify-center gap-1 text-sm">
-                      <Users className="w-3.5 h-3.5 text-muted-foreground" /> {tier.assignedSuppliers.length}
+                      <FolderTree className="w-3.5 h-3.5 text-muted-foreground" /> {tier.assignedGroups.length}
                     </span>
                   </TableCell>
                   <TableCell className="text-center">
@@ -223,8 +223,8 @@ export function TierManagement({ onBack }: TierManagementProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {deleteTarget?.name}?</AlertDialogTitle>
             <AlertDialogDescription>
-              {deleteTarget && deleteTarget.assignedSuppliers.length > 0
-                ? `This tier has ${deleteTarget.assignedSuppliers.length} suppliers assigned. You must reassign them before deleting.`
+              {deleteTarget && deleteTarget.assignedGroups.length > 0
+                ? `This tier has ${deleteTarget.assignedGroups.length} supplier groups assigned. You must reassign them before deleting.`
                 : 'This action cannot be undone. The tier will be permanently removed.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
