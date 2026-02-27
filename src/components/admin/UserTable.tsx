@@ -69,7 +69,6 @@ export function UserTable({
             <TableHead>User</TableHead>
             <TableHead>Role</TableHead>
             <TableHead>Department</TableHead>
-            <TableHead>Supplier</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Last Login</TableHead>
             <TableHead>Created</TableHead>
@@ -94,15 +93,6 @@ export function UserTable({
                 {user.department ? (
                   <Badge variant="outline" className="text-xs">
                     {user.department}
-                  </Badge>
-                ) : (
-                  <span className="text-muted-foreground text-sm">—</span>
-                )}
-              </TableCell>
-              <TableCell>
-                {user.supplierName ? (
-                  <Badge variant="outline" className="text-xs">
-                    {user.supplierName}
                   </Badge>
                 ) : (
                   <span className="text-muted-foreground text-sm">—</span>
