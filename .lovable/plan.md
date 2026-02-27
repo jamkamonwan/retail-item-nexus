@@ -1,32 +1,63 @@
 
 
-# Show Assigned Tier on Supplier Group Screen
+# Fix Labels and Add Tier Column to Supplier User Table
 
 ## Overview
 
-Display the assigned Tier name next to each Supplier Group -- both in the list view table and the detail view header. If no tier is assigned, show nothing (blank).
-
-## How It Works
-
-The tier-to-group relationship already exists in `mockTiers` data (each tier has an `assignedGroups` array). We just need to look up which tier contains each group's ID and display it.
+Three changes: (1) Add a "Tier" column to the Supplier Users table in User Management, (2) rename labels across admin screens, and (3) remove tier name from the Supplier Admin dashboard.
 
 ## Changes
 
-### 1. List View -- Add "Tier" column to the groups table
+### 1. Add "Tier" column to Supplier User Table (`SupplierUserTable.tsx`)
 
-Add a new column between "Suppliers" and "Created" that shows the tier name as a colored badge if assigned, or leaves the cell empty if not.
+Look up the tier for each supplier user via their `supplierGroupId` using `mockTiers.assignedGroups`. Display the tier name as a colored badge, or leave blank if no tier is assigned.
 
-### 2. Detail View -- Show Tier in the group header
+- Import `mockTiers` from `@/data/mock/tiers`
+- Add helper: `const getTierForGroup = (groupId?: string) => groupId ? mockTiers.find(t => t.assignedGroups.includes(groupId)) : undefined`
+- Add "Access Plan" column header after "Supplier Codes"
+- Render tier badge or empty cell per row
 
-Below the group name/description, display "Tier: Premium" (as a badge) when a tier is assigned. If no tier is assigned, show nothing.
+### 2. Rename labels across admin screens
 
-### 3. No data model changes needed
+| Old Label | New Label | Files |
+|-----------|-----------|-------|
+| Create Tier | Create Access Plan | `TierManagement.tsx`, `TierFormDialog.tsx` |
+| Update Tier | Update Access Plan | `TierFormDialog.tsx` |
+| Edit Tier | Edit Access Plan | `TierFormDialog.tsx` |
+| Create New Tier | Create New Access Plan | `TierFormDialog.tsx` |
+| Tier & Module Configuration | Access Plan & Module Configuration | `TierManagement.tsx` |
+| Tier & Module Config | Access Plan & Module Config | `AdminDashboard.tsx` |
+| Tier Name | Access Plan Name | `TierFormDialog.tsx` |
+| Select a tier | Select an access plan | `TierManagement.tsx` |
+| Delete [tier name]? | Delete [name]? | `TierManagement.tsx` |
+| tier has X supplier groups | access plan has X supplier partners | `TierManagement.tsx` |
+| New Supplier Group | New Supplier Partner | `SupplierGroupFormDialog.tsx` |
+| Create Supplier Group | Create Supplier Partner | `SupplierGroupFormDialog.tsx` |
+| Supplier Groups (heading) | Supplier Partners | `SupplierGroupManagement.tsx` |
+| Assigned Supplier Groups | Assigned Supplier Partners | `TierManagement.tsx` |
+| Supplier Groups -- tier | Supplier Partners -- plan | `TierSupplierDialog.tsx` |
+| supplier groups assigned | supplier partners assigned | `TierSupplierDialog.tsx` |
+| No supplier groups assigned | No supplier partners assigned | `TierManagement.tsx` |
+| Supplier Group (column) | Supplier Partner | `SupplierUserTable.tsx` |
+| Supplier Group * (label) | Supplier Partner * | `UserFormDialog.tsx` |
+| Select a supplier group | Select a supplier partner | `UserFormDialog.tsx` |
+| Tier (column in group list) | Access Plan | `SupplierGroupManagement.tsx` |
 
-The mapping already exists in `mockTiers.assignedGroups`. We just import `mockTiers` and do a simple lookup.
+### 3. Remove Tier name from Supplier Admin Dashboard (`SupplierAdminDashboard.tsx`)
+
+Remove line 59-61 that shows `{tier ? tier.name -- tier.description : 'No tier assigned'}`. The supplier admin should not see the tier/access plan name.
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/components/admin/SupplierGroupManagement.tsx` | Import `mockTiers`, add helper to find tier for a group, add Tier column to list table, show tier badge in detail view |
+| `src/components/admin/SupplierUserTable.tsx` | Add Access Plan column with tier badge lookup |
+| `src/components/admin/TierManagement.tsx` | Rename Tier to Access Plan, Supplier Group to Supplier Partner |
+| `src/components/admin/TierFormDialog.tsx` | Rename Tier labels to Access Plan |
+| `src/components/admin/TierSupplierDialog.tsx` | Rename Supplier Group to Supplier Partner |
+| `src/components/admin/SupplierGroupManagement.tsx` | Rename Supplier Group to Supplier Partner, Tier to Access Plan |
+| `src/components/admin/SupplierGroupFormDialog.tsx` | Rename Supplier Group to Supplier Partner |
+| `src/components/admin/UserFormDialog.tsx` | Rename Supplier Group label to Supplier Partner |
+| `src/components/npd/dashboards/AdminDashboard.tsx` | Rename Tier & Module Config to Access Plan & Module Config |
+| `src/components/npd/dashboards/SupplierAdminDashboard.tsx` | Remove tier name/description display |
 
