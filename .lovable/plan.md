@@ -1,42 +1,21 @@
 
 
-# Change Tier Assignment from Individual Suppliers to Supplier Groups
-
-## Overview
-
-Currently, Tiers assign individual supplier codes (e.g., `supplier-001`). The user wants Tiers to assign **Supplier Groups** instead (e.g., "Group Unilever", "Group DKSH"), since groups are the primary entity.
+# Fix Supplier Group Form & Supplier Codes
 
 ## Changes
 
-### 1. Data Model: `src/data/mock/tiers.ts`
-- Rename `assignedSuppliers: string[]` to `assignedGroups: string[]` in the `MockTier` interface
-- Update seed data to reference group IDs (`group-001`, `group-002`) instead of supplier IDs
+### 1. Add Auto-Fill button to `src/components/admin/SupplierGroupFormDialog.tsx`
+- Add a "Auto Fill with Dummy Data" button that populates the form with random mock data
+- Generates a random group name (e.g., "Group Nestle", "Group P&G") and description
 
-### 2. Hook: `src/hooks/useTiers.ts`
-- Rename all `assignedSuppliers` references to `assignedGroups`
-- Update `assignSupplier` to `assignGroup` and `removeSupplier` to `removeGroup`
-- Deletion guard: check `assignedGroups.length` instead of `assignedSuppliers.length`
-- One-tier-per-group enforcement stays the same logic, just operating on group IDs
-
-### 3. Tier Detail View: `src/components/admin/TierManagement.tsx`
-- Replace the "Assigned Suppliers" card with "Assigned Supplier Groups"
-- Show group name, supplier count (from group's `supplierIds.length`), and description
-- Import `mockSupplierGroups` to look up group info instead of `mockSuppliers`
-- Update the list view column from "Suppliers" to "Groups" with group count
-- Update delete warning text to reference groups
-
-### 4. Tier Supplier Dialog: `src/components/admin/TierSupplierDialog.tsx`
-- Rename to `TierGroupDialog` (or keep file name, rename component)
-- Change props from supplier-based to group-based: search/assign/remove **Supplier Groups** instead of individual suppliers
-- Show group name + number of supplier codes in each group
-- Enforce one-tier-per-group: groups already assigned to another tier are shown disabled
+### 2. Change supplier codes from string to integer in `src/data/mock/suppliers.ts`
+- Update all supplier `code` values from text strings (e.g., `'ACME'`, `'GFOOD'`) to numeric strings representing integers (e.g., `'10001'`, `'10002'`)
+- The `code` field type stays `string` in TypeScript (since it's displayed as text), but all values will be numeric integers like real supplier codes (e.g., `83790`, `34355`)
 
 ### Files Modified
 
 | File | Change |
 |------|--------|
-| `src/data/mock/tiers.ts` | Rename `assignedSuppliers` to `assignedGroups`, update seed data |
-| `src/hooks/useTiers.ts` | Rename methods and fields from supplier to group |
-| `src/components/admin/TierManagement.tsx` | Show groups instead of suppliers in detail and list views |
-| `src/components/admin/TierSupplierDialog.tsx` | Rewrite to search/assign/remove supplier groups |
+| `src/data/mock/suppliers.ts` | Replace all text-based codes with 5-digit integer codes |
+| `src/components/admin/SupplierGroupFormDialog.tsx` | Add "Auto Fill" button that generates random group name + description |
 
