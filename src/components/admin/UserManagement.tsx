@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,6 +15,7 @@ import {
 import { UserPlus, ArrowLeft } from 'lucide-react';
 import { UserFiltersComponent } from './UserFilters';
 import { UserTable } from './UserTable';
+import { SupplierUserTable } from './SupplierUserTable';
 import { UserFormDialog } from './UserFormDialog';
 import { useUsers } from '@/hooks/useUsers';
 import { useDepartments } from '@/hooks/useDepartments';
@@ -28,6 +30,9 @@ export function UserManagement({ onBack }: UserManagementProps) {
   const { users, loading, filters, setFilters, createUser, updateUser, deactivateUser, activateUser, resetPassword } = useUsers();
   const { departments } = useDepartments();
   const { suppliers } = useSuppliers();
+
+  const supplierUsers = users.filter(u => u.role === 'supplier' || u.role === 'supplier_admin');
+  const internalUsers = users.filter(u => u.role !== 'supplier' && u.role !== 'supplier_admin');
 
   const [formOpen, setFormOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
@@ -128,25 +133,51 @@ export function UserManagement({ onBack }: UserManagementProps) {
         </CardContent>
       </Card>
 
-      {/* User Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Users ({users.length})</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <UserTable
-            users={users}
-            loading={loading}
-            onEdit={handleEdit}
-            onView={handleView}
-            onDeactivate={handleDeactivate}
-            onActivate={handleActivate}
-            onResetPassword={handleResetPassword}
-          />
-        </CardContent>
-      </Card>
+      {/* Tabs: Supplier vs Internal */}
+      <Tabs defaultValue="supplier" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="supplier">Supplier Users ({supplierUsers.length})</TabsTrigger>
+          <TabsTrigger value="internal">Internal Users ({internalUsers.length})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="supplier">
+          <Card>
+            <CardHeader>
+              <CardTitle>Supplier Users</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SupplierUserTable
+                users={supplierUsers}
+                loading={loading}
+                onEdit={handleEdit}
+                onView={handleView}
+                onDeactivate={handleDeactivate}
+                onActivate={handleActivate}
+                onResetPassword={handleResetPassword}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="internal">
+          <Card>
+            <CardHeader>
+              <CardTitle>Internal Users</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <UserTable
+                users={internalUsers}
+                loading={loading}
+                onEdit={handleEdit}
+                onView={handleView}
+                onDeactivate={handleDeactivate}
+                onActivate={handleActivate}
+                onResetPassword={handleResetPassword}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Create/Edit Dialog */}
       <UserFormDialog
