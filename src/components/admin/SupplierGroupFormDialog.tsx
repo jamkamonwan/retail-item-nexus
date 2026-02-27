@@ -5,6 +5,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { MockSupplierGroup } from '@/data/mock/supplierGroups';
+import { Wand2 } from 'lucide-react';
+
+const DUMMY_GROUPS = [
+  { name: 'Group Nestle', description: 'Nestle branded supplier codes' },
+  { name: 'Group P&G', description: 'Procter & Gamble supplier codes' },
+  { name: 'Group Unilever', description: 'Unilever all divisions' },
+  { name: 'Group Mars', description: 'Mars Petcare and Confectionery' },
+  { name: 'Group Colgate', description: 'Colgate-Palmolive supplier codes' },
+  { name: 'Group Danone', description: 'Danone dairy and water brands' },
+  { name: 'Group Mondelez', description: 'Mondelez snacks and beverages' },
+  { name: 'Group Henkel', description: 'Henkel home care and beauty' },
+];
 
 interface SupplierGroupFormDialogProps {
   open: boolean;
@@ -44,6 +56,15 @@ export function SupplierGroupFormDialog({ open, onOpenChange, group, onSubmit }:
             {isEditing ? 'Update the group details.' : 'Create a new supplier group to organize supplier codes.'}
           </DialogDescription>
         </DialogHeader>
+        {!isEditing && (
+          <Button variant="outline" size="sm" className="w-fit" onClick={() => {
+            const dummy = DUMMY_GROUPS[Math.floor(Math.random() * DUMMY_GROUPS.length)];
+            setName(dummy.name);
+            setDescription(dummy.description);
+          }}>
+            <Wand2 className="w-4 h-4 mr-1" /> Auto Fill
+          </Button>
+        )}
         <div className="space-y-4 py-2">
           <div className="space-y-2">
             <Label htmlFor="group-name">Group Name</Label>

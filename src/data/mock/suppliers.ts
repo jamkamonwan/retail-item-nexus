@@ -15,7 +15,7 @@ export const mockSuppliers: MockSupplier[] = [
   {
     id: 'supplier-001',
     name: 'ACME Corporation',
-    code: 'ACME',
+    code: '10001',
     isActive: true,
     contactEmail: 'contact@acme.com',
     contactPhone: '+66-2-123-4567',
@@ -25,7 +25,7 @@ export const mockSuppliers: MockSupplier[] = [
   {
     id: 'supplier-002',
     name: 'Global Foods Ltd',
-    code: 'GFOOD',
+    code: '10002',
     isActive: true,
     contactEmail: 'info@globalfoods.com',
     contactPhone: '+66-2-234-5678',
@@ -35,7 +35,7 @@ export const mockSuppliers: MockSupplier[] = [
   {
     id: 'supplier-003',
     name: 'Fresh Produce Co',
-    code: 'FRESH',
+    code: '10003',
     isActive: true,
     contactEmail: 'sales@freshproduce.co.th',
     contactPhone: '+66-2-345-6789',
@@ -45,7 +45,7 @@ export const mockSuppliers: MockSupplier[] = [
   {
     id: 'supplier-004',
     name: 'Premium Imports',
-    code: 'PREM',
+    code: '10004',
     isActive: true,
     contactEmail: 'imports@premium.com',
     contactPhone: '+66-2-456-7890',
@@ -55,7 +55,7 @@ export const mockSuppliers: MockSupplier[] = [
   {
     id: 'supplier-005',
     name: 'Thai Organic Farm',
-    code: 'TORG',
+    code: '10005',
     isActive: true,
     contactEmail: 'organic@thaifarm.com',
     contactPhone: '+66-2-567-8901',
@@ -65,7 +65,7 @@ export const mockSuppliers: MockSupplier[] = [
   {
     id: 'supplier-006',
     name: 'Old Supplier Inc',
-    code: 'OLDSUP',
+    code: '10006',
     isActive: false,
     contactEmail: 'contact@oldsupplier.com',
     createdAt: new Date('2022-01-01'),
@@ -73,7 +73,7 @@ export const mockSuppliers: MockSupplier[] = [
   {
     id: 'supplier-007',
     name: 'DKSH Thailand',
-    code: 'DKSH',
+    code: '10007',
     isActive: true,
     contactEmail: 'contact@dksh.co.th',
     contactPhone: '+66-2-678-9012',
@@ -83,7 +83,7 @@ export const mockSuppliers: MockSupplier[] = [
   {
     id: 'supplier-008',
     name: 'Thainamthip Co.',
-    code: 'TNAM',
+    code: '10008',
     isActive: true,
     contactEmail: 'info@thainamthip.com',
     contactPhone: '+66-2-789-0123',
