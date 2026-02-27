@@ -14,7 +14,7 @@ export interface MockUser {
   department?: string;
   supplierId?: string;
   supplierName?: string;
-  supplierIds?: string[];
+  supplierGroupId?: string;
   permissions: string[];
   createdAt: Date;
   lastLoginAt?: Date;

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -15,10 +15,10 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
 import { UserProfile, CreateUserData, UpdateUserData, Supplier, UserTypeValue } from '@/types/admin';
 import { USER_TYPES, UserType } from '@/types/npd';
-import { Wand2, Search, X, Info } from 'lucide-react';
+import { mockSupplierGroups } from '@/data/mock/supplierGroups';
+import { Wand2, Info } from 'lucide-react';
 
 // Dummy data generator
 const DUMMY_FIRST_NAMES = ['John', 'Jane', 'Michael', 'Sarah', 'David', 'Emma', 'Chris', 'Lisa', 'Robert', 'Anna'];
@@ -37,6 +37,7 @@ const generateDummyUser = () => {
     userType: role === 'supplier_admin' ? 'external' as const : 'internal' as const,
     role: role,
     supplierId: '',
+    supplierGroupId: '',
   };
 };
 
@@ -46,6 +47,7 @@ const userSchema = z.object({
   userType: z.enum(['internal', 'external']),
   role: z.string().min(1, 'Role is required'),
   supplierId: z.string().optional(),
+  supplierGroupId: z.string().optional(),
 });
 
 type UserFormValues = z.infer<typeof userSchema>;
@@ -66,8 +68,6 @@ export function UserFormDialog({
   onSubmit,
 }: UserFormDialogProps) {
   const [submitting, setSubmitting] = useState(false);
-  const [selectedSupplierIds, setSelectedSupplierIds] = useState<string[]>([]);
-  const [supplierSearch, setSupplierSearch] = useState('');
   const isEditing = !!user;
 
   const form = useForm<UserFormValues>({
@@ -78,6 +78,7 @@ export function UserFormDialog({
       userType: 'internal',
       role: '',
       supplierId: '',
+      supplierGroupId: '',
     },
   });
 
@@ -100,8 +101,8 @@ export function UserFormDialog({
         userType: user.userType,
         role: user.role,
         supplierId: user.supplierId || '',
+        supplierGroupId: (user as any).supplierGroupId || '',
       });
-      setSelectedSupplierIds(user.supplierIds || []);
     } else {
       form.reset({
         fullName: '',
@@ -109,32 +110,10 @@ export function UserFormDialog({
         userType: 'internal',
         role: '',
         supplierId: '',
+        supplierGroupId: '',
       });
-      setSelectedSupplierIds([]);
     }
-    setSupplierSearch('');
   }, [user, form]);
-
-  // Filter suppliers for search
-  const filteredSuppliers = useMemo(() => {
-    if (!supplierSearch.trim()) return suppliers.filter(s => s.isActive);
-    const q = supplierSearch.toLowerCase();
-    return suppliers.filter(s => 
-      s.isActive && 
-      (s.code.toLowerCase().includes(q) || s.name.toLowerCase().includes(q))
-    );
-  }, [suppliers, supplierSearch]);
-
-  const addSupplier = (supplierId: string) => {
-    if (!selectedSupplierIds.includes(supplierId)) {
-      setSelectedSupplierIds(prev => [...prev, supplierId]);
-    }
-    setSupplierSearch('');
-  };
-
-  const removeSupplier = (supplierId: string) => {
-    setSelectedSupplierIds(prev => prev.filter(id => id !== supplierId));
-  };
 
   const handleSubmit = async (values: UserFormValues) => {
     setSubmitting(true);
@@ -146,7 +125,7 @@ export function UserFormDialog({
           userType: values.userType as UserTypeValue,
           role: values.role as UserType,
           supplierId: values.userType === 'external' && !isSupplierAdmin ? values.supplierId : undefined,
-          supplierIds: isSupplierAdmin ? selectedSupplierIds : undefined,
+          supplierGroupId: isSupplierAdmin ? values.supplierGroupId : undefined,
         });
       } else {
         await onSubmit({
@@ -155,7 +134,7 @@ export function UserFormDialog({
           userType: values.userType as UserTypeValue,
           role: values.role as UserType,
           supplierId: values.userType === 'external' && !isSupplierAdmin ? values.supplierId : undefined,
-          supplierIds: isSupplierAdmin ? selectedSupplierIds : undefined,
+          supplierGroupId: isSupplierAdmin ? values.supplierGroupId : undefined,
         });
       }
       onOpenChange(false);
@@ -166,13 +145,12 @@ export function UserFormDialog({
 
   const handleAutoFill = () => {
     const dummyData = generateDummyUser();
-    // Always demo supplier_admin with pre-selected suppliers
+    // Always demo supplier_admin with a random group
     dummyData.role = 'supplier_admin';
     dummyData.userType = 'external';
+    const randomGroup = mockSupplierGroups[Math.floor(Math.random() * mockSupplierGroups.length)];
+    dummyData.supplierGroupId = randomGroup?.id || '';
     form.reset(dummyData);
-    const count = Math.min(3, suppliers.length);
-    const shuffled = [...suppliers].sort(() => 0.5 - Math.random());
-    setSelectedSupplierIds(shuffled.slice(0, count).map(s => s.id));
   };
 
   return (
@@ -272,76 +250,25 @@ export function UserFormDialog({
               )}
             </div>
 
-            {/* Multi-Supplier Selector for Supplier Admin */}
+            {/* Supplier Group Selector for Supplier Admin */}
             {isSupplierAdmin && (
               <div className="space-y-3">
-                <Label>Assigned Supplier Codes *</Label>
-                
-                {/* Search Input */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by supplier code or name..."
-                    value={supplierSearch}
-                    onChange={(e) => setSupplierSearch(e.target.value)}
-                    className="pl-9"
-                  />
-                </div>
-
-                {/* Search Results Dropdown */}
-                {supplierSearch.trim() && (
-                  <div className="border rounded-md max-h-40 overflow-y-auto bg-background shadow-sm">
-                    {filteredSuppliers.length === 0 ? (
-                      <p className="p-3 text-sm text-muted-foreground">No suppliers found</p>
-                    ) : (
-                      filteredSuppliers
-                        .filter(s => !selectedSupplierIds.includes(s.id))
-                        .map(s => (
-                          <button
-                            key={s.id}
-                            type="button"
-                            onClick={() => addSupplier(s.id)}
-                            className="w-full text-left px-3 py-2 hover:bg-accent transition-colors flex items-center gap-3 text-sm border-b last:border-b-0"
-                          >
-                            <span className="font-mono font-medium text-primary">{s.code}</span>
-                            <span className="text-foreground">{s.name}</span>
-                          </button>
-                        ))
-                    )}
-                  </div>
-                )}
-
-                {/* Selected Suppliers List */}
-                {selectedSupplierIds.length > 0 && (
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground font-medium">
-                      Selected Suppliers ({selectedSupplierIds.length}):
-                    </p>
-                    <div className="border rounded-md divide-y">
-                      {selectedSupplierIds.map(id => {
-                        const supplier = suppliers.find(s => s.id === id);
-                        if (!supplier) return null;
-                        return (
-                          <div key={id} className="flex items-center justify-between px-3 py-2">
-                            <div className="flex items-center gap-3">
-                              <Badge variant="outline" className="font-mono">{supplier.code}</Badge>
-                              <span className="text-sm">{supplier.name}</span>
-                            </div>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeSupplier(id)}
-                              className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-                            >
-                              <X className="h-3.5 w-3.5" />
-                            </Button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+                <Label>Supplier Group *</Label>
+                <Select
+                  value={form.watch('supplierGroupId') || ''}
+                  onValueChange={(val) => form.setValue('supplierGroupId', val)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a supplier group" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockSupplierGroups.map((group) => (
+                      <SelectItem key={group.id} value={group.id}>
+                        {group.name} ({group.supplierIds.length} codes)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
                 {/* Info Note */}
                 <div className="flex items-start gap-2 rounded-md bg-muted/50 p-3">

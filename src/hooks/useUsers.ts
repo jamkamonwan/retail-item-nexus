@@ -21,7 +21,7 @@ export interface CreateUserData {
   userType: 'internal' | 'external';
   department?: string;
   supplierId?: string;
-  supplierIds?: string[];
+  supplierGroupId?: string;
 }
 
 export interface UpdateUserData {
@@ -31,7 +31,7 @@ export interface UpdateUserData {
   status?: 'active' | 'inactive' | 'locked';
   department?: string;
   supplierId?: string;
-  supplierIds?: string[];
+  supplierGroupId?: string;
 }
 
 export function useUsers() {
@@ -91,7 +91,7 @@ export function useUsers() {
       status: 'active',
       department: data.department,
       supplierId: data.supplierId,
-      supplierIds: data.supplierIds,
+      supplierGroupId: data.supplierGroupId,
       permissions: [],
       createdAt: new Date(),
     };
