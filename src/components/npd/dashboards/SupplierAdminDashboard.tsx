@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { StaffUserFormDialog } from '@/components/admin/StaffUserFormDialog';
 import { StaffModuleDialog } from '@/components/admin/StaffModuleDialog';
 import { useSupplierStaff } from '@/hooks/useSupplierStaff';
 import { MockUser } from '@/data/mock/users';
-import { UserPlus, Users, Shield, Settings2, ToggleLeft, ToggleRight, AlertTriangle } from 'lucide-react';
+import { UserPlus, Users, Shield, AlertTriangle, KeyRound, UserCheck, UserX } from 'lucide-react';
 
 interface SupplierAdminDashboardProps {
   userId?: string;
@@ -20,13 +20,30 @@ export function SupplierAdminDashboard({ userId, supplierGroupId }: SupplierAdmi
   const {
     group, tier, staffUsers, activeCount, maxUsers, canCreateUser,
     availableModules, createStaffUser, toggleUserStatus, updateModules,
+    resetPassword, bulkSetStatus,
   } = useSupplierStaff({ id: userId, supplierGroupId });
 
   const [createOpen, setCreateOpen] = useState(false);
   const [moduleUser, setModuleUser] = useState<MockUser | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  const usagePercent = maxUsers > 0 ? (activeCount / maxUsers) * 100 : 0;
   const limitReached = !canCreateUser;
+  const allSelected = staffUsers.length > 0 && selectedIds.length === staffUsers.length;
+  const someSelected = selectedIds.length > 0;
+
+  const toggleSelectAll = () => {
+    setSelectedIds(allSelected ? [] : staffUsers.map(u => u.id));
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  const handleBulkAction = (action: 'reset' | 'active' | 'inactive') => {
+    if (action === 'reset') resetPassword(selectedIds);
+    else bulkSetStatus(selectedIds, action);
+    setSelectedIds([]);
+  };
 
   return (
     <div className="space-y-6">
@@ -67,18 +84,13 @@ export function SupplierAdminDashboard({ userId, supplierGroupId }: SupplierAdmi
           </div>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Users className="h-4 w-4 text-muted-foreground" />
-            <div className="flex-1 space-y-1">
-              <div className="flex justify-between text-sm">
-                <span>Active Users</span>
-                <span className={limitReached ? 'text-destructive font-semibold' : ''}>
-                  {activeCount} / {maxUsers}
-                  {limitReached && ' — LIMIT REACHED'}
-                </span>
-              </div>
-              <Progress value={usagePercent} className="h-2" />
-            </div>
+            <span className="text-sm">Active Users</span>
+            <span className={`text-lg font-bold ${limitReached ? 'text-destructive' : ''}`}>
+              {activeCount} / {maxUsers}
+            </span>
+            {limitReached && <span className="text-xs font-semibold text-destructive">LIMIT REACHED</span>}
           </div>
           {limitReached && (
             <div className="mt-3 flex items-center gap-2 text-sm text-destructive">
@@ -88,6 +100,29 @@ export function SupplierAdminDashboard({ userId, supplierGroupId }: SupplierAdmi
           )}
         </CardContent>
       </Card>
+
+      {/* Bulk Action Toolbar */}
+      {someSelected && (
+        <Card>
+          <CardContent className="py-3">
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-sm font-medium">{selectedIds.length} selected</span>
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => handleBulkAction('reset')}>
+                <KeyRound className="h-3.5 w-3.5" />
+                Reset Password
+              </Button>
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => handleBulkAction('active')}>
+                <UserCheck className="h-3.5 w-3.5" />
+                Set Active
+              </Button>
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => handleBulkAction('inactive')}>
+                <UserX className="h-3.5 w-3.5" />
+                Set Inactive
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Staff Table */}
       <Card>
@@ -101,16 +136,27 @@ export function SupplierAdminDashboard({ userId, supplierGroupId }: SupplierAdmi
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={allSelected}
+                      onCheckedChange={toggleSelectAll}
+                    />
+                  </TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Modules</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {staffUsers.map(user => (
-                  <TableRow key={user.id}>
+                  <TableRow key={user.id} data-state={selectedIds.includes(user.id) ? 'selected' : undefined}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedIds.includes(user.id)}
+                        onCheckedChange={() => toggleSelect(user.id)}
+                      />
+                    </TableCell>
                     <TableCell className="font-medium">{user.fullName}</TableCell>
                     <TableCell className="text-muted-foreground">{user.email}</TableCell>
                     <TableCell>
@@ -122,24 +168,6 @@ export function SupplierAdminDashboard({ userId, supplierGroupId }: SupplierAdmi
                       <Badge variant={user.status === 'active' ? 'default' : 'outline'}>
                         {user.status}
                       </Badge>
-                    </TableCell>
-                    <TableCell className="text-right space-x-1">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon" onClick={() => toggleUserStatus(user.id)}>
-                              {user.status === 'active'
-                                ? <ToggleRight className="h-4 w-4 text-primary" />
-                                : <ToggleLeft className="h-4 w-4 text-muted-foreground" />
-                              }
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>{user.status === 'active' ? 'Deactivate' : 'Activate'}</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      <Button variant="ghost" size="icon" onClick={() => setModuleUser(user)}>
-                        <Settings2 className="h-4 w-4" />
-                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
