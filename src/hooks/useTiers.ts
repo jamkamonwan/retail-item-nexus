@@ -5,11 +5,11 @@ import { toast } from 'sonner';
 export function useTiers() {
   const [tiers, setTiers] = useState<MockTier[]>([...mockTiers]);
 
-  const createTier = useCallback((tier: Omit<MockTier, 'id' | 'createdAt' | 'assignedSuppliers'> & { maxUsers?: number }) => {
+  const createTier = useCallback((tier: Omit<MockTier, 'id' | 'createdAt' | 'assignedGroups'> & { maxUsers?: number }) => {
     const newTier: MockTier = {
       ...tier,
       id: `tier_${Date.now()}`,
-      assignedSuppliers: [],
+      assignedGroups: [],
       createdAt: new Date(),
     };
     setTiers(prev => [...prev, newTier]);
@@ -23,8 +23,8 @@ export function useTiers() {
 
   const deleteTier = useCallback((id: string) => {
     const tier = tiers.find(t => t.id === id);
-    if (tier && tier.assignedSuppliers.length > 0) {
-      toast.error(`Cannot delete "${tier.name}" — ${tier.assignedSuppliers.length} suppliers are assigned`);
+    if (tier && tier.assignedGroups.length > 0) {
+      toast.error(`Cannot delete "${tier.name}" — ${tier.assignedGroups.length} groups are assigned`);
       return;
     }
     setTiers(prev => prev.filter(t => t.id !== id));
@@ -44,25 +44,24 @@ export function useTiers() {
     }));
   }, []);
 
-  const assignSupplier = useCallback((tierId: string, supplierId: string) => {
+  const assignGroup = useCallback((tierId: string, groupId: string) => {
     setTiers(prev => prev.map(t => {
-      // Remove supplier from any other tier first
-      const without = t.assignedSuppliers.filter(s => s !== supplierId);
+      const without = t.assignedGroups.filter(g => g !== groupId);
       if (t.id === tierId) {
-        return { ...t, assignedSuppliers: [...without, supplierId] };
+        return { ...t, assignedGroups: [...without, groupId] };
       }
-      return without.length !== t.assignedSuppliers.length ? { ...t, assignedSuppliers: without } : t;
+      return without.length !== t.assignedGroups.length ? { ...t, assignedGroups: without } : t;
     }));
-    toast.success('Supplier assigned');
+    toast.success('Supplier group assigned');
   }, []);
 
-  const removeSupplier = useCallback((tierId: string, supplierId: string) => {
+  const removeGroup = useCallback((tierId: string, groupId: string) => {
     setTiers(prev => prev.map(t => {
       if (t.id !== tierId) return t;
-      return { ...t, assignedSuppliers: t.assignedSuppliers.filter(s => s !== supplierId) };
+      return { ...t, assignedGroups: t.assignedGroups.filter(g => g !== groupId) };
     }));
-    toast.success('Supplier removed');
+    toast.success('Supplier group removed');
   }, []);
 
-  return { tiers, createTier, updateTier, deleteTier, toggleModule, assignSupplier, removeSupplier };
+  return { tiers, createTier, updateTier, deleteTier, toggleModule, assignGroup, removeGroup };
 }
