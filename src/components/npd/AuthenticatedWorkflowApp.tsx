@@ -173,7 +173,7 @@ export function AuthenticatedWorkflowApp() {
             </TabsTrigger>
             <TabsTrigger value="supplier-groups" className="gap-2">
               <FolderTree className="w-4 h-4" />
-              Supplier Groups
+              Supplier Partners
             </TabsTrigger>
             <TabsTrigger value="config" className="gap-2">
               <Settings2 className="w-4 h-4" />

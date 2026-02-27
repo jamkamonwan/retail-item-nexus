@@ -52,7 +52,7 @@ export function useTiers() {
       }
       return without.length !== t.assignedGroups.length ? { ...t, assignedGroups: without } : t;
     }));
-    toast.success('Supplier group assigned');
+    toast.success('Supplier partner assigned');
   }, []);
 
   const removeGroup = useCallback((tierId: string, groupId: string) => {
@@ -60,7 +60,7 @@ export function useTiers() {
       if (t.id !== tierId) return t;
       return { ...t, assignedGroups: t.assignedGroups.filter(g => g !== groupId) };
     }));
-    toast.success('Supplier group removed');
+    toast.success('Supplier partner removed');
   }, []);
 
   return { tiers, createTier, updateTier, deleteTier, toggleModule, assignGroup, removeGroup };

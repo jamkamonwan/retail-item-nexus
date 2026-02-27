@@ -250,7 +250,7 @@ export function UserFormDialog({
               )}
             </div>
 
-            {/* Supplier Group Selector for Supplier Admin */}
+            {/* Supplier Partner Selector for Supplier Admin */}
             {isSupplierAdmin && (
               <div className="space-y-3">
                 <Label>Supplier Partner *</Label>
