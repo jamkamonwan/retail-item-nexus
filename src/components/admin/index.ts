@@ -5,3 +5,4 @@ export { UserFiltersComponent as UserFilters } from './UserFilters';
 export { TierManagement } from './TierManagement';
 export { TierFormDialog } from './TierFormDialog';
 export { TierSupplierDialog } from './TierSupplierDialog';
+export { SupplierGroupManagement } from './SupplierGroupManagement';
