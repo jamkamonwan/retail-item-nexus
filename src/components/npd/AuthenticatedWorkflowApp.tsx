@@ -10,13 +10,13 @@ import { NPDForm } from './NPDForm';
 import { FieldApprovalConfigScreen } from './FieldApprovalConfigScreen';
 import { ChangePasswordDialog } from '@/components/auth';
 import { BigCHeader } from '@/components/layout/BigCHeader';
-import { SupplierDashboard, ApproverDashboard, AdminDashboard } from './dashboards';
+import { SupplierDashboard, SupplierAdminDashboard, ApproverDashboard, AdminDashboard } from './dashboards';
 import { UserManagement, TierManagement, SupplierGroupManagement } from '@/components/admin';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LayoutDashboard, FileText, Settings2, ListChecks, Users, Layers, FolderTree } from 'lucide-react';
+import { LayoutDashboard, FileText, Settings2, ListChecks, Users, Layers, FolderTree, UserCog } from 'lucide-react';
 import { toast } from 'sonner';
 
-type View = 'dashboard' | 'form' | 'submission' | 'config' | 'all-items' | 'users' | 'tiers' | 'supplier-groups';
+type View = 'dashboard' | 'form' | 'submission' | 'config' | 'all-items' | 'users' | 'tiers' | 'supplier-groups' | 'staff';
 
 // Map roles to their pending status for approver dashboard
 const ROLE_PENDING_STATUS: Partial<Record<UserType, WorkflowStatus>> = {
@@ -36,6 +36,11 @@ export function AuthenticatedWorkflowApp() {
   
   // Allow role switching for demo purposes - default to authenticated role or 'buyer'
   const [demoRole, setDemoRole] = useState<UserType>(role || 'buyer');
+
+  const handleRoleChange = (newRole: UserType) => {
+    setDemoRole(newRole);
+    setCurrentView(newRole === 'supplier_admin' ? 'staff' : 'dashboard');
+  };
 
   // Use demoRole for determining which dashboard to show
   const activeRole = demoRole;
@@ -138,6 +143,23 @@ export function AuthenticatedWorkflowApp() {
             </TabsTrigger>
           </>
         );
+      case 'supplier_admin':
+        return (
+          <>
+            <TabsTrigger value="staff" className="gap-2">
+              <UserCog className="w-4 h-4" />
+              My Staff
+            </TabsTrigger>
+            <TabsTrigger value="dashboard" className="gap-2">
+              <LayoutDashboard className="w-4 h-4" />
+              My Submissions
+            </TabsTrigger>
+            <TabsTrigger value="form" className="gap-2">
+              <FileText className="w-4 h-4" />
+              New Entry
+            </TabsTrigger>
+          </>
+        );
       case 'admin':
         return (
           <>
@@ -198,6 +220,17 @@ export function AuthenticatedWorkflowApp() {
             onViewSubmission={handleViewSubmission}
           />
         );
+      case 'supplier_admin':
+        return (
+          <SupplierDashboard
+            submissions={submissions}
+            loading={loading}
+            userId={user?.id}
+            onCreateNew={handleCreateNew}
+            onEditDraft={handleEditDraft}
+            onViewSubmission={handleViewSubmission}
+          />
+        );
       case 'admin':
         return (
           <AdminDashboard
@@ -241,7 +274,7 @@ export function AuthenticatedWorkflowApp() {
       />
       
       {/* Big C Branded Header */}
-      <BigCHeader demoRole={demoRole} onRoleChange={setDemoRole} />
+      <BigCHeader demoRole={demoRole} onRoleChange={handleRoleChange} />
 
       {/* Navigation Tabs - Below header */}
       <div className="bg-card border-b border-border sticky top-[104px] z-40">
@@ -298,6 +331,13 @@ export function AuthenticatedWorkflowApp() {
 
         {currentView === 'supplier-groups' && (
           <SupplierGroupManagement onBack={handleBackToList} />
+        )}
+
+        {currentView === 'staff' && (
+          <SupplierAdminDashboard
+            userId={user?.id}
+            supplierGroupId="group-001"
+          />
         )}
 
         {currentView === 'submission' && selectedSubmission && (
