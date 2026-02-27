@@ -134,21 +134,22 @@ export function TierManagement({ onBack }: TierManagementProps) {
               {/* Module Access */}
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-base">Allowed Modules ({selectedTier.activeModules.length}/{SYSTEM_MODULES.length})</CardTitle>
+                  <CardTitle className="text-base">Allowed Modules ({selectedTier.activeModules.length})</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-1">
-                  {SYSTEM_MODULES.map(mod => {
-                    const checked = selectedTier.activeModules.includes(mod.id);
-                    return (
-                      <label key={mod.id} className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-muted/50 cursor-pointer transition-colors">
-                        <Checkbox checked={checked} onCheckedChange={() => toggleModule(selectedTier.id, mod.id)} />
+                  {(() => {
+                    const activeModules = SYSTEM_MODULES.filter(mod => selectedTier.activeModules.includes(mod.id));
+                    if (activeModules.length === 0) return <p className="text-sm text-muted-foreground">No modules enabled.</p>;
+                    return activeModules.map(mod => (
+                      <div key={mod.id} className="flex items-center gap-3 rounded-md px-3 py-2">
+                        <Package className="w-4 h-4 text-primary" />
                         <div>
                           <p className="text-sm font-medium">{mod.name}</p>
                           <p className="text-xs text-muted-foreground">{mod.description}</p>
                         </div>
-                      </label>
-                    );
-                  })}
+                      </div>
+                    ));
+                  })()}
                 </CardContent>
               </Card>
 
