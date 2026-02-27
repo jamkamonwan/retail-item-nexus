@@ -18,7 +18,6 @@ import { UserTable } from './UserTable';
 import { SupplierUserTable } from './SupplierUserTable';
 import { UserFormDialog } from './UserFormDialog';
 import { useUsers } from '@/hooks/useUsers';
-import { useDepartments } from '@/hooks/useDepartments';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { UserProfile, CreateUserData, UpdateUserData } from '@/types/admin';
 
@@ -28,7 +27,6 @@ interface UserManagementProps {
 
 export function UserManagement({ onBack }: UserManagementProps) {
   const { users, loading, filters, setFilters, createUser, updateUser, deactivateUser, activateUser, resetPassword } = useUsers();
-  const { departments } = useDepartments();
   const { suppliers } = useSuppliers();
 
   const supplierUsers = users.filter(u => u.role === 'supplier' || u.role === 'supplier_admin');
@@ -151,8 +149,6 @@ export function UserManagement({ onBack }: UserManagementProps) {
           <UserFiltersComponent
             filters={filters}
             onFiltersChange={setFilters}
-            departments={departments}
-            suppliers={suppliers}
           />
         </CardContent>
       </Card>

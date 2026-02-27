@@ -2,23 +2,20 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Search, X } from 'lucide-react';
-import { UserFilters, UserStatus, Department, Supplier } from '@/types/admin';
+import { UserFilters, UserStatus } from '@/types/admin';
 import { USER_TYPES, UserType } from '@/types/npd';
 
 interface UserFiltersProps {
   filters: UserFilters;
   onFiltersChange: (filters: UserFilters) => void;
-  departments: Department[];
-  suppliers: Supplier[];
 }
-
 const STATUS_OPTIONS: { value: UserStatus; label: string }[] = [
   { value: 'active', label: 'Active' },
   { value: 'inactive', label: 'Inactive' },
   { value: 'locked', label: 'Locked' },
 ];
 
-export function UserFiltersComponent({ filters, onFiltersChange, departments, suppliers }: UserFiltersProps) {
+export function UserFiltersComponent({ filters, onFiltersChange }: UserFiltersProps) {
   const handleSearchChange = (value: string) => {
     onFiltersChange({ ...filters, search: value });
   };
@@ -27,16 +24,8 @@ export function UserFiltersComponent({ filters, onFiltersChange, departments, su
     onFiltersChange({ ...filters, role: value === 'all' ? null : value as UserType });
   };
 
-  const handleDepartmentChange = (value: string) => {
-    onFiltersChange({ ...filters, department: value === 'all' ? null : value });
-  };
-
   const handleStatusChange = (value: string) => {
     onFiltersChange({ ...filters, status: value === 'all' ? null : (value as UserStatus) });
-  };
-
-  const handleSupplierChange = (value: string) => {
-    onFiltersChange({ ...filters, supplierId: value === 'all' ? null : value });
   };
 
   const clearFilters = () => {
@@ -49,8 +38,7 @@ export function UserFiltersComponent({ filters, onFiltersChange, departments, su
     });
   };
 
-  const hasActiveFilters =
-    filters.search || filters.role || filters.department || filters.status || filters.supplierId;
+  const hasActiveFilters = filters.search || filters.role || filters.status;
 
   return (
     <div className="flex flex-wrap gap-3 items-end">
@@ -84,23 +72,6 @@ export function UserFiltersComponent({ filters, onFiltersChange, departments, su
         </Select>
       </div>
 
-      {/* Department Filter */}
-      <div className="w-[150px]">
-        <Select value={filters.department || 'all'} onValueChange={handleDepartmentChange}>
-          <SelectTrigger>
-            <SelectValue placeholder="Department" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Depts</SelectItem>
-            {departments.map((dept) => (
-              <SelectItem key={dept.code} value={dept.code}>
-                {dept.code}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
       {/* Status Filter */}
       <div className="w-[130px]">
         <Select value={filters.status || 'all'} onValueChange={handleStatusChange}>
@@ -117,25 +88,6 @@ export function UserFiltersComponent({ filters, onFiltersChange, departments, su
           </SelectContent>
         </Select>
       </div>
-
-      {/* Supplier Filter */}
-      {suppliers.length > 0 && (
-        <div className="w-[150px]">
-          <Select value={filters.supplierId || 'all'} onValueChange={handleSupplierChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Supplier" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Suppliers</SelectItem>
-              {suppliers.map((s) => (
-                <SelectItem key={s.id} value={s.id}>
-                  {s.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
 
       {/* Clear Filters */}
       {hasActiveFilters && (
