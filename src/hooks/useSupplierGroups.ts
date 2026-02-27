@@ -74,12 +74,26 @@ export function useSupplierGroups() {
     setGroups((prev) =>
       prev.map((g) =>
         g.id === groupId
-          ? { ...g, supplierIds: g.supplierIds.filter((id) => id !== supplierId) }
+          ? {
+              ...g,
+              supplierIds: g.supplierIds.filter((id) => id !== supplierId),
+              mainSupplierId: g.mainSupplierId === supplierId ? undefined : g.mainSupplierId,
+            }
           : g
       )
     );
     toast.info('Supplier removed from group');
   }, []);
 
-  return { groups, createGroup, updateGroup, deleteGroup, assignSupplier, removeSupplier, getSupplierGroup };
+  const setMainSupplier = useCallback((groupId: string, supplierId: string | undefined) => {
+    setGroups((prev) =>
+      prev.map((g) =>
+        g.id === groupId ? { ...g, mainSupplierId: supplierId } : g
+      )
+    );
+    if (supplierId) toast.success('Main supplier set');
+    else toast.info('Main supplier cleared');
+  }, []);
+
+  return { groups, createGroup, updateGroup, deleteGroup, assignSupplier, removeSupplier, getSupplierGroup, setMainSupplier };
 }
