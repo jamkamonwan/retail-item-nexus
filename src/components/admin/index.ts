@@ -6,3 +6,4 @@ export { TierManagement } from './TierManagement';
 export { TierFormDialog } from './TierFormDialog';
 export { TierSupplierDialog } from './TierSupplierDialog';
 export { SupplierGroupManagement } from './SupplierGroupManagement';
+export { SupplierAdminWizard } from './SupplierAdminWizard';
