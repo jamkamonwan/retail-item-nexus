@@ -150,14 +150,6 @@ export function AuthenticatedWorkflowApp() {
               <UserCog className="w-4 h-4" />
               My Staff
             </TabsTrigger>
-            <TabsTrigger value="dashboard" className="gap-2">
-              <LayoutDashboard className="w-4 h-4" />
-              My Submissions
-            </TabsTrigger>
-            <TabsTrigger value="form" className="gap-2">
-              <FileText className="w-4 h-4" />
-              New Entry
-            </TabsTrigger>
           </>
         );
       case 'admin':

@@ -1,6 +1,5 @@
-import { useAuth } from '@/hooks/useAuth';
 import { USER_TYPES, UserType } from '@/types/npd';
-import { mockUsers } from '@/data/mock';
+import { mockUsers, getUserByRole } from '@/data/mock';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -28,22 +27,20 @@ const ROLE_ICONS: Record<UserType, React.ReactNode> = {
   supplier_admin: <Building2 className="w-4 h-4" />,
 };
 
-export function UserMenu() {
-  const { user, role, signOut } = useAuth();
+interface UserMenuProps {
+  demoRole: UserType;
+}
 
-  // Get full mock user data
-  const mockUser = user ? mockUsers.find(u => u.id === user.id) : null;
+export function UserMenu({ demoRole }: UserMenuProps) {
+  // Get mock user matching the current demo role
+  const mockUser = getUserByRole(demoRole);
 
-  const handleSignOut = async () => {
-    const { error } = await signOut();
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success('Signed out successfully');
-    }
+  const handleSignOut = () => {
+    toast.success('Signed out successfully');
   };
 
-  const displayName = mockUser?.fullName || user?.email || 'User';
+  const displayName = mockUser?.fullName || 'User';
+  const displayEmail = mockUser?.email || 'user@company.com';
   const initials = displayName
     .split(' ')
     .map((n: string) => n[0])
@@ -63,12 +60,10 @@ export function UserMenu() {
             <span className="text-sm font-medium">
               {displayName}
             </span>
-            {role && (
-              <Badge variant="secondary" className="text-xs gap-1">
-                {ROLE_ICONS[role]}
-                {USER_TYPES[role]?.label}
-              </Badge>
-            )}
+            <Badge variant="secondary" className="text-xs gap-1">
+              {ROLE_ICONS[demoRole]}
+              {USER_TYPES[demoRole]?.label}
+            </Badge>
           </div>
         </Button>
       </DropdownMenuTrigger>
@@ -77,19 +72,17 @@ export function UserMenu() {
           <div className="flex flex-col">
             <span>{displayName}</span>
             <span className="text-xs text-muted-foreground font-normal">
-              {user?.email}
+              {displayEmail}
             </span>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {role && (
-          <DropdownMenuItem disabled>
-            <div className="flex items-center gap-2">
-              {ROLE_ICONS[role]}
-              <span>Role: {USER_TYPES[role]?.label}</span>
-            </div>
-          </DropdownMenuItem>
-        )}
+        <DropdownMenuItem disabled>
+          <div className="flex items-center gap-2">
+            {ROLE_ICONS[demoRole]}
+            <span>Role: {USER_TYPES[demoRole]?.label}</span>
+          </div>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
           <LogOut className="w-4 h-4 mr-2" />

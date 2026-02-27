@@ -1,10 +1,8 @@
-import { useState } from 'react';
-import { Search, MapPin, ChevronDown, Menu, ShoppingCart } from 'lucide-react';
+import { MapPin, ChevronDown, Menu, ShoppingCart } from 'lucide-react';
 import { UserMenu } from '@/components/auth';
 import { RoleSimulator } from '@/components/npd/RoleSimulator';
 import { UserType } from '@/types/npd';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import {
   DropdownMenu,
@@ -19,8 +17,6 @@ interface BigCHeaderProps {
 }
 
 export function BigCHeader({ demoRole, onRoleChange }: BigCHeaderProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-
   return (
     <header className="sticky top-0 z-50">
       {/* Top Utility Bar */}
@@ -76,23 +72,8 @@ export function BigCHeader({ demoRole, onRoleChange }: BigCHeaderProps) {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Search Bar */}
-            <div className="flex-1 flex items-center max-w-2xl">
-              <div className="relative flex-1">
-                <Input
-                  type="text"
-                  placeholder="ค้นหาสินค้า, รหัสสินค้า..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pr-12 bg-card border-0 rounded-r-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                />
-              </div>
-              <Button 
-                className="rounded-l-none bg-warning text-warning-foreground hover:bg-warning/90 px-4"
-              >
-                <Search className="w-5 h-5" />
-              </Button>
-            </div>
+            {/* Spacer */}
+            <div className="flex-1" />
 
             {/* Right Side Actions */}
             <div className="flex items-center gap-3">
@@ -108,7 +89,7 @@ export function BigCHeader({ demoRole, onRoleChange }: BigCHeaderProps) {
               </Card>
 
               {/* User Menu */}
-              <UserMenu />
+              <UserMenu demoRole={demoRole} />
 
               {/* Cart Icon (decorative for retail feel) */}
               <Button variant="ghost" size="icon" className="text-accent-foreground hover:bg-accent/80 hidden sm:flex">
