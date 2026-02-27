@@ -153,7 +153,7 @@ export function TierManagement({ onBack }: TierManagementProps) {
                 </CardContent>
               </Card>
 
-              {/* Assigned Supplier Groups */}
+              {/* Assigned Supplier Partners */}
               <Card>
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
