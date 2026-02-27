@@ -67,8 +67,8 @@ export function SupplierGroupFormDialog({ open, onOpenChange, group, onSubmit }:
         )}
         <div className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label htmlFor="group-name">Group Name</Label>
-            <Input id="group-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Group A DKSH" />
+            <Label htmlFor="group-name">Supplier Partner Name</Label>
+            <Input id="group-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Partner A DKSH" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="group-desc">Description</Label>
