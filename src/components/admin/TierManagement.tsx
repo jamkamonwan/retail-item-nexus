@@ -159,7 +159,7 @@ export function TierManagement({ onBack }: TierManagementProps) {
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base">Assigned Supplier Partners ({selectedTier.assignedGroups.length})</CardTitle>
                     <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setGroupDialogOpen(true)}>
-                      <Plus className="w-3.5 h-3.5" /> Add Partner
+                      <Plus className="w-3.5 h-3.5" /> Add Supplier Partner
                     </Button>
                   </div>
                 </CardHeader>

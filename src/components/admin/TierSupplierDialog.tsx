@@ -62,7 +62,7 @@ export function TierSupplierDialog({ open, onOpenChange, tier, allTiers, onAssig
         </div>
 
         <div className="space-y-2 border-t pt-3">
-          <p className="text-sm font-medium text-foreground">Add Partner</p>
+          <p className="text-sm font-medium text-foreground">Add Supplier Partner</p>
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Search groups…" className="pl-8" value={search} onChange={e => setSearch(e.target.value)} />
