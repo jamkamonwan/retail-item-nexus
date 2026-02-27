@@ -102,27 +102,25 @@ export function SupplierAdminDashboard({ userId, supplierGroupId }: SupplierAdmi
       </Card>
 
       {/* Bulk Action Toolbar */}
-      {someSelected && (
-        <Card>
-          <CardContent className="py-3">
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="text-sm font-medium">{selectedIds.length} selected</span>
-              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => handleBulkAction('reset')}>
+      <Card>
+        <CardContent className="py-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-sm font-medium">{selectedIds.length} selected</span>
+              <Button variant="outline" size="sm" className="gap-1.5" disabled={!someSelected} onClick={() => handleBulkAction('reset')}>
                 <KeyRound className="h-3.5 w-3.5" />
                 Reset Password
               </Button>
-              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => handleBulkAction('active')}>
+              <Button variant="outline" size="sm" className="gap-1.5" disabled={!someSelected} onClick={() => handleBulkAction('active')}>
                 <UserCheck className="h-3.5 w-3.5" />
                 Set Active
               </Button>
-              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => handleBulkAction('inactive')}>
+              <Button variant="outline" size="sm" className="gap-1.5" disabled={!someSelected} onClick={() => handleBulkAction('inactive')}>
                 <UserX className="h-3.5 w-3.5" />
                 Set Inactive
               </Button>
             </div>
           </CardContent>
         </Card>
-      )}
 
       {/* Staff Table */}
       <Card>
