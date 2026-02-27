@@ -5,6 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { MockModule } from '@/data/mock/tiers';
+import { Wand2 } from 'lucide-react';
+
+const THAI_FIRST_NAMES = ['Somchai', 'Somsak', 'Somporn', 'Siriporn', 'Suwanna', 'Nattapong', 'Kittipong', 'Waraporn', 'Pimchanok', 'Thanawat', 'Aranya', 'Chaiwat', 'Dusit', 'Ekkachai', 'Jiraporn'];
+const THAI_LAST_NAMES = ['Kaewsai', 'Srisuk', 'Thongkam', 'Wongchai', 'Rattanapong', 'Bunyasarn', 'Chaiprapat', 'Detcharoen', 'Intaraprasit', 'Jantarasiri'];
+
+function randomPick<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
 
 interface StaffUserFormDialogProps {
   open: boolean;
@@ -17,6 +25,20 @@ export function StaffUserFormDialog({ open, onOpenChange, availableModules, onSu
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [selectedModules, setSelectedModules] = useState<string[]>([]);
+
+  const handleAutoFill = () => {
+    const first = randomPick(THAI_FIRST_NAMES);
+    const last = randomPick(THAI_LAST_NAMES);
+    const name = `${first} ${last}`;
+    setFullName(name);
+    setEmail(`${first.toLowerCase()}.${last.toLowerCase()}@supplier.com`);
+    // Pick 1-3 random modules
+    if (availableModules.length > 0) {
+      const count = Math.min(Math.floor(Math.random() * 3) + 1, availableModules.length);
+      const shuffled = [...availableModules].sort(() => Math.random() - 0.5);
+      setSelectedModules(shuffled.slice(0, count).map(m => m.id));
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,8 +60,16 @@ export function StaffUserFormDialog({ open, onOpenChange, availableModules, onSu
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Create Staff User</DialogTitle>
-          <DialogDescription>Role will be set to Normal Supplier automatically.</DialogDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <DialogTitle>Create Staff User</DialogTitle>
+              <DialogDescription>Role will be set to Normal Supplier automatically.</DialogDescription>
+            </div>
+            <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={handleAutoFill}>
+              <Wand2 className="h-3.5 w-3.5" />
+              Auto Fill
+            </Button>
+          </div>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">

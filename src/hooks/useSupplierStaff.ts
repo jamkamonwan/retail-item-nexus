@@ -64,7 +64,6 @@ export function useSupplierStaff(adminUser: { id?: string; supplierGroupId?: str
     setUsers(prev => prev.map(u => {
       if (u.id !== userId) return u;
       const newStatus = u.status === 'active' ? 'inactive' : 'active';
-      // Check headcount when activating
       if (newStatus === 'active') {
         const currentActive = prev.filter(
           p => p.supplierGroupId === adminUser?.supplierGroupId && p.role === 'supplier' && p.status === 'active'
@@ -84,6 +83,37 @@ export function useSupplierStaff(adminUser: { id?: string; supplierGroupId?: str
     toast.success('Modules updated');
   }, []);
 
+  const resetPassword = useCallback((userIds: string[]) => {
+    const names = users.filter(u => userIds.includes(u.id)).map(u => u.fullName);
+    names.forEach(name => toast.success(`Password reset link sent to ${name}`));
+  }, [users]);
+
+  const bulkSetStatus = useCallback((userIds: string[], status: 'active' | 'inactive') => {
+    setUsers(prev => {
+      const currentActive = prev.filter(
+        p => p.supplierGroupId === adminUser?.supplierGroupId && p.role === 'supplier' && p.status === 'active'
+      ).length;
+
+      if (status === 'active') {
+        const toActivate = userIds.filter(id => prev.find(u => u.id === id)?.status !== 'active');
+        if (currentActive + toActivate.length > maxUsers) {
+          toast.error(`Cannot activate ${toActivate.length} users — would exceed limit of ${maxUsers}`);
+          return prev;
+        }
+      }
+
+      let count = 0;
+      const updated = prev.map(u => {
+        if (!userIds.includes(u.id)) return u;
+        if (u.status === status) return u;
+        count++;
+        return { ...u, status: status as MockUser['status'] };
+      });
+      if (count > 0) toast.success(`${count} user(s) set to ${status}`);
+      return updated;
+    });
+  }, [adminUser?.supplierGroupId, maxUsers]);
+
   return {
     group,
     tier,
@@ -95,5 +125,7 @@ export function useSupplierStaff(adminUser: { id?: string; supplierGroupId?: str
     createStaffUser,
     toggleUserStatus,
     updateModules,
+    resetPassword,
+    bulkSetStatus,
   };
 }
