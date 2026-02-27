@@ -53,7 +53,7 @@ export interface UserProfile {
   department?: string;
   supplierId?: string;
   supplierName?: string;
-  supplierIds?: string[];
+  supplierGroupId?: string;
   permissions: string[];
   avatarUrl?: string;
   lastLoginAt?: Date;
@@ -75,7 +75,7 @@ export interface CreateUserData {
   userType: UserTypeValue;
   department?: string;
   supplierId?: string;
-  supplierIds?: string[];
+  supplierGroupId?: string;
   permissions?: PermissionType[];
 }
 
@@ -87,6 +87,6 @@ export interface UpdateUserData {
   status?: UserStatus;
   department?: string;
   supplierId?: string;
-  supplierIds?: string[];
+  supplierGroupId?: string;
   permissions?: PermissionType[];
 }
