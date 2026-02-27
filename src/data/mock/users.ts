@@ -16,6 +16,7 @@ export interface MockUser {
   supplierName?: string;
   supplierGroupId?: string;
   permissions: string[];
+  assignedModules?: string[];
   createdAt: Date;
   lastLoginAt?: Date;
 }
@@ -32,6 +33,7 @@ export const mockUsers: MockUser[] = [
     supplierName: 'ACME Corporation',
     supplierGroupId: 'group-001',
     permissions: [],
+    assignedModules: ['new_item', 'supply_chain', 'pricing'],
     createdAt: new Date('2024-01-15'),
     lastLoginAt: new Date('2025-01-30'),
   },
@@ -46,6 +48,7 @@ export const mockUsers: MockUser[] = [
     supplierName: 'Global Foods Ltd',
     supplierGroupId: 'group-002',
     permissions: [],
+    assignedModules: ['new_item', 'ecommerce'],
     createdAt: new Date('2024-02-20'),
     lastLoginAt: new Date('2025-01-28'),
   },
