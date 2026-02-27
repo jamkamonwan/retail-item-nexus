@@ -64,8 +64,8 @@ export function TierManagement({ onBack }: TierManagementProps) {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Tier & Module Configuration</h2>
-          <p className="text-muted-foreground">Manage service tiers and control module access per tier</p>
+          <h2 className="text-2xl font-bold text-foreground">Access Plan & Module Configuration</h2>
+          <p className="text-muted-foreground">Manage access plans and control module access per plan</p>
         </div>
       </div>
 
@@ -75,7 +75,7 @@ export function TierManagement({ onBack }: TierManagementProps) {
         <div className="w-80 border-r flex flex-col">
           <div className="p-3 border-b">
             <Button onClick={handleCreate} className="w-full gap-2" size="sm">
-              <Plus className="w-4 h-4" /> Create Tier
+              <Plus className="w-4 h-4" /> Create Access Plan
             </Button>
           </div>
           <ScrollArea className="flex-1">
@@ -156,16 +156,16 @@ export function TierManagement({ onBack }: TierManagementProps) {
               <Card>
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-base">Assigned Supplier Groups ({selectedTier.assignedGroups.length})</CardTitle>
+                    <CardTitle className="text-base">Assigned Supplier Partners ({selectedTier.assignedGroups.length})</CardTitle>
                     <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setGroupDialogOpen(true)}>
-                      <Plus className="w-3.5 h-3.5" /> Add Group
+                      <Plus className="w-3.5 h-3.5" /> Add Partner
                     </Button>
                   </div>
                 </CardHeader>
                 <CardContent>
                   {(() => {
                     const groups = getGroupInfo(selectedTier.assignedGroups);
-                    if (groups.length === 0) return <p className="text-sm text-muted-foreground">No supplier groups assigned.</p>;
+                    if (groups.length === 0) return <p className="text-sm text-muted-foreground">No supplier partners assigned.</p>;
                     return (
                       <Table>
                         <TableHeader>
@@ -196,7 +196,7 @@ export function TierManagement({ onBack }: TierManagementProps) {
             </div>
           ) : (
             <div className="flex items-center justify-center h-full text-muted-foreground">
-              <p>Select a tier to view details</p>
+              <p>Select an access plan to view details</p>
             </div>
           )}
         </div>
@@ -220,7 +220,7 @@ export function TierManagement({ onBack }: TierManagementProps) {
             <AlertDialogTitle>Delete {deleteTarget?.name}?</AlertDialogTitle>
             <AlertDialogDescription>
               {deleteTarget && deleteTarget.assignedGroups.length > 0
-                ? `This tier has ${deleteTarget.assignedGroups.length} supplier groups assigned. You must reassign them before deleting.`
+                ? `This access plan has ${deleteTarget.assignedGroups.length} supplier partners assigned. You must reassign them before deleting.`
                 : 'This action cannot be undone. The tier will be permanently removed.'}
             </AlertDialogDescription>
           </AlertDialogHeader>

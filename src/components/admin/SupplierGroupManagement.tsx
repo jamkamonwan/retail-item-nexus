@@ -126,11 +126,11 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Supplier Groups</h2>
-          <p className="text-muted-foreground text-sm">Organize supplier codes into groups for portal access</p>
+          <h2 className="text-2xl font-bold">Supplier Partners</h2>
+          <p className="text-muted-foreground text-sm">Organize supplier codes into partners for portal access</p>
         </div>
         <Button onClick={() => { setEditingGroup(null); setFormOpen(true); }}>
-          <Plus className="w-4 h-4 mr-1" /> New Group
+          <Plus className="w-4 h-4 mr-1" /> New Partner
         </Button>
       </div>
 
@@ -140,7 +140,7 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
             <TableHeader>
               <TableRow>
                 <TableHead>Group Name</TableHead>
-                <TableHead>Tier</TableHead>
+                <TableHead>Access Plan</TableHead>
                 <TableHead>Suppliers</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead className="w-[120px]">Actions</TableHead>
@@ -149,7 +149,7 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
             <TableBody>
               {groups.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">No groups yet. Click "New Group" to create one.</TableCell>
+                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">No partners yet. Click "New Partner" to create one.</TableCell>
                 </TableRow>
               )}
               {groups.map((g) => (

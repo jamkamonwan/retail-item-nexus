@@ -74,10 +74,10 @@ export function AdminDashboard({
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Layers className="w-5 h-5 text-primary" />
-              Tier & Module Config
+              Access Plan & Module Config
             </CardTitle>
             <CardDescription>
-              Define service tiers and map modules to each tier
+              Define access plans and map modules to each plan
             </CardDescription>
           </CardHeader>
         </Card>

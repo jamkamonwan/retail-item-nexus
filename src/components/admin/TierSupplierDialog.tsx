@@ -36,14 +36,14 @@ export function TierSupplierDialog({ open, onOpenChange, tier, allTiers, onAssig
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Supplier Groups — {tier.name}</DialogTitle>
-          <DialogDescription>Manage supplier groups assigned to this tier</DialogDescription>
+          <DialogTitle>Supplier Partners — {tier.name}</DialogTitle>
+          <DialogDescription>Manage supplier partners assigned to this access plan</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2">
           <p className="text-sm font-medium text-foreground">Assigned ({assignedGroups.length})</p>
           {assignedGroups.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No groups assigned</p>
+            <p className="text-sm text-muted-foreground">No partners assigned</p>
           ) : (
             <div className="space-y-1">
               {assignedGroups.map(g => (
@@ -62,14 +62,14 @@ export function TierSupplierDialog({ open, onOpenChange, tier, allTiers, onAssig
         </div>
 
         <div className="space-y-2 border-t pt-3">
-          <p className="text-sm font-medium text-foreground">Add Group</p>
+          <p className="text-sm font-medium text-foreground">Add Partner</p>
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Search groups…" className="pl-8" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
           <ScrollArea className="max-h-40">
             {filteredUnassigned.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-2 text-center">No available groups</p>
+              <p className="text-sm text-muted-foreground py-2 text-center">No available partners</p>
             ) : (
               <div className="space-y-1">
                 {filteredUnassigned.map(g => (

@@ -253,13 +253,13 @@ export function UserFormDialog({
             {/* Supplier Group Selector for Supplier Admin */}
             {isSupplierAdmin && (
               <div className="space-y-3">
-                <Label>Supplier Group *</Label>
+                <Label>Supplier Partner *</Label>
                 <Select
                   value={form.watch('supplierGroupId') || ''}
                   onValueChange={(val) => form.setValue('supplierGroupId', val)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a supplier group" />
+                    <SelectValue placeholder="Select a supplier partner" />
                   </SelectTrigger>
                   <SelectContent>
                     {mockSupplierGroups.map((group) => (

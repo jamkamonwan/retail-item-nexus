@@ -51,9 +51,9 @@ export function SupplierGroupFormDialog({ open, onOpenChange, group, onSubmit }:
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Edit Group' : 'New Supplier Group'}</DialogTitle>
+          <DialogTitle>{isEditing ? 'Edit Partner' : 'New Supplier Partner'}</DialogTitle>
           <DialogDescription>
-            {isEditing ? 'Update the group details.' : 'Create a new supplier group to organize supplier codes.'}
+            {isEditing ? 'Update the partner details.' : 'Create a new supplier partner to organize supplier codes.'}
           </DialogDescription>
         </DialogHeader>
         {!isEditing && (
