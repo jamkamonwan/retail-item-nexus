@@ -139,7 +139,7 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Group Name</TableHead>
+                <TableHead>Supplier Partner Name</TableHead>
                 <TableHead>Access Plan</TableHead>
                 <TableHead>Suppliers</TableHead>
                 <TableHead>Created</TableHead>
