@@ -82,21 +82,19 @@ export function UserTable({
 
   return (
     <div className="space-y-2">
-      {selectedIds.size > 0 && (
-        <div className="flex items-center gap-3 rounded-md border bg-muted/50 px-4 py-2">
-          <span className="text-sm font-medium">{selectedIds.size} selected</span>
+      <div className="flex items-center gap-3 rounded-md border bg-muted/50 px-4 py-2">
+          <span className="text-sm font-medium">{selectedIds.size > 0 ? `${selectedIds.size} selected` : 'No users selected'}</span>
           <div className="ml-auto flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleBulkReset}>
+            <Button variant="outline" size="sm" onClick={handleBulkReset} disabled={selectedIds.size === 0}>
               <KeyRound className="mr-2 h-4 w-4" />
               Reset Password
             </Button>
-            <Button variant="outline" size="sm" className="text-destructive border-destructive/50 hover:bg-destructive/10" onClick={handleBulkDeactivate}>
+            <Button variant="outline" size="sm" className="text-destructive border-destructive/50 hover:bg-destructive/10" onClick={handleBulkDeactivate} disabled={selectedIds.size === 0}>
               <UserX className="mr-2 h-4 w-4" />
               Set Inactive
             </Button>
           </div>
         </div>
-      )}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
