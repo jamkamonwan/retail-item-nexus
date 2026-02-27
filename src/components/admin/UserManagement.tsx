@@ -12,13 +12,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { UserPlus, ArrowLeft } from 'lucide-react';
+import { UserPlus, ArrowLeft, ShieldPlus } from 'lucide-react';
 import { UserFiltersComponent } from './UserFilters';
 import { UserTable } from './UserTable';
 import { SupplierUserTable } from './SupplierUserTable';
 import { UserFormDialog } from './UserFormDialog';
+import { SupplierAdminWizard } from './SupplierAdminWizard';
 import { useUsers } from '@/hooks/useUsers';
 import { useSuppliers } from '@/hooks/useSuppliers';
+import { useTiers } from '@/hooks/useTiers';
 import { UserProfile, CreateUserData, UpdateUserData } from '@/types/admin';
 
 interface UserManagementProps {
@@ -28,11 +30,13 @@ interface UserManagementProps {
 export function UserManagement({ onBack }: UserManagementProps) {
   const { users, loading, filters, setFilters, createUser, updateUser, deactivateUser, activateUser, resetPassword } = useUsers();
   const { suppliers } = useSuppliers();
+  const { tiers } = useTiers();
 
   const supplierUsers = users.filter(u => u.role === 'supplier' || u.role === 'supplier_admin');
   const internalUsers = users.filter(u => u.role !== 'supplier' && u.role !== 'supplier_admin');
 
   const [formOpen, setFormOpen] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
@@ -137,10 +141,16 @@ export function UserManagement({ onBack }: UserManagementProps) {
             <p className="text-muted-foreground">Manage user accounts, roles, and permissions</p>
           </div>
         </div>
-        <Button onClick={handleCreateNew} className="gap-2">
-          <UserPlus className="h-4 w-4" />
-          Create User
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setWizardOpen(true)} className="gap-2">
+            <ShieldPlus className="h-4 w-4" />
+            Create Supplier Admin
+          </Button>
+          <Button onClick={handleCreateNew} className="gap-2">
+            <UserPlus className="h-4 w-4" />
+            Create User
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -210,6 +220,14 @@ export function UserManagement({ onBack }: UserManagementProps) {
         user={selectedUser}
         suppliers={suppliers}
         onSubmit={handleFormSubmit}
+      />
+
+      {/* Supplier Admin Wizard */}
+      <SupplierAdminWizard
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        tiers={tiers}
+        onSubmit={async (data) => { await createUser(data); }}
       />
 
       {/* Confirmation Dialog */}
