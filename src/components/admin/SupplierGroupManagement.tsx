@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useSupplierGroups } from '@/hooks/useSupplierGroups';
 import { mockSuppliers } from '@/data/mock/suppliers';
 import { MockSupplierGroup } from '@/data/mock/supplierGroups';
+import { mockTiers } from '@/data/mock/tiers';
 import { SupplierGroupFormDialog } from './SupplierGroupFormDialog';
 import { GroupSupplierDialog } from './GroupSupplierDialog';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,7 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
   const selectedGroup = groups.find((g) => g.id === selectedGroupId);
 
   const getSupplierInfo = (id: string) => mockSuppliers.find((s) => s.id === id);
+  const getTierForGroup = (groupId: string) => mockTiers.find((t) => t.assignedGroups.includes(groupId));
 
   const handleFormSubmit = (data: { name: string; description: string }) => {
     if (editingGroup) {
@@ -64,6 +66,10 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
             <div>
               <CardTitle className="text-xl">{selectedGroup.name}</CardTitle>
               {selectedGroup.description && <p className="text-muted-foreground text-sm mt-1">{selectedGroup.description}</p>}
+              {(() => {
+                const tier = getTierForGroup(selectedGroup.id);
+                return tier ? <Badge className={`mt-2 ${tier.color}`}>{tier.name}</Badge> : null;
+              })()}
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={() => handleEdit(selectedGroup)}>
@@ -134,6 +140,7 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
             <TableHeader>
               <TableRow>
                 <TableHead>Group Name</TableHead>
+                <TableHead>Tier</TableHead>
                 <TableHead>Suppliers</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead className="w-[120px]">Actions</TableHead>
@@ -142,12 +149,13 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
             <TableBody>
               {groups.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground py-8">No groups yet. Click "New Group" to create one.</TableCell>
+                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">No groups yet. Click "New Group" to create one.</TableCell>
                 </TableRow>
               )}
               {groups.map((g) => (
                 <TableRow key={g.id} className="cursor-pointer" onClick={() => setSelectedGroupId(g.id)}>
                   <TableCell className="font-medium">{g.name}</TableCell>
+                  <TableCell>{(() => { const tier = getTierForGroup(g.id); return tier ? <Badge className={tier.color}>{tier.name}</Badge> : null; })()}</TableCell>
                   <TableCell><Badge variant="secondary">{g.supplierIds.length} codes</Badge></TableCell>
                   <TableCell className="text-muted-foreground text-sm">{format(g.createdAt, 'dd MMM yyyy')}</TableCell>
                   <TableCell>
