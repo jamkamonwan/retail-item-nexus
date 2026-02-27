@@ -22,9 +22,10 @@ interface TierGroupDialogProps {
 export function TierSupplierDialog({ open, onOpenChange, tier, allTiers, onAssign, onRemove }: TierGroupDialogProps) {
   const [search, setSearch] = useState('');
 
-  const assignedGroups = mockSupplierGroups.filter(g => tier.assignedGroups.includes(g.id));
+  const tierGroups = tier.assignedGroups ?? [];
+  const assignedGroups = mockSupplierGroups.filter(g => tierGroups.includes(g.id));
 
-  const allAssigned = new Set(allTiers.flatMap(t => t.assignedGroups));
+  const allAssigned = new Set(allTiers.flatMap(t => t.assignedGroups ?? []));
   const unassignedGroups = mockSupplierGroups.filter(g => !allAssigned.has(g.id));
 
   const filteredUnassigned = unassignedGroups.filter(g =>
