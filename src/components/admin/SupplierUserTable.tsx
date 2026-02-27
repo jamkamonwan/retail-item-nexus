@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -23,6 +25,8 @@ interface SupplierUserTableProps {
   onDeactivate: (user: UserProfile) => void;
   onActivate: (user: UserProfile) => void;
   onResetPassword: (user: UserProfile) => void;
+  onBulkResetPassword: (userIds: string[]) => void;
+  onBulkDeactivate: (userIds: string[]) => void;
 }
 
 const statusColors: Record<string, string> = {
@@ -49,7 +53,36 @@ function getTierForGroup(groupId?: string) {
 
 export function SupplierUserTable({
   users, loading, onEdit, onView, onDeactivate, onActivate, onResetPassword,
+  onBulkResetPassword, onBulkDeactivate,
 }: SupplierUserTableProps) {
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAll = () => {
+    if (selectedIds.size === users.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(users.map(u => u.id)));
+    }
+  };
+
+  const handleBulkReset = () => {
+    onBulkResetPassword(Array.from(selectedIds));
+    setSelectedIds(new Set());
+  };
+
+  const handleBulkDeactivate = () => {
+    onBulkDeactivate(Array.from(selectedIds));
+    setSelectedIds(new Set());
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -67,89 +100,118 @@ export function SupplierUserTable({
   }
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>User</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Supplier Partner</TableHead>
-            <TableHead>Supplier Codes</TableHead>
-            <TableHead>Access Plan</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Last Login</TableHead>
-            <TableHead className="w-[70px]"></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {users.map((user) => {
-            const { groupName, codes } = resolveGroup(user.supplierGroupId);
-            return (
-              <TableRow key={user.id}>
-                <TableCell>
-                  <div className="flex flex-col">
-                    <span className="font-medium">{user.fullName || 'No name'}</span>
-                    <span className="text-sm text-muted-foreground">{user.email}</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="secondary" className="text-xs">
-                    {USER_TYPES[user.role]?.label || user.role}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline" className="text-xs">{groupName}</Badge>
-                </TableCell>
-                <TableCell>
-                  <span className="text-sm font-mono">{codes}</span>
-                </TableCell>
-                <TableCell>
-                  {(() => {
-                    const tier = getTierForGroup(user.supplierGroupId);
-                    return tier ? <Badge className={tier.color}>{tier.name}</Badge> : null;
-                  })()}
-                </TableCell>
-                <TableCell>
-                  <Badge className={statusColors[user.status]}>{user.status}</Badge>
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {user.lastLoginAt ? format(new Date(user.lastLoginAt), 'MMM d, yyyy') : '—'}
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onView(user)}>
-                        <Eye className="mr-2 h-4 w-4" /> View Details
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onEdit(user)}>
-                        <Edit className="mr-2 h-4 w-4" /> Edit User
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onResetPassword(user)}>
-                        <KeyRound className="mr-2 h-4 w-4" /> Reset Password
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      {user.status === 'active' ? (
-                        <DropdownMenuItem onClick={() => onDeactivate(user)} className="text-destructive focus:text-destructive">
-                          <UserX className="mr-2 h-4 w-4" /> Deactivate
+    <div className="space-y-2">
+      {selectedIds.size > 0 && (
+        <div className="flex items-center gap-3 rounded-md border bg-muted/50 px-4 py-2">
+          <span className="text-sm font-medium">{selectedIds.size} selected</span>
+          <div className="ml-auto flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleBulkReset}>
+              <KeyRound className="mr-2 h-4 w-4" />
+              Reset Password
+            </Button>
+            <Button variant="outline" size="sm" className="text-destructive border-destructive/50 hover:bg-destructive/10" onClick={handleBulkDeactivate}>
+              <UserX className="mr-2 h-4 w-4" />
+              Set Inactive
+            </Button>
+          </div>
+        </div>
+      )}
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[40px]">
+                <Checkbox
+                  checked={selectedIds.size === users.length && users.length > 0}
+                  onCheckedChange={toggleAll}
+                />
+              </TableHead>
+              <TableHead>User</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Supplier Partner</TableHead>
+              <TableHead>Supplier Codes</TableHead>
+              <TableHead>Access Plan</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Last Login</TableHead>
+              <TableHead className="w-[70px]"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {users.map((user) => {
+              const { groupName, codes } = resolveGroup(user.supplierGroupId);
+              return (
+                <TableRow key={user.id} data-state={selectedIds.has(user.id) ? 'selected' : undefined}>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedIds.has(user.id)}
+                      onCheckedChange={() => toggleSelect(user.id)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <span className="font-medium">{user.fullName || 'No name'}</span>
+                      <span className="text-sm text-muted-foreground">{user.email}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="secondary" className="text-xs">
+                      {USER_TYPES[user.role]?.label || user.role}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="text-xs">{groupName}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm font-mono">{codes}</span>
+                  </TableCell>
+                  <TableCell>
+                    {(() => {
+                      const tier = getTierForGroup(user.supplierGroupId);
+                      return tier ? <Badge className={tier.color}>{tier.name}</Badge> : null;
+                    })()}
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={statusColors[user.status]}>{user.status}</Badge>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {user.lastLoginAt ? format(new Date(user.lastLoginAt), 'MMM d, yyyy') : '—'}
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => onView(user)}>
+                          <Eye className="mr-2 h-4 w-4" /> View Details
                         </DropdownMenuItem>
-                      ) : (
-                        <DropdownMenuItem onClick={() => onActivate(user)}>
-                          <UserCheck className="mr-2 h-4 w-4" /> Activate
+                        <DropdownMenuItem onClick={() => onEdit(user)}>
+                          <Edit className="mr-2 h-4 w-4" /> Edit User
                         </DropdownMenuItem>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+                        <DropdownMenuItem onClick={() => onResetPassword(user)}>
+                          <KeyRound className="mr-2 h-4 w-4" /> Reset Password
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        {user.status === 'active' ? (
+                          <DropdownMenuItem onClick={() => onDeactivate(user)} className="text-destructive focus:text-destructive">
+                            <UserX className="mr-2 h-4 w-4" /> Deactivate
+                          </DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuItem onClick={() => onActivate(user)}>
+                            <UserCheck className="mr-2 h-4 w-4" /> Activate
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
