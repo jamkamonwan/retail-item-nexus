@@ -10,7 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Plus, Pencil, Trash2, UserPlus, X, Star } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { ArrowLeft, Plus, Trash2, UserPlus, X, Star, Pencil, Save } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface SupplierGroupManagementProps {
@@ -24,6 +26,9 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [supplierDialogOpen, setSupplierDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editDescription, setEditDescription] = useState('');
 
   const selectedGroup = groups.find((g) => g.id === selectedGroupId);
 
@@ -31,17 +36,26 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
   const getTierForGroup = (groupId: string) => mockTiers.find((t) => t.assignedGroups.includes(groupId));
 
   const handleFormSubmit = (data: { name: string; description: string }) => {
-    if (editingGroup) {
-      updateGroup(editingGroup.id, data);
-    } else {
-      createGroup(data.name, data.description);
-    }
-    setEditingGroup(null);
+    createGroup(data.name, data.description);
   };
 
-  const handleEdit = (group: MockSupplierGroup) => {
-    setEditingGroup(group);
-    setFormOpen(true);
+  const handleStartEdit = () => {
+    if (selectedGroup) {
+      setEditName(selectedGroup.name);
+      setEditDescription(selectedGroup.description || '');
+      setIsEditing(true);
+    }
+  };
+
+  const handleSaveEdit = () => {
+    if (selectedGroup && editName.trim()) {
+      updateGroup(selectedGroup.id, { name: editName.trim(), description: editDescription.trim() });
+      setIsEditing(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
   };
 
   const handleConfirmDelete = () => {
@@ -63,21 +77,41 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-xl">{selectedGroup.name}</CardTitle>
-              {selectedGroup.description && <p className="text-muted-foreground text-sm mt-1">{selectedGroup.description}</p>}
+            <div className="flex-1">
+              {isEditing ? (
+                <div className="space-y-3">
+                  <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="text-xl font-semibold" />
+                  <Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} placeholder="Optional description" rows={2} />
+                </div>
+              ) : (
+                <>
+                  <CardTitle className="text-xl">{selectedGroup.name}</CardTitle>
+                  {selectedGroup.description && <p className="text-muted-foreground text-sm mt-1">{selectedGroup.description}</p>}
+                </>
+              )}
               {(() => {
                 const tier = getTierForGroup(selectedGroup.id);
                 return tier ? <Badge className={`mt-2 ${tier.color}`}>{tier.name}</Badge> : null;
               })()}
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => handleEdit(selectedGroup)}>
-                <Pencil className="w-4 h-4 mr-1" /> Edit
-              </Button>
-              <Button size="sm" onClick={() => setSupplierDialogOpen(true)}>
-                <UserPlus className="w-4 h-4 mr-1" /> Add Supplier
-              </Button>
+              {isEditing ? (
+                <>
+                  <Button variant="outline" size="sm" onClick={handleCancelEdit}>Cancel</Button>
+                  <Button size="sm" onClick={handleSaveEdit} disabled={!editName.trim()}>
+                    <Save className="w-4 h-4 mr-1" /> Save
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="outline" size="sm" onClick={handleStartEdit}>
+                    <Pencil className="w-4 h-4 mr-1" /> Edit
+                  </Button>
+                  <Button size="sm" onClick={() => setSupplierDialogOpen(true)}>
+                    <UserPlus className="w-4 h-4 mr-1" /> Add Supplier
+                  </Button>
+                </>
+              )}
             </div>
           </CardHeader>
           <CardContent>
@@ -128,7 +162,7 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
           </CardContent>
         </Card>
 
-        <SupplierGroupFormDialog open={formOpen} onOpenChange={setFormOpen} group={editingGroup} onSubmit={handleFormSubmit} />
+        <GroupSupplierDialog open={supplierDialogOpen} onOpenChange={setSupplierDialogOpen} group={selectedGroup} allGroups={groups} onAssign={assignSupplier} />
         <GroupSupplierDialog open={supplierDialogOpen} onOpenChange={setSupplierDialogOpen} group={selectedGroup} allGroups={groups} onAssign={assignSupplier} />
       </div>
     );
@@ -142,7 +176,7 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
           <h2 className="text-2xl font-bold">Supplier Partners</h2>
           <p className="text-muted-foreground text-sm">Organize supplier codes into supplier partners for portal access</p>
         </div>
-        <Button onClick={() => { setEditingGroup(null); setFormOpen(true); }}>
+        <Button onClick={() => { setFormOpen(true); }}>
           <Plus className="w-4 h-4 mr-1" /> New Supplier Partner
         </Button>
       </div>
@@ -173,7 +207,6 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
                   <TableCell className="text-muted-foreground text-sm">{format(g.createdAt, 'dd MMM yyyy')}</TableCell>
                   <TableCell>
                     <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
-                      <Button variant="ghost" size="icon" onClick={() => handleEdit(g)}><Pencil className="w-4 h-4" /></Button>
                       <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(g.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                     </div>
                   </TableCell>
@@ -184,7 +217,7 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
         </CardContent>
       </Card>
 
-      <SupplierGroupFormDialog open={formOpen} onOpenChange={setFormOpen} group={editingGroup} onSubmit={handleFormSubmit} />
+      <SupplierGroupFormDialog open={formOpen} onOpenChange={setFormOpen} onSubmit={handleFormSubmit} />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
         <AlertDialogContent>
