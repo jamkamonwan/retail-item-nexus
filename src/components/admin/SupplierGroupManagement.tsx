@@ -74,7 +74,7 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
   };
 
   // --- Shared header layout for create & detail views ---
-  const renderHeader = (opts: { onSave: () => void; saveDisabled: boolean; showAddSupplier: boolean; showAutoFill?: boolean; tierBadge?: React.ReactNode }) => (
+  const renderHeader = (opts: { tierBadge?: React.ReactNode }) => (
     <CardHeader className="space-y-3">
       <div className="max-w-lg space-y-1">
         <label className="text-sm font-medium text-muted-foreground block">Supplier Partner Name</label>
@@ -85,25 +85,6 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
         <Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} placeholder="Optional description" rows={2} />
       </div>
       {opts.tierBadge}
-      <div className="max-w-lg flex items-center gap-2 justify-end">
-        {opts.showAutoFill && (
-          <Button variant="outline" size="sm" onClick={() => {
-            const dummy = DUMMY_GROUPS[Math.floor(Math.random() * DUMMY_GROUPS.length)];
-            setEditName(dummy.name);
-            setEditDescription(dummy.description);
-          }}>
-            <Wand2 className="w-4 h-4 mr-1" /> Auto Fill
-          </Button>
-        )}
-        <Button size="sm" onClick={opts.onSave} disabled={opts.saveDisabled}>
-          <Save className="w-4 h-4 mr-1" /> Save
-        </Button>
-        {opts.showAddSupplier && (
-          <Button size="sm" onClick={() => setSupplierDialogOpen(true)}>
-            <UserPlus className="w-4 h-4 mr-1" /> Add Supplier
-          </Button>
-        )}
-      </div>
     </CardHeader>
   );
 
@@ -111,13 +92,28 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
   if (isCreating) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={() => setIsCreating(false)}>
             <ArrowLeft className="w-4 h-4 mr-1" /> Back to Groups
           </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => {
+              const dummy = DUMMY_GROUPS[Math.floor(Math.random() * DUMMY_GROUPS.length)];
+              setEditName(dummy.name);
+              setEditDescription(dummy.description);
+            }}>
+              <Wand2 className="w-4 h-4 mr-1" /> Auto Fill
+            </Button>
+            <Button size="sm" onClick={handleSaveNew} disabled={!editName.trim()}>
+              <Save className="w-4 h-4 mr-1" /> Save
+            </Button>
+            <Button size="sm" onClick={() => setSupplierDialogOpen(true)}>
+              <UserPlus className="w-4 h-4 mr-1" /> Add Supplier
+            </Button>
+          </div>
         </div>
         <Card>
-          {renderHeader({ onSave: handleSaveNew, saveDisabled: !editName.trim(), showAddSupplier: false, showAutoFill: true })}
+          {renderHeader({})}
           <CardContent>
             <p className="text-muted-foreground text-sm py-4 text-center">Save the supplier partner first, then you can add supplier codes.</p>
           </CardContent>
@@ -131,16 +127,21 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
     const tier = getTierForGroup(selectedGroup.id);
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={() => setSelectedGroupId(null)}>
             <ArrowLeft className="w-4 h-4 mr-1" /> Back to Groups
           </Button>
+          <div className="flex items-center gap-2">
+            <Button size="sm" onClick={handleSaveEdit} disabled={!editName.trim()}>
+              <Save className="w-4 h-4 mr-1" /> Save
+            </Button>
+            <Button size="sm" onClick={() => setSupplierDialogOpen(true)}>
+              <UserPlus className="w-4 h-4 mr-1" /> Add Supplier
+            </Button>
+          </div>
         </div>
         <Card>
           {renderHeader({
-            onSave: handleSaveEdit,
-            saveDisabled: !editName.trim(),
-            showAddSupplier: true,
             tierBadge: tier ? <Badge className={`mt-2 w-fit ${tier.color}`}>{tier.name}</Badge> : null,
           })}
           <CardContent>
