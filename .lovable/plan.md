@@ -1,55 +1,45 @@
+## Fix Detail Page Layout: Move Buttons Inline with Name
 
+### Problem
 
-## Fix Supplier Partner: Inline Creation + Layout Improvements
+The "Save" and "Add Supplier" buttons sit in a separate row below the name and description fields, creating excessive vertical space and an awkward layout.
 
-### Changes (all in `src/components/admin/SupplierGroupManagement.tsx`)
+### Solution
 
-### 1. Replace "New Supplier Partner" popup with inline full-page creation screen
+Restructure the `renderHeader` in `SupplierGroupManagement.tsx` so the **Supplier Partner Name input and buttons share the same row**, while the description stays on the row below.
 
-- Add `isCreating` state. When true, render a full-page view identical to the detail/edit view layout.
-- The "New Supplier Partner" button sets `isCreating = true` and resets `editName`/`editDescription` to empty.
-- The creation screen shows:
-  - "Back to Groups" button
-  - Card with Input for partner name, Textarea for description
-  - "Save" button (calls `createGroup`, then navigates to the new group's detail view)
-  - "Add Supplier" button (disabled until saved, or saves first then opens supplier dialog)
-  - Empty supplier table placeholder
-- Remove `formOpen` state and `SupplierGroupFormDialog` import/usage.
+### Layout Change
 
-### 2. Fix detail view layout -- separate name/description from buttons
+Current:
 
-Currently the CardHeader uses `flex-row items-center justify-between` which crams Input/Textarea and buttons side-by-side.
+```text
+[Label: Supplier Partner Name]  [Input ........................]    [Save] [Add Supplier]
+[Label: Description]  [Textarea ....................] 
 
-New layout:
-- Stack the header vertically: name input and description textarea at the top (full width)
-- Buttons row below, right-aligned, with Save and Add Supplier
-- Give the Input a `max-w-md` and Textarea a `max-w-lg` so they don't stretch the full card width
-- This applies to both the creation screen and the existing detail/edit view
+                   
+```
+
+New:
+
+```text
+[Label: Supplier Partner Name]  [Input ........................]    [Save] [Add Supplier]
+[Label: Description]  [Textarea ....................] 
+```
+
+&nbsp;
+
+&nbsp;
+
+  
+
 
 ### Technical Details
 
-**State changes:**
-- Add: `isCreating: boolean` (default false)
-- Remove: `formOpen`
+**File: `src/components/admin/SupplierGroupManagement.tsx**` (lines 77-110, the `renderHeader` function)
 
-**New creation view** (rendered before the list view check, after the detail view check):
-```
-if (isCreating) {
-  return (
-    // Same structure as detail view but with empty group data
-    // Save creates the group and navigates to detail
-  )
-}
-```
-
-**Layout fix for CardHeader** (both create and detail views):
-- Change from `flex flex-row items-center justify-between` to `flex flex-col space-y-4`
-- Input gets `max-w-md` class
-- Textarea gets `max-w-lg` class  
-- Buttons in a separate `div` with `flex justify-end gap-2`
-
-**Cleanup:**
-- Remove `SupplierGroupFormDialog` import (line 6)
-- Remove `handleFormSubmit` function
-- Remove `<SupplierGroupFormDialog>` JSX (line 195)
-
+- Wrap the name Input and action buttons in a single `flex items-end gap-2` row
+- The Input stays inside its own `div` with `flex-1 max-w-md`
+- Buttons sit at the end of that same row
+- Description Textarea remains in a separate block below
+- Tier badge (if present) stays below description
+- This applies to both the creation and detail views since they share `renderHeader`
