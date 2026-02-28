@@ -1,45 +1,48 @@
-## Fix Detail Page Layout: Move Buttons Inline with Name
+## Move Buttons to Top-Right Corner of Page
 
 ### Problem
 
-The "Save" and "Add Supplier" buttons sit in a separate row below the name and description fields, creating excessive vertical space and an awkward layout.
+The Save/Add Supplier buttons are buried below the form fields inside the card, wasting vertical space.
 
 ### Solution
 
-Restructure the `renderHeader` in `SupplierGroupManagement.tsx` so the **Supplier Partner Name input and buttons share the same row**, while the description stays on the row below.
+Move the buttons out of the `renderHeader` card and into the top bar alongside the "Back to Groups" button, positioned on the right side. This eliminates a whole row inside the card and puts actions where users expect them.
 
 ### Layout Change
 
-Current:
-
 ```text
-[Label: Supplier Partner Name]  [Input ........................]    [Save] [Add Supplier]
-[Label: Description]  [Textarea ....................] 
-
-                   
-```
+Current:
+[Back to Groups]
+┌─────────────────────────────────┐
+│ Supplier Partner Name           │
+│ [Input ........................] │
+│ Description                     │
+│ [Textarea ....................] │
+│              [Save] [Add Supplier] │
+└─────────────────────────────────┘
 
 New:
-
-```text
-[Label: Supplier Partner Name]  [Input ........................]    [Save] [Add Supplier]
-[Label: Description]  [Textarea ....................] 
+[Back to Groups]              [Save] [Add Supplier]
+┌─────────────────────────────────┐
+│ Supplier Partner Name           │
+│ [Input ........................] │
+│ Description                     │
+│ [Textarea ....................] │
+└─────────────────────────────────┘
 ```
-
-&nbsp;
-
-&nbsp;
-
-  
-
 
 ### Technical Details
 
-**File: `src/components/admin/SupplierGroupManagement.tsx**` (lines 77-110, the `renderHeader` function)
+**File: `src/components/admin/SupplierGroupManagement.tsx**`
 
-- Wrap the name Input and action buttons in a single `flex items-end gap-2` row
-- The Input stays inside its own `div` with `flex-1 max-w-md`
-- Buttons sit at the end of that same row
-- Description Textarea remains in a separate block below
-- Tier badge (if present) stays below description
-- This applies to both the creation and detail views since they share `renderHeader`
+1. **Update `renderHeader**`: Remove the buttons div (lines 88-106) from inside the CardHeader. Only keep name input, description textarea, and tier badge.
+2. **Update the creation view** (the `if (isCreating)` block): Change the top bar from just a back button to a `flex justify-between` row with back on left and Save/Auto Fill buttons on right.
+3. **Update the detail view** (the `if (selectedGroup)` block): Same pattern -- back button on left, Save + Add Supplier buttons on right in the top bar.
+4. The `renderHeader` function signature stays the same but the buttons are rendered outside of it, in the parent view's top navigation bar instead.  
+|  
+  
+  
+fix on When creat ethew new supplier partner   
+move the button save  and autofill  on the right rop corner of page   
+add the button add supplier also  in that  page 
+5. &nbsp;
