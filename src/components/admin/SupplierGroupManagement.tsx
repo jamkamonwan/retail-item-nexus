@@ -75,37 +75,37 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
 
   // --- Shared header layout for create & detail views ---
   const renderHeader = (opts: { onSave: () => void; saveDisabled: boolean; showAddSupplier: boolean; showAutoFill?: boolean; tierBadge?: React.ReactNode }) => (
-    <CardHeader className="flex flex-col space-y-4">
-      <div className="space-y-3">
-        <div>
-          <label className="text-sm font-medium text-muted-foreground mb-1 block">Supplier Partner Name</label>
-          <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="max-w-md text-xl font-semibold" placeholder="e.g. Supplier Partner A DKSH" />
+    <CardHeader className="space-y-3">
+      <div className="flex items-end gap-3">
+        <div className="flex-1 max-w-md space-y-1">
+          <label className="text-sm font-medium text-muted-foreground block">Supplier Partner Name</label>
+          <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="text-xl font-semibold" placeholder="e.g. Supplier Partner A DKSH" />
         </div>
-        <div>
-          <label className="text-sm font-medium text-muted-foreground mb-1 block">Description</label>
-          <Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} placeholder="Optional description" rows={2} className="max-w-lg" />
+        <div className="flex items-center gap-2">
+          {opts.showAutoFill && (
+            <Button variant="outline" size="sm" onClick={() => {
+              const dummy = DUMMY_GROUPS[Math.floor(Math.random() * DUMMY_GROUPS.length)];
+              setEditName(dummy.name);
+              setEditDescription(dummy.description);
+            }}>
+              <Wand2 className="w-4 h-4 mr-1" /> Auto Fill
+            </Button>
+          )}
+          <Button size="sm" onClick={opts.onSave} disabled={opts.saveDisabled}>
+            <Save className="w-4 h-4 mr-1" /> Save
+          </Button>
+          {opts.showAddSupplier && (
+            <Button size="sm" onClick={() => setSupplierDialogOpen(true)}>
+              <UserPlus className="w-4 h-4 mr-1" /> Add Supplier
+            </Button>
+          )}
         </div>
-        {opts.tierBadge}
       </div>
-      <div className="flex items-center gap-2 justify-end">
-        {opts.showAutoFill && (
-          <Button variant="outline" size="sm" onClick={() => {
-            const dummy = DUMMY_GROUPS[Math.floor(Math.random() * DUMMY_GROUPS.length)];
-            setEditName(dummy.name);
-            setEditDescription(dummy.description);
-          }}>
-            <Wand2 className="w-4 h-4 mr-1" /> Auto Fill
-          </Button>
-        )}
-        <Button size="sm" onClick={opts.onSave} disabled={opts.saveDisabled}>
-          <Save className="w-4 h-4 mr-1" /> Save
-        </Button>
-        {opts.showAddSupplier && (
-          <Button size="sm" onClick={() => setSupplierDialogOpen(true)}>
-            <UserPlus className="w-4 h-4 mr-1" /> Add Supplier
-          </Button>
-        )}
+      <div className="max-w-lg space-y-1">
+        <label className="text-sm font-medium text-muted-foreground block">Description</label>
+        <Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} placeholder="Optional description" rows={2} />
       </div>
+      {opts.tierBadge}
     </CardHeader>
   );
 
