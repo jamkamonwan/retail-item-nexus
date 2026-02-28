@@ -1,33 +1,33 @@
 
 
-## Fix Supplier Partner Edit Flow
+## Fix Supplier Partner Management - 3 Issues
 
-### What Changes
+### Issue 1: Add pencil icon back in list view Actions column
+The pencil icon was removed but the user wants it back. Clicking it should navigate to the detail page (same as row click).
 
-1. **List view -- Replace pencil icon with explicit "Edit" action that navigates to detail page**
-   - In the list table Actions column, the pencil icon currently opens a popup dialog. Instead, clicking it should navigate to the detail/edit page for that group (same as clicking the row).
-   - Remove the standalone pencil icon button from the Actions column since clicking the row already navigates to the detail page. Keep only the delete (trash) icon in Actions.
+**Change in `SupplierGroupManagement.tsx` (list view Actions column, ~line 209-211):**
+- Add a pencil icon button before the trash button that calls `setSelectedGroupId(g.id)` to navigate to the detail page
 
-2. **Detail view -- Replace "Edit" popup with inline editing of partner name and description**
-   - Currently, clicking "Edit" on the detail page opens `SupplierGroupFormDialog` (a popup). Instead, convert the detail view header into an editable state:
-     - When user clicks "Edit", the partner name and description become editable input fields inline (no dialog).
-     - Show "Save" and "Cancel" buttons to confirm or discard changes.
-   - This allows editing the partner name directly on the detail page as shown in the mockup.
+### Issue 2: Detail page should show editable name/description by default (no "Edit" button)
+When navigating to the detail page, the name and description fields should always be editable inline -- no need to click an "Edit" button first.
 
-3. **Detail view -- Remove pencil icon from supplier rows**
-   - The mockup shows no pencil/edit icon per supplier row. The user can use the existing "X" (remove) button and "Star" (main) toggle. Remove any per-row edit affordance if present (currently there is none beyond X and Star, so this is already correct).
+**Changes in `SupplierGroupManagement.tsx` (detail view):**
+- Remove the `isEditing` toggle logic entirely
+- Always show `<Input>` for name and `<Textarea>` for description in the header
+- Initialize `editName`/`editDescription` when `selectedGroupId` changes (use `useEffect` or initialize on selection)
+- Replace the Edit/Save/Cancel buttons with just a "Save" button (always visible, disabled when name is empty) and the "Add Supplier" button
+- On save, call `updateGroup` and show toast
 
-### Technical Details
+### Issue 3: Double black overlay when opening "Add Supplier" dialog
+The `GroupSupplierDialog` is rendered **twice** (lines 165-166 are duplicated). This causes a double overlay (two dialog overlays stacking = extra dark background).
+
+**Fix:** Remove the duplicate `<GroupSupplierDialog>` on line 166.
+
+### Technical Summary
 
 **File: `src/components/admin/SupplierGroupManagement.tsx`**
-
-- Add `isEditing` state (`useState<boolean>(false)`) plus `editName` / `editDescription` state for inline editing.
-- In the **detail view header**, when `isEditing` is true, render `<Input>` for name and `<Textarea>` for description instead of static text, with Save/Cancel buttons replacing Edit/Add Supplier.
-- When `isEditing` is false, show the current static header with Edit and Add Supplier buttons (as now).
-- On Save, call `updateGroup(selectedGroup.id, { name: editName, description: editDescription })` and set `isEditing(false)`.
-- In the **list view Actions column**, remove the pencil `<Button>` -- keep only the trash icon. The row click already navigates to the detail page.
-- Remove `SupplierGroupFormDialog` import and usage since editing will be inline. Keep it only for the "New Supplier Partner" creation flow (or also convert creation to inline -- but for now keep the dialog for creation since it's a simpler action).
-
-**File: `src/components/admin/SupplierGroupFormDialog.tsx`**
-- No changes needed -- still used for creating new partners.
-
+1. List view: Add `<Pencil>` icon button in Actions column that navigates to detail page
+2. Detail view: Remove `isEditing` state and conditional -- always render editable `<Input>`/`<Textarea>` for name/description, with a persistent Save button
+3. Add a `useEffect` or handle in the selection setter to initialize `editName`/`editDescription` from the selected group
+4. Remove duplicate `<GroupSupplierDialog>` (line 166)
+5. Clean up unused `handleStartEdit`, `handleCancelEdit`, simplify `isEditing` state removal
