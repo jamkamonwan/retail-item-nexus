@@ -1,33 +1,55 @@
 
 
-## Fix Supplier Partner Management - 3 Issues
+## Fix Supplier Partner: Inline Creation + Layout Improvements
 
-### Issue 1: Add pencil icon back in list view Actions column
-The pencil icon was removed but the user wants it back. Clicking it should navigate to the detail page (same as row click).
+### Changes (all in `src/components/admin/SupplierGroupManagement.tsx`)
 
-**Change in `SupplierGroupManagement.tsx` (list view Actions column, ~line 209-211):**
-- Add a pencil icon button before the trash button that calls `setSelectedGroupId(g.id)` to navigate to the detail page
+### 1. Replace "New Supplier Partner" popup with inline full-page creation screen
 
-### Issue 2: Detail page should show editable name/description by default (no "Edit" button)
-When navigating to the detail page, the name and description fields should always be editable inline -- no need to click an "Edit" button first.
+- Add `isCreating` state. When true, render a full-page view identical to the detail/edit view layout.
+- The "New Supplier Partner" button sets `isCreating = true` and resets `editName`/`editDescription` to empty.
+- The creation screen shows:
+  - "Back to Groups" button
+  - Card with Input for partner name, Textarea for description
+  - "Save" button (calls `createGroup`, then navigates to the new group's detail view)
+  - "Add Supplier" button (disabled until saved, or saves first then opens supplier dialog)
+  - Empty supplier table placeholder
+- Remove `formOpen` state and `SupplierGroupFormDialog` import/usage.
 
-**Changes in `SupplierGroupManagement.tsx` (detail view):**
-- Remove the `isEditing` toggle logic entirely
-- Always show `<Input>` for name and `<Textarea>` for description in the header
-- Initialize `editName`/`editDescription` when `selectedGroupId` changes (use `useEffect` or initialize on selection)
-- Replace the Edit/Save/Cancel buttons with just a "Save" button (always visible, disabled when name is empty) and the "Add Supplier" button
-- On save, call `updateGroup` and show toast
+### 2. Fix detail view layout -- separate name/description from buttons
 
-### Issue 3: Double black overlay when opening "Add Supplier" dialog
-The `GroupSupplierDialog` is rendered **twice** (lines 165-166 are duplicated). This causes a double overlay (two dialog overlays stacking = extra dark background).
+Currently the CardHeader uses `flex-row items-center justify-between` which crams Input/Textarea and buttons side-by-side.
 
-**Fix:** Remove the duplicate `<GroupSupplierDialog>` on line 166.
+New layout:
+- Stack the header vertically: name input and description textarea at the top (full width)
+- Buttons row below, right-aligned, with Save and Add Supplier
+- Give the Input a `max-w-md` and Textarea a `max-w-lg` so they don't stretch the full card width
+- This applies to both the creation screen and the existing detail/edit view
 
-### Technical Summary
+### Technical Details
 
-**File: `src/components/admin/SupplierGroupManagement.tsx`**
-1. List view: Add `<Pencil>` icon button in Actions column that navigates to detail page
-2. Detail view: Remove `isEditing` state and conditional -- always render editable `<Input>`/`<Textarea>` for name/description, with a persistent Save button
-3. Add a `useEffect` or handle in the selection setter to initialize `editName`/`editDescription` from the selected group
-4. Remove duplicate `<GroupSupplierDialog>` (line 166)
-5. Clean up unused `handleStartEdit`, `handleCancelEdit`, simplify `isEditing` state removal
+**State changes:**
+- Add: `isCreating: boolean` (default false)
+- Remove: `formOpen`
+
+**New creation view** (rendered before the list view check, after the detail view check):
+```
+if (isCreating) {
+  return (
+    // Same structure as detail view but with empty group data
+    // Save creates the group and navigates to detail
+  )
+}
+```
+
+**Layout fix for CardHeader** (both create and detail views):
+- Change from `flex flex-row items-center justify-between` to `flex flex-col space-y-4`
+- Input gets `max-w-md` class
+- Textarea gets `max-w-lg` class  
+- Buttons in a separate `div` with `flex justify-end gap-2`
+
+**Cleanup:**
+- Remove `SupplierGroupFormDialog` import (line 6)
+- Remove `handleFormSubmit` function
+- Remove `<SupplierGroupFormDialog>` JSX (line 195)
+
