@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSupplierGroups } from '@/hooks/useSupplierGroups';
 import { mockSuppliers } from '@/data/mock/suppliers';
 import { MockSupplierGroup } from '@/data/mock/supplierGroups';
@@ -22,11 +22,9 @@ interface SupplierGroupManagementProps {
 export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps) {
   const { groups, createGroup, updateGroup, deleteGroup, assignSupplier, removeSupplier, setMainSupplier } = useSupplierGroups();
   const [formOpen, setFormOpen] = useState(false);
-  const [editingGroup, setEditingGroup] = useState<MockSupplierGroup | null>(null);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [supplierDialogOpen, setSupplierDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState('');
   const [editDescription, setEditDescription] = useState('');
 
@@ -35,27 +33,22 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
   const getSupplierInfo = (id: string) => mockSuppliers.find((s) => s.id === id);
   const getTierForGroup = (groupId: string) => mockTiers.find((t) => t.assignedGroups.includes(groupId));
 
-  const handleFormSubmit = (data: { name: string; description: string }) => {
-    createGroup(data.name, data.description);
-  };
-
-  const handleStartEdit = () => {
+  // Initialize edit fields when selecting a group
+  useEffect(() => {
     if (selectedGroup) {
       setEditName(selectedGroup.name);
       setEditDescription(selectedGroup.description || '');
-      setIsEditing(true);
     }
+  }, [selectedGroupId]);
+
+  const handleFormSubmit = (data: { name: string; description: string }) => {
+    createGroup(data.name, data.description);
   };
 
   const handleSaveEdit = () => {
     if (selectedGroup && editName.trim()) {
       updateGroup(selectedGroup.id, { name: editName.trim(), description: editDescription.trim() });
-      setIsEditing(false);
     }
-  };
-
-  const handleCancelEdit = () => {
-    setIsEditing(false);
   };
 
   const handleConfirmDelete = () => {
@@ -78,40 +71,22 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex-1">
-              {isEditing ? (
-                <div className="space-y-3">
-                  <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="text-xl font-semibold" />
-                  <Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} placeholder="Optional description" rows={2} />
-                </div>
-              ) : (
-                <>
-                  <CardTitle className="text-xl">{selectedGroup.name}</CardTitle>
-                  {selectedGroup.description && <p className="text-muted-foreground text-sm mt-1">{selectedGroup.description}</p>}
-                </>
-              )}
+              <div className="space-y-3">
+                <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="text-xl font-semibold" placeholder="Supplier Partner Name" />
+                <Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} placeholder="Optional description" rows={2} />
+              </div>
               {(() => {
                 const tier = getTierForGroup(selectedGroup.id);
                 return tier ? <Badge className={`mt-2 ${tier.color}`}>{tier.name}</Badge> : null;
               })()}
             </div>
             <div className="flex gap-2">
-              {isEditing ? (
-                <>
-                  <Button variant="outline" size="sm" onClick={handleCancelEdit}>Cancel</Button>
-                  <Button size="sm" onClick={handleSaveEdit} disabled={!editName.trim()}>
-                    <Save className="w-4 h-4 mr-1" /> Save
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button variant="outline" size="sm" onClick={handleStartEdit}>
-                    <Pencil className="w-4 h-4 mr-1" /> Edit
-                  </Button>
-                  <Button size="sm" onClick={() => setSupplierDialogOpen(true)}>
-                    <UserPlus className="w-4 h-4 mr-1" /> Add Supplier
-                  </Button>
-                </>
-              )}
+              <Button size="sm" onClick={handleSaveEdit} disabled={!editName.trim()}>
+                <Save className="w-4 h-4 mr-1" /> Save
+              </Button>
+              <Button size="sm" onClick={() => setSupplierDialogOpen(true)}>
+                <UserPlus className="w-4 h-4 mr-1" /> Add Supplier
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -163,7 +138,6 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
         </Card>
 
         <GroupSupplierDialog open={supplierDialogOpen} onOpenChange={setSupplierDialogOpen} group={selectedGroup} allGroups={groups} onAssign={assignSupplier} />
-        <GroupSupplierDialog open={supplierDialogOpen} onOpenChange={setSupplierDialogOpen} group={selectedGroup} allGroups={groups} onAssign={assignSupplier} />
       </div>
     );
   }
@@ -207,6 +181,7 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
                   <TableCell className="text-muted-foreground text-sm">{format(g.createdAt, 'dd MMM yyyy')}</TableCell>
                   <TableCell>
                     <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                      <Button variant="ghost" size="icon" onClick={() => setSelectedGroupId(g.id)}><Pencil className="w-4 h-4" /></Button>
                       <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(g.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                     </div>
                   </TableCell>
