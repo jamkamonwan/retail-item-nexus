@@ -3,17 +3,24 @@ import { useSupplierGroups } from '@/hooks/useSupplierGroups';
 import { mockSuppliers } from '@/data/mock/suppliers';
 import { MockSupplierGroup } from '@/data/mock/supplierGroups';
 import { mockTiers } from '@/data/mock/tiers';
-import { SupplierGroupFormDialog } from './SupplierGroupFormDialog';
 import { GroupSupplierDialog } from './GroupSupplierDialog';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Plus, Trash2, UserPlus, X, Star, Pencil, Save } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, UserPlus, X, Star, Pencil, Save, Wand2 } from 'lucide-react';
 import { format } from 'date-fns';
+
+const DUMMY_GROUPS = [
+  { name: 'Group Nestle', description: 'Nestle branded supplier codes' },
+  { name: 'Group P&G', description: 'Procter & Gamble supplier codes' },
+  { name: 'Group Unilever', description: 'Unilever all divisions' },
+  { name: 'Group Mars', description: 'Mars Petcare and Confectionery' },
+  { name: 'Group Colgate', description: 'Colgate-Palmolive supplier codes' },
+];
 
 interface SupplierGroupManagementProps {
   onBack: () => void;
@@ -21,7 +28,7 @@ interface SupplierGroupManagementProps {
 
 export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps) {
   const { groups, createGroup, updateGroup, deleteGroup, assignSupplier, removeSupplier, setMainSupplier } = useSupplierGroups();
-  const [formOpen, setFormOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [supplierDialogOpen, setSupplierDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
@@ -33,7 +40,6 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
   const getSupplierInfo = (id: string) => mockSuppliers.find((s) => s.id === id);
   const getTierForGroup = (groupId: string) => mockTiers.find((t) => t.assignedGroups.includes(groupId));
 
-  // Initialize edit fields when selecting a group
   useEffect(() => {
     if (selectedGroup) {
       setEditName(selectedGroup.name);
@@ -41,14 +47,17 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
     }
   }, [selectedGroupId]);
 
-  const handleFormSubmit = (data: { name: string; description: string }) => {
-    createGroup(data.name, data.description);
-  };
-
   const handleSaveEdit = () => {
     if (selectedGroup && editName.trim()) {
       updateGroup(selectedGroup.id, { name: editName.trim(), description: editDescription.trim() });
     }
+  };
+
+  const handleSaveNew = () => {
+    if (!editName.trim()) return;
+    const newGroup = createGroup(editName.trim(), editDescription.trim());
+    setIsCreating(false);
+    setSelectedGroupId(newGroup.id);
   };
 
   const handleConfirmDelete = () => {
@@ -58,8 +67,70 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
     }
   };
 
+  const handleStartCreate = () => {
+    setEditName('');
+    setEditDescription('');
+    setIsCreating(true);
+  };
+
+  // --- Shared header layout for create & detail views ---
+  const renderHeader = (opts: { onSave: () => void; saveDisabled: boolean; showAddSupplier: boolean; showAutoFill?: boolean; tierBadge?: React.ReactNode }) => (
+    <CardHeader className="flex flex-col space-y-4">
+      <div className="space-y-3">
+        <div>
+          <label className="text-sm font-medium text-muted-foreground mb-1 block">Supplier Partner Name</label>
+          <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="max-w-md text-xl font-semibold" placeholder="e.g. Supplier Partner A DKSH" />
+        </div>
+        <div>
+          <label className="text-sm font-medium text-muted-foreground mb-1 block">Description</label>
+          <Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} placeholder="Optional description" rows={2} className="max-w-lg" />
+        </div>
+        {opts.tierBadge}
+      </div>
+      <div className="flex items-center gap-2 justify-end">
+        {opts.showAutoFill && (
+          <Button variant="outline" size="sm" onClick={() => {
+            const dummy = DUMMY_GROUPS[Math.floor(Math.random() * DUMMY_GROUPS.length)];
+            setEditName(dummy.name);
+            setEditDescription(dummy.description);
+          }}>
+            <Wand2 className="w-4 h-4 mr-1" /> Auto Fill
+          </Button>
+        )}
+        <Button size="sm" onClick={opts.onSave} disabled={opts.saveDisabled}>
+          <Save className="w-4 h-4 mr-1" /> Save
+        </Button>
+        {opts.showAddSupplier && (
+          <Button size="sm" onClick={() => setSupplierDialogOpen(true)}>
+            <UserPlus className="w-4 h-4 mr-1" /> Add Supplier
+          </Button>
+        )}
+      </div>
+    </CardHeader>
+  );
+
+  // --- Creation View ---
+  if (isCreating) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="sm" onClick={() => setIsCreating(false)}>
+            <ArrowLeft className="w-4 h-4 mr-1" /> Back to Groups
+          </Button>
+        </div>
+        <Card>
+          {renderHeader({ onSave: handleSaveNew, saveDisabled: !editName.trim(), showAddSupplier: false, showAutoFill: true })}
+          <CardContent>
+            <p className="text-muted-foreground text-sm py-4 text-center">Save the supplier partner first, then you can add supplier codes.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   // --- Detail View ---
   if (selectedGroup) {
+    const tier = getTierForGroup(selectedGroup.id);
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-4">
@@ -67,28 +138,13 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
             <ArrowLeft className="w-4 h-4 mr-1" /> Back to Groups
           </Button>
         </div>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div className="flex-1">
-              <div className="space-y-3">
-                <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="text-xl font-semibold" placeholder="Supplier Partner Name" />
-                <Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} placeholder="Optional description" rows={2} />
-              </div>
-              {(() => {
-                const tier = getTierForGroup(selectedGroup.id);
-                return tier ? <Badge className={`mt-2 ${tier.color}`}>{tier.name}</Badge> : null;
-              })()}
-            </div>
-            <div className="flex gap-2">
-              <Button size="sm" onClick={handleSaveEdit} disabled={!editName.trim()}>
-                <Save className="w-4 h-4 mr-1" /> Save
-              </Button>
-              <Button size="sm" onClick={() => setSupplierDialogOpen(true)}>
-                <UserPlus className="w-4 h-4 mr-1" /> Add Supplier
-              </Button>
-            </div>
-          </CardHeader>
+          {renderHeader({
+            onSave: handleSaveEdit,
+            saveDisabled: !editName.trim(),
+            showAddSupplier: true,
+            tierBadge: tier ? <Badge className={`mt-2 w-fit ${tier.color}`}>{tier.name}</Badge> : null,
+          })}
           <CardContent>
             {selectedGroup.supplierIds.length === 0 ? (
               <p className="text-muted-foreground text-sm py-4 text-center">No suppliers assigned yet. Click "Add Supplier" to get started.</p>
@@ -110,13 +166,7 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
                     return (
                       <TableRow key={sid}>
                         <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => setMainSupplier(selectedGroup.id, isMain ? undefined : sid)}
-                            title={isMain ? 'Remove main supplier' : 'Set as main supplier'}
-                          >
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setMainSupplier(selectedGroup.id, isMain ? undefined : sid)} title={isMain ? 'Remove main supplier' : 'Set as main supplier'}>
                             <Star className={`w-4 h-4 ${isMain ? 'fill-yellow-400 text-yellow-500' : 'text-muted-foreground'}`} />
                           </Button>
                         </TableCell>
@@ -136,7 +186,6 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
             )}
           </CardContent>
         </Card>
-
         <GroupSupplierDialog open={supplierDialogOpen} onOpenChange={setSupplierDialogOpen} group={selectedGroup} allGroups={groups} onAssign={assignSupplier} />
       </div>
     );
@@ -150,7 +199,7 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
           <h2 className="text-2xl font-bold">Supplier Partners</h2>
           <p className="text-muted-foreground text-sm">Organize supplier codes into supplier partners for portal access</p>
         </div>
-        <Button onClick={() => { setFormOpen(true); }}>
+        <Button onClick={handleStartCreate}>
           <Plus className="w-4 h-4 mr-1" /> New Supplier Partner
         </Button>
       </div>
@@ -191,8 +240,6 @@ export function SupplierGroupManagement({ onBack }: SupplierGroupManagementProps
           </Table>
         </CardContent>
       </Card>
-
-      <SupplierGroupFormDialog open={formOpen} onOpenChange={setFormOpen} onSubmit={handleFormSubmit} />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
         <AlertDialogContent>
