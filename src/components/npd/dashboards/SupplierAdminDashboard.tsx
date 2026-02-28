@@ -5,11 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { StaffUserFormDialog } from '@/components/admin/StaffUserFormDialog';
+import { StaffUserFormScreen } from '@/components/admin/StaffUserFormScreen';
 import { StaffModuleDialog } from '@/components/admin/StaffModuleDialog';
 import { useSupplierStaff } from '@/hooks/useSupplierStaff';
 import { MockUser } from '@/data/mock/users';
-import { UserPlus, Users, Shield, AlertTriangle, KeyRound, UserCheck, UserX } from 'lucide-react';
+import { UserPlus, Users, Shield, AlertTriangle, KeyRound, UserCheck, UserX, Pencil } from 'lucide-react';
 
 interface SupplierAdminDashboardProps {
   userId?: string;
@@ -23,7 +23,7 @@ export function SupplierAdminDashboard({ userId, supplierGroupId }: SupplierAdmi
     resetPassword, bulkSetStatus,
   } = useSupplierStaff({ id: userId, supplierGroupId });
 
-  const [createOpen, setCreateOpen] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const [moduleUser, setModuleUser] = useState<MockUser | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -45,6 +45,20 @@ export function SupplierAdminDashboard({ userId, supplierGroupId }: SupplierAdmi
     setSelectedIds([]);
   };
 
+  // Show create form as main screen
+  if (showCreateForm) {
+    return (
+      <StaffUserFormScreen
+        availableModules={availableModules}
+        onSubmit={(data) => {
+          createStaffUser(data);
+          setShowCreateForm(false);
+        }}
+        onBack={() => setShowCreateForm(false)}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header Card */}
@@ -65,7 +79,7 @@ export function SupplierAdminDashboard({ userId, supplierGroupId }: SupplierAdmi
                 <TooltipTrigger asChild>
                   <span>
                     <Button
-                      onClick={() => setCreateOpen(true)}
+                      onClick={() => setShowCreateForm(true)}
                       disabled={limitReached}
                       className="gap-2"
                     >
@@ -105,7 +119,7 @@ export function SupplierAdminDashboard({ userId, supplierGroupId }: SupplierAdmi
       <Card>
         <CardContent className="py-3">
           <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-sm font-medium">{selectedIds.length} selected</span>
+            <span className="text-sm font-medium">{selectedIds.length > 0 ? `${selectedIds.length} selected` : 'No users selected'}</span>
               <Button variant="outline" size="sm" className="gap-1.5" disabled={!someSelected} onClick={() => handleBulkAction('reset')}>
                 <KeyRound className="h-3.5 w-3.5" />
                 Reset Password
@@ -158,9 +172,13 @@ export function SupplierAdminDashboard({ userId, supplierGroupId }: SupplierAdmi
                     <TableCell className="font-medium">{user.fullName}</TableCell>
                     <TableCell className="text-muted-foreground">{user.email}</TableCell>
                     <TableCell>
-                      <Badge variant="secondary" className="cursor-pointer" onClick={() => setModuleUser(user)}>
-                        {(user.assignedModules?.length ?? 0)} of {availableModules.length}
-                      </Badge>
+                      <button
+                        className="inline-flex items-center gap-1.5 text-sm cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => setModuleUser(user)}
+                      >
+                        <span>{(user.assignedModules?.length ?? 0)} / {availableModules.length}</span>
+                        <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                      </button>
                     </TableCell>
                     <TableCell>
                       <Badge variant={user.status === 'active' ? 'default' : 'outline'}>
@@ -175,13 +193,7 @@ export function SupplierAdminDashboard({ userId, supplierGroupId }: SupplierAdmi
         </CardContent>
       </Card>
 
-      {/* Dialogs */}
-      <StaffUserFormDialog
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-        availableModules={availableModules}
-        onSubmit={createStaffUser}
-      />
+      {/* Module Dialog */}
       <StaffModuleDialog
         open={!!moduleUser}
         onOpenChange={open => { if (!open) setModuleUser(null); }}
