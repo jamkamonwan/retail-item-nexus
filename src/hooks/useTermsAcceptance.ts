@@ -94,7 +94,7 @@ export function useTermsAcceptance(userId?: string, userEmail?: string, userName
       actorId: userId,
       entityType: 'terms',
       entityId: publishedTerms.id,
-      metadata: { version: publishedTerms.version },
+      metadata: { version: publishedTerms.version, user_name: userName, user_email: userEmail },
     });
 
     setHasAccepted(true);
