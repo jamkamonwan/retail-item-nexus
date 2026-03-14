@@ -127,12 +127,22 @@ export function TermsAcceptanceReport({ onBack, embedded }: TermsAcceptanceRepor
     return (log.metadata as any)?.user_email || (log.metadata as any)?.email || '—';
   };
 
+  const getSupplierCode = (log: AuditLogEntry) => {
+    return (log.metadata as any)?.supplier_codes || (log.metadata as any)?.supplier_code || '—';
+  };
+
+  const getSupplierPartner = (log: AuditLogEntry) => {
+    return (log.metadata as any)?.supplier_partner || '—';
+  };
+
   const filteredLogs = logs.filter(l => {
     if (!search) return true;
     const name = getUserName(l).toLowerCase();
     const email = getUserEmail(l).toLowerCase();
+    const sc = getSupplierCode(l).toLowerCase();
+    const sp = getSupplierPartner(l).toLowerCase();
     const s = search.toLowerCase();
-    return name.includes(s) || email.includes(s);
+    return name.includes(s) || email.includes(s) || sc.includes(s) || sp.includes(s);
   });
 
   return (
@@ -150,10 +160,18 @@ export function TermsAcceptanceReport({ onBack, embedded }: TermsAcceptanceRepor
           </Button>
         </div>
       )}
+      {embedded && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">Track supplier acceptance and rejection of published terms versions.</p>
+          <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
+            <RefreshCw className="w-4 h-4" /> Refresh
+          </Button>
+        </div>
+      )}
 
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle className="text-base">Filters</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4 flex-wrap">
@@ -205,6 +223,8 @@ export function TermsAcceptanceReport({ onBack, embedded }: TermsAcceptanceRepor
                   <TableHead>Title</TableHead>
                   <TableHead>User Name</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>Supplier Code</TableHead>
+                  <TableHead>Supplier Partner</TableHead>
                   <TableHead>Action</TableHead>
                   <TableHead>Date / Time</TableHead>
                 </TableRow>
@@ -216,13 +236,15 @@ export function TermsAcceptanceReport({ onBack, embedded }: TermsAcceptanceRepor
                     <TableCell>{getVersionTitle(log.entity_id)}</TableCell>
                     <TableCell>{getUserName(log)}</TableCell>
                     <TableCell className="text-sm">{getUserEmail(log)}</TableCell>
+                    <TableCell className="text-sm">{getSupplierCode(log)}</TableCell>
+                    <TableCell className="text-sm">{getSupplierPartner(log)}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className={getActionBadge(log.event_type)}>
                         {getActionLabel(log.event_type)}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      {log.created_at ? format(new Date(log.created_at), 'dd MMM yyyy HH:mm') : '—'}
+                    <TableCell className="text-sm whitespace-nowrap">
+                      {log.created_at ? format(new Date(log.created_at), 'dd MMM yyyy HH:mm:ss') : '—'}
                     </TableCell>
                   </TableRow>
                 ))}

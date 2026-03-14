@@ -224,6 +224,7 @@ export function AuthenticatedWorkflowApp() {
             onNavigateToUsers={handleNavigateToUsers}
             onNavigateToTiers={handleNavigateToTiers}
             onNavigateToAuditLogs={handleNavigateToAuditLogs}
+            onNavigateToTerms={() => setCurrentView('terms')}
           />
         );
       default:
