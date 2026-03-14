@@ -104,7 +104,7 @@ export function useTermsVersions() {
     return true;
   };
 
-  const publishVersion = async (id: string, actorId?: string) => {
+  const publishVersion = async (id: string, actorId?: string, userName?: string, userEmail?: string) => {
     // Archive current published version
     const currentPublished = versions.find(v => v.status === 'PUBLISHED');
     if (currentPublished) {
@@ -118,7 +118,7 @@ export function useTermsVersions() {
         actorId,
         entityType: 'terms',
         entityId: currentPublished.id,
-        metadata: { version: currentPublished.version },
+        metadata: { version: currentPublished.version, title: currentPublished.title, user_name: userName || '', email: userEmail || '' },
       });
     }
 
@@ -140,7 +140,7 @@ export function useTermsVersions() {
       actorId,
       entityType: 'terms',
       entityId: id,
-      metadata: { version: version?.version },
+      metadata: { version: version?.version, title: version?.title, user_name: userName || '', email: userEmail || '' },
     });
 
     toast.success('Terms version published');
