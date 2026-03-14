@@ -11,6 +11,7 @@ import { ArrowLeft, Search, ChevronLeft, ChevronRight, Eye, RefreshCw, X, Downlo
 import { useAuditLogs, AuditLogEntry, AUDIT_EVENT_TYPES, ENTITY_TYPES } from '@/hooks/useAuditLogs';
 import { format } from 'date-fns';
 import { exportToExcel } from '@/utils/exportExcel';
+import { mockUsers } from '@/data/mock';
 
 interface AuditLogViewerProps {
   onBack: () => void;
@@ -46,6 +47,8 @@ function getMetaField(log: AuditLogEntry, field: string): string {
   const meta = log.metadata as Record<string, unknown> | null;
   return (meta?.[field] as string) || '';
 }
+
+const DEFAULT_TERMS_USER = mockUsers.find((u) => u.role === 'admin');
 
 function getDescription(log: AuditLogEntry): string {
   const meta = log.metadata as Record<string, unknown> | null;
@@ -98,6 +101,35 @@ function getDescription(log: AuditLogEntry): string {
   }
 }
 
+function getActorDisplay(log: AuditLogEntry): string {
+  const actor =
+    getMetaField(log, 'created_by') ||
+    getMetaField(log, 'assigned_by') ||
+    getMetaField(log, 'approved_by') ||
+    getMetaField(log, 'rejected_by') ||
+    getMetaField(log, 'removed_by') ||
+    getMetaField(log, 'deactivated_by') ||
+    getMetaField(log, 'activated_by') ||
+    getMetaField(log, 'sent_by') ||
+    getMetaField(log, 'updated_by') ||
+    getMetaField(log, 'submitted_by') ||
+    getMetaField(log, 'uploaded_by') ||
+    getMetaField(log, 'user_name');
+
+  if (actor) return actor;
+  if (log.event_type.startsWith('TERMS_')) return DEFAULT_TERMS_USER?.fullName || 'Admin User';
+  return '—';
+}
+
+function getEmailDisplay(log: AuditLogEntry): string {
+  const meta = log.metadata as Record<string, unknown> | null;
+  const email = (meta?.email as string) || (meta?.user_email as string) || '';
+
+  if (email) return email;
+  if (log.event_type.startsWith('TERMS_')) return DEFAULT_TERMS_USER?.email || 'admin@company.com';
+  return '—';
+}
+
 export function AuditLogViewer({ onBack }: AuditLogViewerProps) {
   const { logs, loading, filters, setFilters, page, setPage, pageSize, totalCount, refetch } = useAuditLogs();
   const [detailLog, setDetailLog] = useState<AuditLogEntry | null>(null);
@@ -134,8 +166,8 @@ export function AuditLogViewer({ onBack }: AuditLogViewerProps) {
                 Timestamp: format(new Date(log.created_at), 'yyyy-MM-dd HH:mm:ss'),
                 Event: log.event_type,
                 Description: getDescription(log),
-                'Actor': getMetaField(log, 'created_by') || getMetaField(log, 'user_name') || '',
-                Email: (meta?.email as string) || '',
+                'Actor': getActorDisplay(log),
+                Email: getEmailDisplay(log),
                 'Supplier Code': (meta?.supplier_codes as string) || (meta?.supplier_code as string) || '',
                 'Supplier Partner': (meta?.supplier_partner as string) || '',
                 'Entity Type': log.entity_type || '',
@@ -269,10 +301,10 @@ export function AuditLogViewer({ onBack }: AuditLogViewerProps) {
                           <span className="text-foreground">{getDescription(log)}</span>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                          {getMetaField(log, 'created_by') || getMetaField(log, 'assigned_by') || getMetaField(log, 'approved_by') || getMetaField(log, 'rejected_by') || getMetaField(log, 'removed_by') || getMetaField(log, 'deactivated_by') || getMetaField(log, 'activated_by') || getMetaField(log, 'sent_by') || getMetaField(log, 'updated_by') || getMetaField(log, 'submitted_by') || getMetaField(log, 'uploaded_by') || getMetaField(log, 'user_name') || '—'}
+                          {getActorDisplay(log)}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                          {email || getMetaField(log, 'user_email') || '—'}
+                          {getEmailDisplay(log)}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {supplierCode || '—'}
