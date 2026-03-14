@@ -174,10 +174,6 @@ export function AuthenticatedWorkflowApp() {
               <FileCheck className="w-4 h-4" />
               Terms
             </TabsTrigger>
-            <TabsTrigger value="terms-report" className="gap-2">
-              <ClipboardList className="w-4 h-4" />
-              Acceptance
-            </TabsTrigger>
             <TabsTrigger value="config" className="gap-2">
               <Settings2 className="w-4 h-4" />
               Config
