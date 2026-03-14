@@ -1,85 +1,48 @@
+## Move Buttons to Top-Right Corner of Page
 
+### Problem
 
-# Terms & Conditions Management Module
+The Save/Add Supplier buttons are buried below the form fields inside the card, wasting vertical space.
 
-## Overview
+### Solution
 
-Full implementation of the T&C module per the functional spec: admin CRUD with version control, supplier acceptance enforcement, acceptance reporting, and audit logging.
+Move the buttons out of the `renderHeader` card and into the top bar alongside the "Back to Groups" button, positioned on the right side. This eliminates a whole row inside the card and puts actions where users expect them.
 
-## Database Schema
+### Layout Change
 
-### Table: `terms_versions`
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid PK | |
-| version | text NOT NULL | e.g. "v1.0" |
-| title | text NOT NULL | |
-| content | text NOT NULL | Full T&C text |
-| status | text NOT NULL | DRAFT / PUBLISHED / ARCHIVED |
-| created_by | uuid | Admin who created |
-| published_at | timestamptz | Set on publish |
-| created_at | timestamptz | Default now() |
+```text
+Current:
+[Back to Groups]
+┌─────────────────────────────────┐
+│ Supplier Partner Name           │
+│ [Input ........................] │
+│ Description                     │
+│ [Textarea ....................] │
+│              [Save] [Add Supplier] │
+└─────────────────────────────────┘
 
-### Table: `user_terms_acceptance`
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid PK | |
-| user_id | uuid NOT NULL | |
-| terms_version_id | uuid FK → terms_versions | |
-| status | text NOT NULL | ACCEPTED / REJECTED |
-| accepted_at | timestamptz | |
-| ip_address | text | |
-| created_at | timestamptz | Default now() |
-| UNIQUE(user_id, terms_version_id) | | One record per user per version |
+New:
+[Back to Groups]              [Save] [Add Supplier]
+┌─────────────────────────────────┐
+│ Supplier Partner Name           │
+│ [Input ........................] │
+│ Description                     │
+│ [Textarea ....................] │
+└─────────────────────────────────┘
+```
 
-RLS: Authenticated users can read terms_versions. Only admins can insert/update terms_versions. Users can insert their own acceptance records and read their own.
+### Technical Details
 
-## New Files
+**File: `src/components/admin/SupplierGroupManagement.tsx**`
 
-### Hooks
-- **`useTermsVersions.ts`** — CRUD for terms versions (admin). Create draft, edit draft, publish (archives previous), list all versions.
-- **`useTermsAcceptance.ts`** — Check if current user accepted latest published version. Accept/reject. Used for enforcement gate.
-
-### Admin Components
-- **`TermsManagement.tsx`** — Admin page: list all versions with status badges, create new draft, edit draft, publish button, version history table.
-- **`TermsAcceptanceReport.tsx`** — Admin report: table of supplier users showing acceptance status per version, with filters (user, supplier, version, status).
-
-### Supplier Components
-- **`TermsAcceptancePage.tsx`** — Full-screen gate: shows title, version, published date, scrollable content, Accept/Reject buttons. Shown when supplier hasn't accepted latest version.
-
-## Navigation & Routing Changes
-
-### Admin side (`AuthenticatedWorkflowApp.tsx`)
-- Add `'terms'` and `'terms-report'` to the `View` type.
-- Add a "Terms" tab under admin navigation (with `FileCheck` icon).
-- Render `TermsManagement` and `TermsAcceptanceReport` for those views.
-
-### Supplier side (login gate)
-- In `AuthenticatedWorkflowApp`, before rendering the main content for supplier/supplier_admin roles, check `useTermsAcceptance()`. If not accepted, render `TermsAcceptancePage` instead of the normal UI.
-
-## Audit Logging
-
-All actions call `logAuditEvent()` with appropriate event types:
-- Admin: `TERMS_CREATED`, `TERMS_UPDATED`, `TERMS_PUBLISHED`, `TERMS_ARCHIVED`
-- Supplier: `TERMS_VIEWED`, `TERMS_ACCEPTED`, `TERMS_REJECTED`
-
-Update `AUDIT_EVENT_TYPES` in `useAuditLogs.ts` to include `TERMS_CREATED`, `TERMS_UPDATED`, `TERMS_PUBLISHED`, `TERMS_ARCHIVED`.
-
-## Key Business Rules
-
-1. Only one version can be PUBLISHED at a time — publishing archives the previous.
-2. Only DRAFT versions are editable.
-3. Supplier users must accept the latest published version to access the portal.
-4. Rejecting terms blocks portal access with a message.
-5. When a new version is published, all users must re-accept.
-
-## Implementation Order
-
-1. Database migration (2 tables + RLS)
-2. Hooks (`useTermsVersions`, `useTermsAcceptance`)
-3. Admin UI (TermsManagement + AcceptanceReport)
-4. Supplier gate (TermsAcceptancePage)
-5. Wire into AuthenticatedWorkflowApp navigation
-6. Audit logging integration
-7. Seed sample draft/published terms for demo
-
+1. **Update `renderHeader**`: Remove the buttons div (lines 88-106) from inside the CardHeader. Only keep name input, description textarea, and tier badge.
+2. **Update the creation view** (the `if (isCreating)` block): Change the top bar from just a back button to a `flex justify-between` row with back on left and Save/Auto Fill buttons on right.
+3. **Update the detail view** (the `if (selectedGroup)` block): Same pattern -- back button on left, Save + Add Supplier buttons on right in the top bar.
+4. The `renderHeader` function signature stays the same but the buttons are rendered outside of it, in the parent view's top navigation bar instead.  
+|  
+  
+  
+fix on When creat ethew new supplier partner   
+move the button save  and autofill  on the right rop corner of page   
+add the button add supplier also  in that  page 
+5. &nbsp;
