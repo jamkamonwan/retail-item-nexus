@@ -157,8 +157,7 @@ export function TermsManagement({ onBack }: TermsManagementProps) {
       toast.success('Terms version created as draft');
     }
     setFormOpen(false);
-    // Refetch via hook
-    window.location.reload(); // Simple refresh to sync
+    await refetch();
   };
 
   const handlePublish = async () => {
