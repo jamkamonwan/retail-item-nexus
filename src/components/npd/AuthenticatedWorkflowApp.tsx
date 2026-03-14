@@ -45,7 +45,7 @@ export function AuthenticatedWorkflowApp() {
   const { hasAccepted, publishedTerms, loading: termsLoading, acceptTerms, rejectTerms } = useTermsAcceptance(
     isSupplierRole ? user?.id : undefined,
     user?.email,
-    user?.fullName || user?.email
+    user?.email
   );
 
   const handleRoleChange = (newRole: UserType) => {
