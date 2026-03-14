@@ -12,6 +12,7 @@ import { ChangePasswordDialog } from '@/components/auth';
 import { BigCHeader } from '@/components/layout/BigCHeader';
 import { SupplierDashboard, SupplierAdminDashboard, ApproverDashboard, AdminDashboard } from './dashboards';
 import { UserManagement, TierManagement, SupplierGroupManagement } from '@/components/admin';
+import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LayoutDashboard, FileText, Settings2, ListChecks, Users, Layers, FolderTree, UserCog, ScrollText } from 'lucide-react';
 import { toast } from 'sonner';
