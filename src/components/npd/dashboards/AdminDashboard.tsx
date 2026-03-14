@@ -88,6 +88,18 @@ export function AdminDashboard({
           </CardHeader>
         </Card>
         
+        <Card className="hover:bg-accent/50 cursor-pointer transition-colors" onClick={onNavigateToTerms}>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <FileCheck className="w-5 h-5 text-primary" />
+              Terms & Conditions
+            </CardTitle>
+            <CardDescription>
+              Manage T&C versions and track supplier acceptance
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
         <Card className="hover:bg-accent/50 cursor-pointer transition-colors" onClick={onNavigateToAuditLogs}>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">

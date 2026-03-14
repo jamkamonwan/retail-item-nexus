@@ -223,6 +223,8 @@ export function TermsAcceptanceReport({ onBack, embedded }: TermsAcceptanceRepor
                   <TableHead>Title</TableHead>
                   <TableHead>User Name</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>Supplier Code</TableHead>
+                  <TableHead>Supplier Partner</TableHead>
                   <TableHead>Action</TableHead>
                   <TableHead>Date / Time</TableHead>
                 </TableRow>
@@ -234,13 +236,15 @@ export function TermsAcceptanceReport({ onBack, embedded }: TermsAcceptanceRepor
                     <TableCell>{getVersionTitle(log.entity_id)}</TableCell>
                     <TableCell>{getUserName(log)}</TableCell>
                     <TableCell className="text-sm">{getUserEmail(log)}</TableCell>
+                    <TableCell className="text-sm">{getSupplierCode(log)}</TableCell>
+                    <TableCell className="text-sm">{getSupplierPartner(log)}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className={getActionBadge(log.event_type)}>
                         {getActionLabel(log.event_type)}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      {log.created_at ? format(new Date(log.created_at), 'dd MMM yyyy HH:mm') : '—'}
+                    <TableCell className="text-sm whitespace-nowrap">
+                      {log.created_at ? format(new Date(log.created_at), 'dd MMM yyyy HH:mm:ss') : '—'}
                     </TableCell>
                   </TableRow>
                 ))}
