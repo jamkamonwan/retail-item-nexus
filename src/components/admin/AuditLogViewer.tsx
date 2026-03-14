@@ -29,6 +29,11 @@ const EVENT_CATEGORY_COLORS: Record<string, string> = {
   USER_ROLE_REMOVED: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
   SUPPLIER_USER_ASSIGNED: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
   SUPPLIER_USER_REMOVED: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+  TERMS_CREATED: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200',
+  TERMS_UPDATED: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200',
+  TERMS_PUBLISHED: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  TERMS_ARCHIVED: 'bg-muted text-muted-foreground',
+  TERMS_VIEWED: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
   TERMS_ACCEPTED: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
   TERMS_REJECTED: 'bg-destructive/10 text-destructive',
 };
@@ -74,12 +79,20 @@ function getDescription(log: AuditLogEntry): string {
       return `Password reset requested by ${meta.user_name}`;
     case 'PASSWORD_RESET_SUCCESS':
       return `Password reset completed for ${meta.user_name}`;
+    case 'TERMS_CREATED':
+      return `Created Terms ${meta.version} "${meta.title || meta.document}" by ${meta.user_name || '—'} (${meta.email || meta.user_email || '—'})`;
+    case 'TERMS_UPDATED':
+      return `Updated Terms ${meta.version} "${meta.title || meta.document}" by ${meta.user_name || '—'} (${meta.email || meta.user_email || '—'})`;
+    case 'TERMS_PUBLISHED':
+      return `Published Terms ${meta.version} "${meta.title || meta.document}" by ${meta.user_name || '—'} (${meta.email || meta.user_email || '—'})`;
+    case 'TERMS_ARCHIVED':
+      return `Archived Terms ${meta.version} "${meta.title || meta.document}" by ${meta.user_name || '—'} (${meta.email || meta.user_email || '—'})`;
     case 'TERMS_VIEWED':
-      return `${meta.user_name} viewed "${meta.document}" ${meta.version}`;
+      return `${meta.user_name} (${meta.email || meta.user_email || '—'}) viewed Terms ${meta.version} "${meta.title || meta.document || ''}"`;
     case 'TERMS_ACCEPTED':
-      return `${meta.user_name} accepted "${meta.document}" ${meta.version}`;
+      return `${meta.user_name} (${meta.email || meta.user_email || '—'}) accepted Terms ${meta.version} "${meta.title || meta.document || ''}"`;
     case 'TERMS_REJECTED':
-      return `${meta.user_name} rejected Terms ${meta.version}${meta.reason ? ` — ${meta.reason}` : ''}`;
+      return `${meta.user_name} (${meta.email || meta.user_email || '—'}) rejected Terms ${meta.version} "${meta.title || meta.document || ''}"${meta.reason ? ` — ${meta.reason}` : ''}`;
     default:
       return '';
   }
