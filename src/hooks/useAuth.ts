@@ -47,8 +47,8 @@ export function useAuth() {
     if (mockUser) {
       currentMockUserId = mockUser.id;
       setAuthState({
-        user: { id: mockUser.id, email: mockUser.email },
-        session: { user: { id: mockUser.id, email: mockUser.email } },
+        user: { id: mockUser.id, email: mockUser.email, fullName: mockUser.fullName },
+        session: { user: { id: mockUser.id, email: mockUser.email, fullName: mockUser.fullName } },
         role: mockUser.role,
         loading: false,
       });
