@@ -21,7 +21,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LayoutDashboard, FileText, Settings2, ListChecks, Users, Layers, FolderTree, UserCog, ScrollText, FileCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
-type View = 'dashboard' | 'form' | 'submission' | 'config' | 'all-items' | 'users' | 'tiers' | 'supplier-groups' | 'staff' | 'audit-logs' | 'terms' | 'terms-report';
+type View = 'dashboard' | 'form' | 'submission' | 'config' | 'all-items' | 'users' | 'tiers' | 'supplier-groups' | 'staff' | 'audit-logs' | 'terms';
 
 // Map roles to their pending status for approver dashboard
 const ROLE_PENDING_STATUS: Partial<Record<UserType, WorkflowStatus>> = {
