@@ -11,6 +11,7 @@ import { ArrowLeft, Search, ChevronLeft, ChevronRight, Eye, RefreshCw, X, Downlo
 import { useAuditLogs, AuditLogEntry, AUDIT_EVENT_TYPES, ENTITY_TYPES } from '@/hooks/useAuditLogs';
 import { format } from 'date-fns';
 import { exportToExcel } from '@/utils/exportExcel';
+import { mockUsers } from '@/data/mock';
 
 interface AuditLogViewerProps {
   onBack: () => void;
