@@ -148,7 +148,7 @@ export function TermsManagement({ onBack }: TermsManagementProps) {
           content: formData.content,
           status: 'DRAFT',
           created_by: user?.id || null,
-          attachments,
+          attachments: attachments as any,
         }]);
       if (error) {
         toast.error('Failed to create');
