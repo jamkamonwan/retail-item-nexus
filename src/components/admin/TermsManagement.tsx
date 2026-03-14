@@ -422,6 +422,12 @@ export function TermsManagement({ onBack }: TermsManagementProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+        </TabsContent>
+
+        <TabsContent value="acceptance-log">
+          <TermsAcceptanceReport embedded />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
