@@ -139,6 +139,22 @@ export function UserManagement({ onBack }: UserManagementProps) {
           </div>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={() => {
+            const rows = users.map(u => ({
+              Name: u.fullName || '',
+              Email: u.email,
+              Role: u.role,
+              Status: u.status,
+              Department: u.department || '',
+              'Supplier Code': u.supplierCode || '',
+              'Last Login': u.lastLogin ? new Date(u.lastLogin).toISOString() : '',
+              'Created At': u.createdAt ? new Date(u.createdAt).toISOString() : '',
+            }));
+            exportToExcel(rows, `users-${new Date().toISOString().slice(0, 10)}`);
+          }} className="gap-2">
+            <Download className="h-4 w-4" />
+            Export Excel
+          </Button>
           <Button variant="outline" onClick={() => setView({ type: 'create-supplier-admin' })} className="gap-2">
             <ShieldPlus className="h-4 w-4" />
             Create Supplier Admin
