@@ -80,6 +80,10 @@ export function AuthenticatedWorkflowApp() {
     setCurrentView('tiers');
   };
 
+  const handleNavigateToAuditLogs = () => {
+    setCurrentView('audit-logs');
+  };
+
   const handleApprove = async (submission: NPDSubmission) => {
     const nextStatus = WORKFLOW_STATUSES[submission.status].nextStatus;
     if (nextStatus) {
