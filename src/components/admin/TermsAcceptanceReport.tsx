@@ -76,7 +76,8 @@ export function TermsAcceptanceReport({ onBack, embedded }: TermsAcceptanceRepor
 
       // Filter by version if selected
       if (filterVersion !== 'all') {
-        filtered = filtered.filter(l => l.entity_id === filterVersion);
+        const selectedVer = versions.find(v => v.id === filterVersion);
+        filtered = filtered.filter(l => l.entity_id === filterVersion || (selectedVer && l.entity_id === selectedVer.version));
       }
 
       setLogs(filtered);
