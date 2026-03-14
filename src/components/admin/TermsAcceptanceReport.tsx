@@ -76,7 +76,8 @@ export function TermsAcceptanceReport({ onBack, embedded }: TermsAcceptanceRepor
 
       // Filter by version if selected
       if (filterVersion !== 'all') {
-        filtered = filtered.filter(l => l.entity_id === filterVersion);
+        const selectedVer = versions.find(v => v.id === filterVersion);
+        filtered = filtered.filter(l => l.entity_id === filterVersion || (selectedVer && l.entity_id === selectedVer.version));
       }
 
       setLogs(filtered);
@@ -91,13 +92,14 @@ export function TermsAcceptanceReport({ onBack, embedded }: TermsAcceptanceRepor
 
   const getVersionLabel = (entityId: string | null) => {
     if (!entityId) return '—';
-    const v = versions.find(ver => ver.id === entityId);
-    return v?.version || entityId.substring(0, 8);
+    // entity_id may be a UUID or a version string like "v3.0"
+    const v = versions.find(ver => ver.id === entityId || ver.version === entityId);
+    return v?.version || entityId;
   };
 
   const getVersionTitle = (entityId: string | null) => {
     if (!entityId) return '—';
-    const v = versions.find(ver => ver.id === entityId);
+    const v = versions.find(ver => ver.id === entityId || ver.version === entityId);
     return v?.title || '—';
   };
 
