@@ -17,15 +17,8 @@ import { useSuppliers } from '@/hooks/useSuppliers';
 import { useTiers } from '@/hooks/useTiers';
 import { UserProfile, CreateUserData, UpdateUserData } from '@/types/admin';
 import { exportToExcel } from '@/utils/exportExcel';
-import { UserFiltersComponent } from './UserFilters';
-import { UserTable } from './UserTable';
-import { SupplierUserTable } from './SupplierUserTable';
-import { UserFormScreen } from './UserFormScreen';
-import { SupplierAdminWizard } from './SupplierAdminWizard';
-import { useUsers } from '@/hooks/useUsers';
-import { useSuppliers } from '@/hooks/useSuppliers';
-import { useTiers } from '@/hooks/useTiers';
-import { UserProfile, CreateUserData, UpdateUserData } from '@/types/admin';
+
+
 
 type ViewState = 
   | { type: 'list' }
