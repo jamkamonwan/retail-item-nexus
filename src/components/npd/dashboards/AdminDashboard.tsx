@@ -22,6 +22,7 @@ export function AdminDashboard({
   onNavigateToConfig,
   onNavigateToUsers,
   onNavigateToTiers,
+  onNavigateToAuditLogs,
   loading,
 }: AdminDashboardProps) {
   if (loading) {
