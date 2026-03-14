@@ -72,7 +72,7 @@ export function useTermsVersions() {
     return data as TermsVersion;
   };
 
-  const updateVersion = async (id: string, params: { title?: string; content?: string; version?: string }, actorId?: string) => {
+  const updateVersion = async (id: string, params: { title?: string; content?: string; version?: string }, actorId?: string, userName?: string, userEmail?: string) => {
     // Only allow editing drafts
     const existing = versions.find(v => v.id === id);
     if (existing && existing.status !== 'DRAFT') {
@@ -96,7 +96,7 @@ export function useTermsVersions() {
       actorId,
       entityType: 'terms',
       entityId: id,
-      metadata: params,
+      metadata: { ...params, user_name: userName || '', email: userEmail || '' },
     });
 
     toast.success('Terms version updated');
