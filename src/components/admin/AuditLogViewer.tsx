@@ -48,6 +48,8 @@ function getMetaField(log: AuditLogEntry, field: string): string {
   return (meta?.[field] as string) || '';
 }
 
+const DEFAULT_TERMS_USER = mockUsers.find((u) => u.role === 'admin');
+
 function getDescription(log: AuditLogEntry): string {
   const meta = log.metadata as Record<string, unknown> | null;
   if (!meta) return '';
