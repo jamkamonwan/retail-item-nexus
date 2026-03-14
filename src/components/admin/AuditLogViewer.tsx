@@ -79,18 +79,6 @@ function getDescription(log: AuditLogEntry): string {
       return `${meta.user_name} accepted "${meta.document}" ${meta.version}`;
     case 'TERMS_REJECTED':
       return `${meta.user_name} rejected Terms ${meta.version}${meta.reason ? ` — ${meta.reason}` : ''}`;
-    case 'ITEM_CREATED':
-      return `Created item "${meta.product_name_en || meta.product_name}" by ${meta.created_by}`;
-    case 'ITEM_SUBMITTED':
-      return `Submitted "${meta.product_name}" for review`;
-    case 'ITEM_APPROVED':
-      return `"${meta.product_name}" approved by ${meta.approved_by} (${meta.approved_by_role})`;
-    case 'ITEM_REJECTED':
-      return `"${meta.product_name}" rejected by ${meta.rejected_by} — ${meta.reason}`;
-    case 'ITEM_UPDATED':
-      return `"${meta.product_name}" updated by ${meta.updated_by} — fields: ${Array.isArray(meta.fields_updated) ? (meta.fields_updated as string[]).join(', ') : ''}`;
-    case 'DOCUMENT_UPLOADED':
-      return `Uploaded "${meta.file_name}" (${meta.file_size_kb}KB) for ${meta.product_name}`;
     default:
       return '';
   }
