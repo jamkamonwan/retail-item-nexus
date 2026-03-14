@@ -124,7 +124,7 @@ export async function logAuditEvent(params: {
     target_user_id: params.targetUserId || null,
     entity_type: params.entityType || null,
     entity_id: params.entityId || null,
-    metadata: params.metadata || {},
+    metadata: (params.metadata || {}) as Record<string, string | number | boolean | null>,
     user_agent: navigator.userAgent,
   }]);
 
