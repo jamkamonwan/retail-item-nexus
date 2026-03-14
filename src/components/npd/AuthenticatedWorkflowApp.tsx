@@ -43,7 +43,9 @@ export function AuthenticatedWorkflowApp() {
   // Terms acceptance check for supplier roles
   const isSupplierRole = demoRole === 'supplier' || demoRole === 'supplier_admin';
   const { hasAccepted, publishedTerms, loading: termsLoading, acceptTerms, rejectTerms } = useTermsAcceptance(
-    isSupplierRole ? user?.id : undefined
+    isSupplierRole ? user?.id : undefined,
+    user?.email,
+    user?.user_metadata?.full_name || user?.email
   );
 
   const handleRoleChange = (newRole: UserType) => {
