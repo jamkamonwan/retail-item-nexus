@@ -101,6 +101,35 @@ function getDescription(log: AuditLogEntry): string {
   }
 }
 
+function getActorDisplay(log: AuditLogEntry): string {
+  const actor =
+    getMetaField(log, 'created_by') ||
+    getMetaField(log, 'assigned_by') ||
+    getMetaField(log, 'approved_by') ||
+    getMetaField(log, 'rejected_by') ||
+    getMetaField(log, 'removed_by') ||
+    getMetaField(log, 'deactivated_by') ||
+    getMetaField(log, 'activated_by') ||
+    getMetaField(log, 'sent_by') ||
+    getMetaField(log, 'updated_by') ||
+    getMetaField(log, 'submitted_by') ||
+    getMetaField(log, 'uploaded_by') ||
+    getMetaField(log, 'user_name');
+
+  if (actor) return actor;
+  if (log.event_type.startsWith('TERMS_')) return DEFAULT_TERMS_USER?.fullName || 'Admin User';
+  return '—';
+}
+
+function getEmailDisplay(log: AuditLogEntry): string {
+  const meta = log.metadata as Record<string, unknown> | null;
+  const email = (meta?.email as string) || (meta?.user_email as string) || '';
+
+  if (email) return email;
+  if (log.event_type.startsWith('TERMS_')) return DEFAULT_TERMS_USER?.email || 'admin@company.com';
+  return '—';
+}
+
 export function AuditLogViewer({ onBack }: AuditLogViewerProps) {
   const { logs, loading, filters, setFilters, page, setPage, pageSize, totalCount, refetch } = useAuditLogs();
   const [detailLog, setDetailLog] = useState<AuditLogEntry | null>(null);
