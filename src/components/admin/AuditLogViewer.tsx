@@ -238,6 +238,12 @@ export function AuditLogViewer({ onBack }: AuditLogViewerProps) {
                         <TableCell className="text-sm text-muted-foreground">
                           {email || '—'}
                         </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {supplierCode || '—'}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {supplierPartner || '—'}
+                        </TableCell>
                         <TableCell>
                           <Button variant="ghost" size="icon" className="h-7 w-7">
                             <Eye className="h-3.5 w-3.5" />
