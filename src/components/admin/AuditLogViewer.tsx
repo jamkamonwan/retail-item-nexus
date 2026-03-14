@@ -208,6 +208,8 @@ export function AuditLogViewer({ onBack }: AuditLogViewerProps) {
                     <TableHead>Description</TableHead>
                     <TableHead className="w-[140px]">By</TableHead>
                     <TableHead className="w-[200px]">Email</TableHead>
+                    <TableHead className="w-[140px]">Supplier Code</TableHead>
+                    <TableHead className="w-[160px]">Supplier Partner</TableHead>
                     <TableHead className="w-[50px]" />
                   </TableRow>
                 </TableHeader>
