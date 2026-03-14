@@ -297,7 +297,7 @@ export function AuthenticatedWorkflowApp() {
         {currentView === 'supplier-groups' && <SupplierGroupManagement onBack={handleBackToList} />}
         {currentView === 'audit-logs' && <AuditLogViewer onBack={handleBackToList} />}
         {currentView === 'terms' && <TermsManagement onBack={handleBackToList} />}
-        {currentView === 'terms-report' && <TermsAcceptanceReport onBack={handleBackToList} />}
+        
 
         {currentView === 'staff' && (
           <SupplierAdminDashboard userId={user?.id} supplierGroupId="group-001" />
