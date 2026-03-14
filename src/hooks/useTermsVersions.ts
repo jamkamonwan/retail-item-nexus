@@ -40,7 +40,7 @@ export function useTermsVersions() {
     fetchVersions();
   }, [fetchVersions]);
 
-  const createVersion = async (params: { version: string; title: string; content: string; createdBy?: string }) => {
+  const createVersion = async (params: { version: string; title: string; content: string; createdBy?: string; userName?: string; userEmail?: string }) => {
     const { data, error } = await supabase
       .from('terms_versions')
       .insert([{
@@ -64,7 +64,7 @@ export function useTermsVersions() {
       actorId: params.createdBy,
       entityType: 'terms',
       entityId: (data as TermsVersion).id,
-      metadata: { version: params.version, title: params.title },
+      metadata: { version: params.version, title: params.title, user_name: params.userName || '', email: params.userEmail || '' },
     });
 
     toast.success('Terms version created as draft');
@@ -72,7 +72,7 @@ export function useTermsVersions() {
     return data as TermsVersion;
   };
 
-  const updateVersion = async (id: string, params: { title?: string; content?: string; version?: string }, actorId?: string) => {
+  const updateVersion = async (id: string, params: { title?: string; content?: string; version?: string }, actorId?: string, userName?: string, userEmail?: string) => {
     // Only allow editing drafts
     const existing = versions.find(v => v.id === id);
     if (existing && existing.status !== 'DRAFT') {
@@ -96,7 +96,7 @@ export function useTermsVersions() {
       actorId,
       entityType: 'terms',
       entityId: id,
-      metadata: params,
+      metadata: { ...params, user_name: userName || '', email: userEmail || '' },
     });
 
     toast.success('Terms version updated');
@@ -104,7 +104,7 @@ export function useTermsVersions() {
     return true;
   };
 
-  const publishVersion = async (id: string, actorId?: string) => {
+  const publishVersion = async (id: string, actorId?: string, userName?: string, userEmail?: string) => {
     // Archive current published version
     const currentPublished = versions.find(v => v.status === 'PUBLISHED');
     if (currentPublished) {
@@ -118,7 +118,7 @@ export function useTermsVersions() {
         actorId,
         entityType: 'terms',
         entityId: currentPublished.id,
-        metadata: { version: currentPublished.version },
+        metadata: { version: currentPublished.version, title: currentPublished.title, user_name: userName || '', email: userEmail || '' },
       });
     }
 
@@ -140,7 +140,7 @@ export function useTermsVersions() {
       actorId,
       entityType: 'terms',
       entityId: id,
-      metadata: { version: version?.version },
+      metadata: { version: version?.version, title: version?.title, user_name: userName || '', email: userEmail || '' },
     });
 
     toast.success('Terms version published');

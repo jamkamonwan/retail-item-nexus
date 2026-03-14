@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useTermsVersions, TermsVersion } from '@/hooks/useTermsVersions';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { logAuditEvent } from '@/hooks/useAuditLogs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -165,11 +166,26 @@ export function TermsManagement({ onBack }: TermsManagementProps) {
           .update({ version: formData.version, title: formData.title, content: formData.content, attachments: attachments as any })
           .eq('id', editingVersion.id);
         if (error) { toast.error('Failed to update'); return; }
+        await logAuditEvent({
+          eventType: 'TERMS_UPDATED',
+          actorId: createdBy || undefined,
+          entityType: 'terms',
+          entityId: editingVersion.id,
+          metadata: { version: formData.version, title: formData.title, user_name: user?.fullName || '', email: user?.email || '' },
+        });
         toast.success('Draft saved');
       } else {
-        const { error } = await supabase.from('terms_versions')
-          .insert([{ version: formData.version, title: formData.title, content: formData.content, status: 'DRAFT', created_by: createdBy, attachments: attachments as any }]);
+        const { data, error } = await supabase.from('terms_versions')
+          .insert([{ version: formData.version, title: formData.title, content: formData.content, status: 'DRAFT', created_by: createdBy, attachments: attachments as any }])
+          .select().single();
         if (error) { toast.error('Failed to create: ' + error.message); return; }
+        await logAuditEvent({
+          eventType: 'TERMS_CREATED',
+          actorId: createdBy || undefined,
+          entityType: 'terms',
+          entityId: (data as any)?.id,
+          metadata: { version: formData.version, title: formData.title, user_name: user?.fullName || '', email: user?.email || '' },
+        });
         toast.success('Draft created');
       }
       await refetch();
@@ -189,16 +205,30 @@ export function TermsManagement({ onBack }: TermsManagementProps) {
           .update({ version: formData.version, title: formData.title, content: formData.content, attachments: attachments as any })
           .eq('id', editingVersion.id);
         if (error) { toast.error('Failed to update'); return; }
+        await logAuditEvent({
+          eventType: 'TERMS_UPDATED',
+          actorId: createdBy || undefined,
+          entityType: 'terms',
+          entityId: editingVersion.id,
+          metadata: { version: formData.version, title: formData.title, user_name: user?.fullName || '', email: user?.email || '' },
+        });
       } else {
         const { data, error } = await supabase.from('terms_versions')
           .insert([{ version: formData.version, title: formData.title, content: formData.content, status: 'DRAFT', created_by: createdBy, attachments: attachments as any }])
           .select().single();
         if (error || !data) { toast.error('Failed to create: ' + (error?.message || '')); return; }
         targetId = (data as any).id;
+        await logAuditEvent({
+          eventType: 'TERMS_CREATED',
+          actorId: createdBy || undefined,
+          entityType: 'terms',
+          entityId: targetId,
+          metadata: { version: formData.version, title: formData.title, user_name: user?.fullName || '', email: user?.email || '' },
+        });
       }
       await refetch();
       if (targetId) {
-        await publishVersion(targetId, createdBy || undefined);
+        await publishVersion(targetId, createdBy || undefined, user?.fullName, user?.email);
       }
       setView('list');
     } finally {
@@ -208,7 +238,7 @@ export function TermsManagement({ onBack }: TermsManagementProps) {
 
   const handlePublishExisting = async () => {
     if (!publishTargetId) return;
-    await publishVersion(publishTargetId, createdBy || undefined);
+    await publishVersion(publishTargetId, createdBy || undefined, user?.fullName, user?.email);
     setPublishConfirmAction(null);
     setPublishTargetId(null);
   };

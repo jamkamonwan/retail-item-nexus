@@ -7,6 +7,7 @@ export type UserType = MockRole;
 interface MockUser {
   id: string;
   email: string;
+  fullName?: string;
 }
 
 interface AuthState {
@@ -23,8 +24,8 @@ export function useAuth() {
   const [authState, setAuthState] = useState<AuthState>(() => {
     const mockUser = mockUsers.find(u => u.id === currentMockUserId);
     return {
-      user: mockUser ? { id: mockUser.id, email: mockUser.email } : null,
-      session: mockUser ? { user: { id: mockUser.id, email: mockUser.email } } : null,
+      user: mockUser ? { id: mockUser.id, email: mockUser.email, fullName: mockUser.fullName } : null,
+      session: mockUser ? { user: { id: mockUser.id, email: mockUser.email, fullName: mockUser.fullName } } : null,
       role: mockUser?.role || null,
       loading: false,
     };
@@ -34,8 +35,8 @@ export function useAuth() {
     currentMockUserId = userId;
     const mockUser = mockUsers.find(u => u.id === userId);
     setAuthState({
-      user: mockUser ? { id: mockUser.id, email: mockUser.email } : null,
-      session: mockUser ? { user: { id: mockUser.id, email: mockUser.email } } : null,
+      user: mockUser ? { id: mockUser.id, email: mockUser.email, fullName: mockUser.fullName } : null,
+      session: mockUser ? { user: { id: mockUser.id, email: mockUser.email, fullName: mockUser.fullName } } : null,
       role: mockUser?.role || null,
       loading: false,
     });
@@ -46,8 +47,8 @@ export function useAuth() {
     if (mockUser) {
       currentMockUserId = mockUser.id;
       setAuthState({
-        user: { id: mockUser.id, email: mockUser.email },
-        session: { user: { id: mockUser.id, email: mockUser.email } },
+        user: { id: mockUser.id, email: mockUser.email, fullName: mockUser.fullName },
+        session: { user: { id: mockUser.id, email: mockUser.email, fullName: mockUser.fullName } },
         role: mockUser.role,
         loading: false,
       });
