@@ -5,6 +5,7 @@ import {
   Settings2, 
   Users, 
   Layers,
+  ScrollText,
 } from 'lucide-react';
 
 interface AdminDashboardProps {
