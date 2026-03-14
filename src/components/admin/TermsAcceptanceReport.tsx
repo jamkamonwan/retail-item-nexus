@@ -10,7 +10,8 @@ import { ArrowLeft, Loader2, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface TermsAcceptanceReportProps {
-  onBack: () => void;
+  onBack?: () => void;
+  embedded?: boolean;
 }
 
 interface AcceptanceRow {
@@ -36,7 +37,7 @@ interface AuditLogEntry {
   created_at: string | null;
 }
 
-export function TermsAcceptanceReport({ onBack }: TermsAcceptanceReportProps) {
+export function TermsAcceptanceReport({ onBack, embedded }: TermsAcceptanceReportProps) {
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
   const [versions, setVersions] = useState<VersionOption[]>([]);
   const [loading, setLoading] = useState(false);
@@ -136,17 +137,19 @@ export function TermsAcceptanceReport({ onBack }: TermsAcceptanceReportProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" onClick={onBack}>
-            <ArrowLeft className="w-4 h-4 mr-1" /> Back
+      {!embedded && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" onClick={onBack}>
+              <ArrowLeft className="w-4 h-4 mr-1" /> Back
+            </Button>
+            <h2 className="text-2xl font-bold text-foreground">Terms & Conditions Log</h2>
+          </div>
+          <Button variant="outline" onClick={fetchData} className="gap-2">
+            <RefreshCw className="w-4 h-4" /> Refresh
           </Button>
-          <h2 className="text-2xl font-bold text-foreground">Terms & Conditions Log</h2>
         </div>
-        <Button variant="outline" onClick={fetchData} className="gap-2">
-          <RefreshCw className="w-4 h-4" /> Refresh
-        </Button>
-      </div>
+      )}
 
       <Card>
         <CardHeader>

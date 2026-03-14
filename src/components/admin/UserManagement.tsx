@@ -6,7 +6,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { UserPlus, ArrowLeft, ShieldPlus } from 'lucide-react';
+import { UserPlus, ArrowLeft, ShieldPlus, Download } from 'lucide-react';
 import { UserFiltersComponent } from './UserFilters';
 import { UserTable } from './UserTable';
 import { SupplierUserTable } from './SupplierUserTable';
@@ -16,6 +16,9 @@ import { useUsers } from '@/hooks/useUsers';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { useTiers } from '@/hooks/useTiers';
 import { UserProfile, CreateUserData, UpdateUserData } from '@/types/admin';
+import { exportToExcel } from '@/utils/exportExcel';
+
+
 
 type ViewState = 
   | { type: 'list' }
@@ -129,6 +132,22 @@ export function UserManagement({ onBack }: UserManagementProps) {
           </div>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={() => {
+            const rows = users.map(u => ({
+              Name: u.fullName || '',
+              Email: u.email,
+              Role: u.role,
+              Status: u.status,
+              Department: u.department || '',
+               'Supplier': u.supplierName || '',
+               'Last Login': u.lastLoginAt ? new Date(u.lastLoginAt).toISOString() : '',
+              'Created At': u.createdAt ? new Date(u.createdAt).toISOString() : '',
+            }));
+            exportToExcel(rows, `users-${new Date().toISOString().slice(0, 10)}`);
+          }} className="gap-2">
+            <Download className="h-4 w-4" />
+            Export Excel
+          </Button>
           <Button variant="outline" onClick={() => setView({ type: 'create-supplier-admin' })} className="gap-2">
             <ShieldPlus className="h-4 w-4" />
             Create Supplier Admin

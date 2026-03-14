@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -14,6 +15,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArrowLeft, Plus, Edit, Send, Eye, Loader2, Paperclip, X, FileText, Save } from 'lucide-react';
 import { format } from 'date-fns';
 import { RichTextEditor } from './RichTextEditor';
+import { TermsAcceptanceReport } from './TermsAcceptanceReport';
 import { toast } from 'sonner';
 
 interface TermsManagementProps {
@@ -316,6 +318,13 @@ export function TermsManagement({ onBack }: TermsManagementProps) {
         </Button>
       </div>
 
+      <Tabs defaultValue="versions" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="versions">Versions</TabsTrigger>
+          <TabsTrigger value="acceptance-log">Acceptance Log</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="versions">
       <Card>
         <CardHeader><CardTitle>Version History</CardTitle></CardHeader>
         <CardContent>
@@ -413,6 +422,12 @@ export function TermsManagement({ onBack }: TermsManagementProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+        </TabsContent>
+
+        <TabsContent value="acceptance-log">
+          <TermsAcceptanceReport embedded />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

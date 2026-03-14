@@ -16,12 +16,12 @@ import { SupplierDashboard, SupplierAdminDashboard, ApproverDashboard, AdminDash
 import { UserManagement, TierManagement, SupplierGroupManagement } from '@/components/admin';
 import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
 import { TermsManagement } from '@/components/admin/TermsManagement';
-import { TermsAcceptanceReport } from '@/components/admin/TermsAcceptanceReport';
+
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LayoutDashboard, FileText, Settings2, ListChecks, Users, Layers, FolderTree, UserCog, ScrollText, FileCheck, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, FileText, Settings2, ListChecks, Users, Layers, FolderTree, UserCog, ScrollText, FileCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
-type View = 'dashboard' | 'form' | 'submission' | 'config' | 'all-items' | 'users' | 'tiers' | 'supplier-groups' | 'staff' | 'audit-logs' | 'terms' | 'terms-report';
+type View = 'dashboard' | 'form' | 'submission' | 'config' | 'all-items' | 'users' | 'tiers' | 'supplier-groups' | 'staff' | 'audit-logs' | 'terms';
 
 // Map roles to their pending status for approver dashboard
 const ROLE_PENDING_STATUS: Partial<Record<UserType, WorkflowStatus>> = {
@@ -174,10 +174,6 @@ export function AuthenticatedWorkflowApp() {
               <FileCheck className="w-4 h-4" />
               Terms
             </TabsTrigger>
-            <TabsTrigger value="terms-report" className="gap-2">
-              <ClipboardList className="w-4 h-4" />
-              Acceptance
-            </TabsTrigger>
             <TabsTrigger value="config" className="gap-2">
               <Settings2 className="w-4 h-4" />
               Config
@@ -301,7 +297,7 @@ export function AuthenticatedWorkflowApp() {
         {currentView === 'supplier-groups' && <SupplierGroupManagement onBack={handleBackToList} />}
         {currentView === 'audit-logs' && <AuditLogViewer onBack={handleBackToList} />}
         {currentView === 'terms' && <TermsManagement onBack={handleBackToList} />}
-        {currentView === 'terms-report' && <TermsAcceptanceReport onBack={handleBackToList} />}
+        
 
         {currentView === 'staff' && (
           <SupplierAdminDashboard userId={user?.id} supplierGroupId="group-001" />
