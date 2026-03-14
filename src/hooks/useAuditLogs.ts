@@ -118,7 +118,7 @@ export async function logAuditEvent(params: {
   entityId?: string;
   metadata?: Record<string, unknown>;
 }) {
-  const { error } = await supabase.from('audit_logs').insert({
+  const { error } = await supabase.from('audit_logs').insert([{
     event_type: params.eventType,
     actor_id: params.actorId || null,
     target_user_id: params.targetUserId || null,
@@ -126,7 +126,7 @@ export async function logAuditEvent(params: {
     entity_id: params.entityId || null,
     metadata: params.metadata || {},
     user_agent: navigator.userAgent,
-  });
+  }]);
 
   if (error) {
     console.error('Failed to log audit event:', error);
