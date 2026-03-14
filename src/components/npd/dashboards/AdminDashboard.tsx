@@ -6,6 +6,7 @@ import {
   Users, 
   Layers,
   ScrollText,
+  FileCheck,
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -16,6 +17,7 @@ interface AdminDashboardProps {
   onNavigateToUsers: () => void;
   onNavigateToTiers: () => void;
   onNavigateToAuditLogs?: () => void;
+  onNavigateToTerms?: () => void;
 }
 
 export function AdminDashboard({
