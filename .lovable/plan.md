@@ -1,37 +1,48 @@
+## Move Buttons to Top-Right Corner of Page
 
+### Problem
 
-# Audit Log Fixes: Add Supplier Code & Partner Columns, Remove Item/Document Events
+The Save/Add Supplier buttons are buried below the form fields inside the card, wasting vertical space.
 
-## Summary
+### Solution
 
-Three changes: add **Supplier Code** and **Supplier Partner** columns to the audit log table UI, and remove all item/document-related audit events (ITEM_CREATED, ITEM_UPDATED, ITEM_SUBMITTED, ITEM_APPROVED, ITEM_REJECTED, DOCUMENT_UPLOADED) since those belong to the item module and don't need auditing.
+Move the buttons out of the `renderHeader` card and into the top bar alongside the "Back to Groups" button, positioned on the right side. This eliminates a whole row inside the card and puts actions where users expect them.
 
-## Changes
+### Layout Change
 
-### 1. Database — Delete item/document audit rows & update metadata with supplier info
+```text
+Current:
+[Back to Groups]
+┌─────────────────────────────────┐
+│ Supplier Partner Name           │
+│ [Input ........................] │
+│ Description                     │
+│ [Textarea ....................] │
+│              [Save] [Add Supplier] │
+└─────────────────────────────────┘
 
-- Delete all rows where `event_type` IN (`ITEM_CREATED`, `ITEM_UPDATED`, `ITEM_SUBMITTED`, `ITEM_APPROVED`, `ITEM_REJECTED`, `DOCUMENT_UPLOADED`)
-- Update existing supplier-related rows to include `supplier_codes` (comma-separated if multiple) and `supplier_partner` in metadata where applicable (e.g., SUPPLIER_USER_ASSIGNED, USER_CREATED for external users)
+New:
+[Back to Groups]              [Save] [Add Supplier]
+┌─────────────────────────────────┐
+│ Supplier Partner Name           │
+│ [Input ........................] │
+│ Description                     │
+│ [Textarea ....................] │
+└─────────────────────────────────┘
+```
 
-### 2. Hook (`useAuditLogs.ts`)
+### Technical Details
 
-- Remove `ITEM_*` and `DOCUMENT_UPLOADED` from `AUDIT_EVENT_TYPES`
-- Remove `item` and `document` from `ENTITY_TYPES`
+**File: `src/components/admin/SupplierGroupManagement.tsx**`
 
-### 3. UI (`AuditLogViewer.tsx`)
-
-- Add two new table columns after Email:
-  - **Supplier Code** — reads `metadata.supplier_code` (or `metadata.supplier_codes` for comma-separated multiple codes)
-  - **Supplier Partner** — reads `metadata.supplier_partner`
-- Show "—" when not applicable (e.g., auth events, internal user events)
-- Remove all `ITEM_*` and `DOCUMENT_UPLOADED` color mappings and `getDescription` cases
-- Add these columns to the detail dialog as well
-
-### 4. Mock data updates
-
-Update metadata for supplier-related events to include realistic supplier codes and partner names:
-- `SUPPLIER_USER_ASSIGNED`: add `supplier_codes: "10001"`, `supplier_partner: "Unilever Group"`
-- `USER_CREATED` (external): add `supplier_codes: "83790, 34355"`, `supplier_partner: "Unilever Group"`
-- `SUPPLIER_USER_REMOVED`: already has `supplier_code`, add `supplier_partner`
-- Other supplier-context events get appropriate values
-
+1. **Update `renderHeader**`: Remove the buttons div (lines 88-106) from inside the CardHeader. Only keep name input, description textarea, and tier badge.
+2. **Update the creation view** (the `if (isCreating)` block): Change the top bar from just a back button to a `flex justify-between` row with back on left and Save/Auto Fill buttons on right.
+3. **Update the detail view** (the `if (selectedGroup)` block): Same pattern -- back button on left, Save + Add Supplier buttons on right in the top bar.
+4. The `renderHeader` function signature stays the same but the buttons are rendered outside of it, in the parent view's top navigation bar instead.  
+|  
+  
+  
+fix on When creat ethew new supplier partner   
+move the button save  and autofill  on the right rop corner of page   
+add the button add supplier also  in that  page 
+5. &nbsp;

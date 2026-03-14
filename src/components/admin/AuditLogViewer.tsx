@@ -30,9 +30,6 @@ const EVENT_CATEGORY_COLORS: Record<string, string> = {
   SUPPLIER_USER_REMOVED: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
   TERMS_ACCEPTED: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
   TERMS_REJECTED: 'bg-destructive/10 text-destructive',
-  ITEM_CREATED: 'bg-sky-100 text-sky-800 dark:bg-sky-900 dark:text-sky-200',
-  ITEM_APPROVED: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  ITEM_REJECTED: 'bg-destructive/10 text-destructive',
 };
 
 function getEventBadgeClass(eventType: string) {
@@ -82,18 +79,6 @@ function getDescription(log: AuditLogEntry): string {
       return `${meta.user_name} accepted "${meta.document}" ${meta.version}`;
     case 'TERMS_REJECTED':
       return `${meta.user_name} rejected Terms ${meta.version}${meta.reason ? ` — ${meta.reason}` : ''}`;
-    case 'ITEM_CREATED':
-      return `Created item "${meta.product_name_en || meta.product_name}" by ${meta.created_by}`;
-    case 'ITEM_SUBMITTED':
-      return `Submitted "${meta.product_name}" for review`;
-    case 'ITEM_APPROVED':
-      return `"${meta.product_name}" approved by ${meta.approved_by} (${meta.approved_by_role})`;
-    case 'ITEM_REJECTED':
-      return `"${meta.product_name}" rejected by ${meta.rejected_by} — ${meta.reason}`;
-    case 'ITEM_UPDATED':
-      return `"${meta.product_name}" updated by ${meta.updated_by} — fields: ${Array.isArray(meta.fields_updated) ? (meta.fields_updated as string[]).join(', ') : ''}`;
-    case 'DOCUMENT_UPLOADED':
-      return `Uploaded "${meta.file_name}" (${meta.file_size_kb}KB) for ${meta.product_name}`;
     default:
       return '';
   }
@@ -223,6 +208,8 @@ export function AuditLogViewer({ onBack }: AuditLogViewerProps) {
                     <TableHead>Description</TableHead>
                     <TableHead className="w-[140px]">By</TableHead>
                     <TableHead className="w-[200px]">Email</TableHead>
+                    <TableHead className="w-[140px]">Supplier Code</TableHead>
+                    <TableHead className="w-[160px]">Supplier Partner</TableHead>
                     <TableHead className="w-[50px]" />
                   </TableRow>
                 </TableHeader>
@@ -230,6 +217,8 @@ export function AuditLogViewer({ onBack }: AuditLogViewerProps) {
                   {logs.map((log) => {
                     const meta = log.metadata as Record<string, unknown> | null;
                     const email = (meta?.email as string) || '';
+                    const supplierCode = (meta?.supplier_codes as string) || (meta?.supplier_code as string) || '';
+                    const supplierPartner = (meta?.supplier_partner as string) || '';
                     return (
                       <TableRow key={log.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setDetailLog(log)}>
                         <TableCell className="text-xs text-muted-foreground font-mono">
@@ -248,6 +237,12 @@ export function AuditLogViewer({ onBack }: AuditLogViewerProps) {
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {email || '—'}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {supplierCode || '—'}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {supplierPartner || '—'}
                         </TableCell>
                         <TableCell>
                           <Button variant="ghost" size="icon" className="h-7 w-7">
@@ -309,6 +304,12 @@ export function AuditLogViewer({ onBack }: AuditLogViewerProps) {
 
                 <span className="text-muted-foreground font-medium">Entity ID:</span>
                 <span className="font-mono text-xs">{detailLog.entity_id || '—'}</span>
+
+                <span className="text-muted-foreground font-medium">Supplier Code:</span>
+                <span>{(detailLog.metadata as Record<string, unknown>)?.supplier_codes as string || (detailLog.metadata as Record<string, unknown>)?.supplier_code as string || '—'}</span>
+
+                <span className="text-muted-foreground font-medium">Supplier Partner:</span>
+                <span>{(detailLog.metadata as Record<string, unknown>)?.supplier_partner as string || '—'}</span>
 
                 <span className="text-muted-foreground font-medium">IP Address:</span>
                 <span className="font-mono text-xs">{detailLog.ip_address || '—'}</span>
