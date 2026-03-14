@@ -55,6 +55,7 @@ export type Database = {
       }
       terms_versions: {
         Row: {
+          attachments: Json | null
           content: string
           created_at: string
           created_by: string | null
@@ -65,6 +66,7 @@ export type Database = {
           version: string
         }
         Insert: {
+          attachments?: Json | null
           content: string
           created_at?: string
           created_by?: string | null
@@ -75,6 +77,7 @@ export type Database = {
           version: string
         }
         Update: {
+          attachments?: Json | null
           content?: string
           created_at?: string
           created_by?: string | null
