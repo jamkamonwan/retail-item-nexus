@@ -180,6 +180,10 @@ export function AuthenticatedWorkflowApp() {
               <Settings2 className="w-4 h-4" />
               Config
             </TabsTrigger>
+            <TabsTrigger value="audit-logs" className="gap-2">
+              <ScrollText className="w-4 h-4" />
+              Audit Logs
+            </TabsTrigger>
           </>
         );
       default:
