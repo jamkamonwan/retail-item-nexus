@@ -25,10 +25,19 @@ interface AcceptanceRow {
 interface VersionOption {
   id: string;
   version: string;
+  title: string;
+}
+
+interface AuditLogEntry {
+  event_type: string;
+  actor_id: string | null;
+  entity_id: string | null;
+  metadata: Record<string, any> | null;
+  created_at: string | null;
 }
 
 export function TermsAcceptanceReport({ onBack }: TermsAcceptanceReportProps) {
-  const [records, setRecords] = useState<AcceptanceRow[]>([]);
+  const [logs, setLogs] = useState<AuditLogEntry[]>([]);
   const [versions, setVersions] = useState<VersionOption[]>([]);
   const [loading, setLoading] = useState(false);
   const [filterVersion, setFilterVersion] = useState<string>('all');
@@ -38,32 +47,38 @@ export function TermsAcceptanceReport({ onBack }: TermsAcceptanceReportProps) {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      // Fetch versions for filter dropdown
+      // Fetch versions for filter dropdown and version label
       const { data: vData } = await supabase
         .from('terms_versions')
-        .select('id, version')
+        .select('id, version, title')
         .order('created_at', { ascending: false });
       setVersions((vData as VersionOption[]) || []);
 
-      // Fetch acceptance records
+      // Fetch audit logs for terms events
       let query = supabase
-        .from('user_terms_acceptance')
+        .from('audit_logs')
         .select('*')
+        .in('event_type', ['TERMS_ACCEPTED', 'TERMS_REJECTED', 'TERMS_VIEWED'])
         .order('created_at', { ascending: false });
 
-      if (filterVersion !== 'all') {
-        query = query.eq('terms_version_id', filterVersion);
-      }
       if (filterStatus !== 'all') {
-        query = query.eq('status', filterStatus);
+        query = query.eq('event_type', filterStatus);
       }
 
       const { data, error } = await query;
       if (error) {
-        console.error('Error fetching acceptance records:', error);
+        console.error('Error fetching terms logs:', error);
         return;
       }
-      setRecords((data as AcceptanceRow[]) || []);
+
+      let filtered = (data as AuditLogEntry[]) || [];
+
+      // Filter by version if selected
+      if (filterVersion !== 'all') {
+        filtered = filtered.filter(l => l.entity_id === filterVersion);
+      }
+
+      setLogs(filtered);
     } finally {
       setLoading(false);
     }
@@ -73,14 +88,50 @@ export function TermsAcceptanceReport({ onBack }: TermsAcceptanceReportProps) {
     fetchData();
   }, [fetchData]);
 
-  const getVersionLabel = (versionId: string) => {
-    const v = versions.find(ver => ver.id === versionId);
-    return v?.version || versionId.substring(0, 8);
+  const getVersionLabel = (entityId: string | null) => {
+    if (!entityId) return '—';
+    const v = versions.find(ver => ver.id === entityId);
+    return v?.version || entityId.substring(0, 8);
   };
 
-  const filteredRecords = records.filter(r => {
+  const getVersionTitle = (entityId: string | null) => {
+    if (!entityId) return '—';
+    const v = versions.find(ver => ver.id === entityId);
+    return v?.title || '—';
+  };
+
+  const getActionLabel = (eventType: string) => {
+    switch (eventType) {
+      case 'TERMS_ACCEPTED': return 'Accepted';
+      case 'TERMS_REJECTED': return 'Rejected';
+      case 'TERMS_VIEWED': return 'Viewed';
+      default: return eventType;
+    }
+  };
+
+  const getActionBadge = (eventType: string) => {
+    switch (eventType) {
+      case 'TERMS_ACCEPTED': return 'bg-green-100 text-green-800 border-green-300';
+      case 'TERMS_REJECTED': return 'bg-red-100 text-red-800 border-red-300';
+      case 'TERMS_VIEWED': return 'bg-blue-100 text-blue-800 border-blue-300';
+      default: return '';
+    }
+  };
+
+  const getUserName = (log: AuditLogEntry) => {
+    return (log.metadata as any)?.user_name || (log.metadata as any)?.name || '—';
+  };
+
+  const getUserEmail = (log: AuditLogEntry) => {
+    return (log.metadata as any)?.user_email || (log.metadata as any)?.email || '—';
+  };
+
+  const filteredLogs = logs.filter(l => {
     if (!search) return true;
-    return r.user_id.toLowerCase().includes(search.toLowerCase());
+    const name = getUserName(l).toLowerCase();
+    const email = getUserEmail(l).toLowerCase();
+    const s = search.toLowerCase();
+    return name.includes(s) || email.includes(s);
   });
 
   return (
@@ -90,7 +141,7 @@ export function TermsAcceptanceReport({ onBack }: TermsAcceptanceReportProps) {
           <Button variant="ghost" size="sm" onClick={onBack}>
             <ArrowLeft className="w-4 h-4 mr-1" /> Back
           </Button>
-          <h2 className="text-2xl font-bold text-foreground">Terms Acceptance Report</h2>
+          <h2 className="text-2xl font-bold text-foreground">Terms & Conditions Log</h2>
         </div>
         <Button variant="outline" onClick={fetchData} className="gap-2">
           <RefreshCw className="w-4 h-4" /> Refresh
@@ -104,7 +155,7 @@ export function TermsAcceptanceReport({ onBack }: TermsAcceptanceReportProps) {
         <CardContent>
           <div className="flex gap-4 flex-wrap">
             <Input
-              placeholder="Search by user ID..."
+              placeholder="Search by name or email..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="max-w-xs"
@@ -121,13 +172,14 @@ export function TermsAcceptanceReport({ onBack }: TermsAcceptanceReportProps) {
               </SelectContent>
             </Select>
             <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="All Statuses" />
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="All Actions" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="ACCEPTED">Accepted</SelectItem>
-                <SelectItem value="REJECTED">Rejected</SelectItem>
+                <SelectItem value="all">All Actions</SelectItem>
+                <SelectItem value="TERMS_ACCEPTED">Accepted</SelectItem>
+                <SelectItem value="TERMS_REJECTED">Rejected</SelectItem>
+                <SelectItem value="TERMS_VIEWED">Viewed</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -140,34 +192,34 @@ export function TermsAcceptanceReport({ onBack }: TermsAcceptanceReportProps) {
             <div className="flex justify-center py-8">
               <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
             </div>
-          ) : filteredRecords.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">No acceptance records found.</p>
+          ) : filteredLogs.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">No terms acceptance records found.</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>User ID</TableHead>
                   <TableHead>Version</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead>Title</TableHead>
+                  <TableHead>User Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Action</TableHead>
+                  <TableHead>Date / Time</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredRecords.map(r => (
-                  <TableRow key={r.id}>
-                    <TableCell className="font-mono text-xs">{r.user_id.substring(0, 12)}...</TableCell>
-                    <TableCell className="font-mono">{getVersionLabel(r.terms_version_id)}</TableCell>
+                {filteredLogs.map((log, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell className="font-mono font-medium">{getVersionLabel(log.entity_id)}</TableCell>
+                    <TableCell>{getVersionTitle(log.entity_id)}</TableCell>
+                    <TableCell>{getUserName(log)}</TableCell>
+                    <TableCell className="text-sm">{getUserEmail(log)}</TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={
-                        r.status === 'ACCEPTED'
-                          ? 'bg-green-100 text-green-800 border-green-300'
-                          : 'bg-red-100 text-red-800 border-red-300'
-                      }>
-                        {r.status}
+                      <Badge variant="outline" className={getActionBadge(log.event_type)}>
+                        {getActionLabel(log.event_type)}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {r.accepted_at ? format(new Date(r.accepted_at), 'dd MMM yyyy HH:mm') : '—'}
+                      {log.created_at ? format(new Date(log.created_at), 'dd MMM yyyy HH:mm') : '—'}
                     </TableCell>
                   </TableRow>
                 ))}

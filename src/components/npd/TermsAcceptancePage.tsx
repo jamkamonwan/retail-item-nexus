@@ -80,9 +80,10 @@ export function TermsAcceptancePage({ terms, onAccept, onReject }: TermsAcceptan
         </CardHeader>
         <CardContent className="pt-4">
           <ScrollArea className="h-[400px] border border-border rounded-md p-4">
-            <div className="whitespace-pre-wrap text-sm text-foreground leading-relaxed">
-              {terms.content}
-            </div>
+            <div
+              className="prose prose-sm max-w-none text-foreground leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: terms.content }}
+            />
           </ScrollArea>
         </CardContent>
         <CardFooter className="flex justify-end gap-3 border-t border-border pt-4">
@@ -105,7 +106,6 @@ export function TermsAcceptancePage({ terms, onAccept, onReject }: TermsAcceptan
         </CardFooter>
       </Card>
 
-      {/* Reject Confirmation */}
       <AlertDialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
