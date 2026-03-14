@@ -15,6 +15,7 @@ interface AdminDashboardProps {
   onNavigateToConfig: () => void;
   onNavigateToUsers: () => void;
   onNavigateToTiers: () => void;
+  onNavigateToAuditLogs?: () => void;
 }
 
 export function AdminDashboard({
