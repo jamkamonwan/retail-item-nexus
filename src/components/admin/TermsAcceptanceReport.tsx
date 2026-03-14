@@ -37,7 +37,7 @@ interface AuditLogEntry {
   created_at: string | null;
 }
 
-export function TermsAcceptanceReport({ onBack }: TermsAcceptanceReportProps) {
+export function TermsAcceptanceReport({ onBack, embedded }: TermsAcceptanceReportProps) {
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
   const [versions, setVersions] = useState<VersionOption[]>([]);
   const [loading, setLoading] = useState(false);
