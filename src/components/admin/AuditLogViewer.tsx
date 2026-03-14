@@ -272,7 +272,7 @@ export function AuditLogViewer({ onBack }: AuditLogViewerProps) {
                           {getMetaField(log, 'created_by') || getMetaField(log, 'assigned_by') || getMetaField(log, 'approved_by') || getMetaField(log, 'rejected_by') || getMetaField(log, 'removed_by') || getMetaField(log, 'deactivated_by') || getMetaField(log, 'activated_by') || getMetaField(log, 'sent_by') || getMetaField(log, 'updated_by') || getMetaField(log, 'submitted_by') || getMetaField(log, 'uploaded_by') || getMetaField(log, 'user_name') || '—'}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                          {email || '—'}
+                          {email || getMetaField(log, 'user_email') || '—'}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {supplierCode || '—'}
