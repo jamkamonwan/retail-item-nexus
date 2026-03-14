@@ -84,6 +84,18 @@ export function AdminDashboard({
             </CardDescription>
           </CardHeader>
         </Card>
+        
+        <Card className="hover:bg-accent/50 cursor-pointer transition-colors" onClick={onNavigateToAuditLogs}>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <ScrollText className="w-5 h-5 text-primary" />
+              Audit Logs
+            </CardTitle>
+            <CardDescription>
+              View system activity and security events
+            </CardDescription>
+          </CardHeader>
+        </Card>
       </div>
     </div>
   );
