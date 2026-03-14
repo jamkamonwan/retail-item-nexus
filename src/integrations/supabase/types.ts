@@ -53,6 +53,77 @@ export type Database = {
         }
         Relationships: []
       }
+      terms_versions: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          published_at: string | null
+          status: string
+          title: string
+          version: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          published_at?: string | null
+          status?: string
+          title: string
+          version: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          published_at?: string | null
+          status?: string
+          title?: string
+          version?: string
+        }
+        Relationships: []
+      }
+      user_terms_acceptance: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          id: string
+          ip_address: string | null
+          status: string
+          terms_version_id: string
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          status: string
+          terms_version_id: string
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          status?: string
+          terms_version_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_terms_acceptance_terms_version_id_fkey"
+            columns: ["terms_version_id"]
+            isOneToOne: false
+            referencedRelation: "terms_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
