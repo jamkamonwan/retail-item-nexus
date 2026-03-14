@@ -330,6 +330,10 @@ export function AuthenticatedWorkflowApp() {
           <SupplierGroupManagement onBack={handleBackToList} />
         )}
 
+        {currentView === 'audit-logs' && (
+          <AuditLogViewer onBack={handleBackToList} />
+        )}
+
         {currentView === 'staff' && (
           <SupplierAdminDashboard
             userId={user?.id}
