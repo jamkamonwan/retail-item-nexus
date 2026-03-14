@@ -40,7 +40,7 @@ export function useTermsVersions() {
     fetchVersions();
   }, [fetchVersions]);
 
-  const createVersion = async (params: { version: string; title: string; content: string; createdBy?: string }) => {
+  const createVersion = async (params: { version: string; title: string; content: string; createdBy?: string; userName?: string; userEmail?: string }) => {
     const { data, error } = await supabase
       .from('terms_versions')
       .insert([{
@@ -64,7 +64,7 @@ export function useTermsVersions() {
       actorId: params.createdBy,
       entityType: 'terms',
       entityId: (data as TermsVersion).id,
-      metadata: { version: params.version, title: params.title },
+      metadata: { version: params.version, title: params.title, user_name: params.userName || '', email: params.userEmail || '' },
     });
 
     toast.success('Terms version created as draft');
