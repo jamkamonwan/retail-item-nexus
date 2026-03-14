@@ -12,11 +12,12 @@ import { ChangePasswordDialog } from '@/components/auth';
 import { BigCHeader } from '@/components/layout/BigCHeader';
 import { SupplierDashboard, SupplierAdminDashboard, ApproverDashboard, AdminDashboard } from './dashboards';
 import { UserManagement, TierManagement, SupplierGroupManagement } from '@/components/admin';
+import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LayoutDashboard, FileText, Settings2, ListChecks, Users, Layers, FolderTree, UserCog } from 'lucide-react';
+import { LayoutDashboard, FileText, Settings2, ListChecks, Users, Layers, FolderTree, UserCog, ScrollText } from 'lucide-react';
 import { toast } from 'sonner';
 
-type View = 'dashboard' | 'form' | 'submission' | 'config' | 'all-items' | 'users' | 'tiers' | 'supplier-groups' | 'staff';
+type View = 'dashboard' | 'form' | 'submission' | 'config' | 'all-items' | 'users' | 'tiers' | 'supplier-groups' | 'staff' | 'audit-logs';
 
 // Map roles to their pending status for approver dashboard
 const ROLE_PENDING_STATUS: Partial<Record<UserType, WorkflowStatus>> = {
@@ -77,6 +78,10 @@ export function AuthenticatedWorkflowApp() {
 
   const handleNavigateToTiers = () => {
     setCurrentView('tiers');
+  };
+
+  const handleNavigateToAuditLogs = () => {
+    setCurrentView('audit-logs');
   };
 
   const handleApprove = async (submission: NPDSubmission) => {
@@ -179,6 +184,10 @@ export function AuthenticatedWorkflowApp() {
               <Settings2 className="w-4 h-4" />
               Config
             </TabsTrigger>
+            <TabsTrigger value="audit-logs" className="gap-2">
+              <ScrollText className="w-4 h-4" />
+              Audit Logs
+            </TabsTrigger>
           </>
         );
       default:
@@ -232,6 +241,7 @@ export function AuthenticatedWorkflowApp() {
             onNavigateToConfig={handleNavigateToConfig}
             onNavigateToUsers={handleNavigateToUsers}
             onNavigateToTiers={handleNavigateToTiers}
+            onNavigateToAuditLogs={handleNavigateToAuditLogs}
           />
         );
       case 'buyer':
@@ -323,6 +333,10 @@ export function AuthenticatedWorkflowApp() {
 
         {currentView === 'supplier-groups' && (
           <SupplierGroupManagement onBack={handleBackToList} />
+        )}
+
+        {currentView === 'audit-logs' && (
+          <AuditLogViewer onBack={handleBackToList} />
         )}
 
         {currentView === 'staff' && (

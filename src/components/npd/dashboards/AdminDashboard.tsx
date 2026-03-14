@@ -5,6 +5,7 @@ import {
   Settings2, 
   Users, 
   Layers,
+  ScrollText,
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -14,12 +15,14 @@ interface AdminDashboardProps {
   onNavigateToConfig: () => void;
   onNavigateToUsers: () => void;
   onNavigateToTiers: () => void;
+  onNavigateToAuditLogs?: () => void;
 }
 
 export function AdminDashboard({
   onNavigateToConfig,
   onNavigateToUsers,
   onNavigateToTiers,
+  onNavigateToAuditLogs,
   loading,
 }: AdminDashboardProps) {
   if (loading) {
@@ -78,6 +81,18 @@ export function AdminDashboard({
             </CardTitle>
             <CardDescription>
               Define access plans and map modules to each plan
+            </CardDescription>
+          </CardHeader>
+        </Card>
+        
+        <Card className="hover:bg-accent/50 cursor-pointer transition-colors" onClick={onNavigateToAuditLogs}>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <ScrollText className="w-5 h-5 text-primary" />
+              Audit Logs
+            </CardTitle>
+            <CardDescription>
+              View system activity and security events
             </CardDescription>
           </CardHeader>
         </Card>
