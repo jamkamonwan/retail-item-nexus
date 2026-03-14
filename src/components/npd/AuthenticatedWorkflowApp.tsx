@@ -241,6 +241,7 @@ export function AuthenticatedWorkflowApp() {
             onNavigateToConfig={handleNavigateToConfig}
             onNavigateToUsers={handleNavigateToUsers}
             onNavigateToTiers={handleNavigateToTiers}
+            onNavigateToAuditLogs={handleNavigateToAuditLogs}
           />
         );
       case 'buyer':
