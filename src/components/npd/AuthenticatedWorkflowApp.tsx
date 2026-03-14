@@ -13,7 +13,7 @@ import { BigCHeader } from '@/components/layout/BigCHeader';
 import { SupplierDashboard, SupplierAdminDashboard, ApproverDashboard, AdminDashboard } from './dashboards';
 import { UserManagement, TierManagement, SupplierGroupManagement } from '@/components/admin';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LayoutDashboard, FileText, Settings2, ListChecks, Users, Layers, FolderTree, UserCog } from 'lucide-react';
+import { LayoutDashboard, FileText, Settings2, ListChecks, Users, Layers, FolderTree, UserCog, ScrollText } from 'lucide-react';
 import { toast } from 'sonner';
 
 type View = 'dashboard' | 'form' | 'submission' | 'config' | 'all-items' | 'users' | 'tiers' | 'supplier-groups' | 'staff';
