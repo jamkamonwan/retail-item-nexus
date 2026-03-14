@@ -52,7 +52,7 @@ function getNextVersion(versions: TermsVersion[]): string {
 }
 
 export function TermsManagement({ onBack }: TermsManagementProps) {
-  const { versions, loading, createVersion, updateVersion, publishVersion } = useTermsVersions();
+  const { versions, loading, createVersion, updateVersion, publishVersion, refetch } = useTermsVersions();
   const { user } = useAuth();
   const [formOpen, setFormOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
