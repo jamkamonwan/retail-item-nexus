@@ -127,12 +127,22 @@ export function TermsAcceptanceReport({ onBack, embedded }: TermsAcceptanceRepor
     return (log.metadata as any)?.user_email || (log.metadata as any)?.email || '—';
   };
 
+  const getSupplierCode = (log: AuditLogEntry) => {
+    return (log.metadata as any)?.supplier_codes || (log.metadata as any)?.supplier_code || '—';
+  };
+
+  const getSupplierPartner = (log: AuditLogEntry) => {
+    return (log.metadata as any)?.supplier_partner || '—';
+  };
+
   const filteredLogs = logs.filter(l => {
     if (!search) return true;
     const name = getUserName(l).toLowerCase();
     const email = getUserEmail(l).toLowerCase();
+    const sc = getSupplierCode(l).toLowerCase();
+    const sp = getSupplierPartner(l).toLowerCase();
     const s = search.toLowerCase();
-    return name.includes(s) || email.includes(s);
+    return name.includes(s) || email.includes(s) || sc.includes(s) || sp.includes(s);
   });
 
   return (
