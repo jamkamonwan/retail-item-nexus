@@ -74,12 +74,20 @@ function getDescription(log: AuditLogEntry): string {
       return `Password reset requested by ${meta.user_name}`;
     case 'PASSWORD_RESET_SUCCESS':
       return `Password reset completed for ${meta.user_name}`;
+    case 'TERMS_CREATED':
+      return `Created Terms ${meta.version} "${meta.title || meta.document}" by ${meta.user_name || '—'} (${meta.email || meta.user_email || '—'})`;
+    case 'TERMS_UPDATED':
+      return `Updated Terms ${meta.version} "${meta.title || meta.document}" by ${meta.user_name || '—'} (${meta.email || meta.user_email || '—'})`;
+    case 'TERMS_PUBLISHED':
+      return `Published Terms ${meta.version} "${meta.title || meta.document}" by ${meta.user_name || '—'} (${meta.email || meta.user_email || '—'})`;
+    case 'TERMS_ARCHIVED':
+      return `Archived Terms ${meta.version} "${meta.title || meta.document}" by ${meta.user_name || '—'} (${meta.email || meta.user_email || '—'})`;
     case 'TERMS_VIEWED':
-      return `${meta.user_name} viewed "${meta.document}" ${meta.version}`;
+      return `${meta.user_name} (${meta.email || meta.user_email || '—'}) viewed Terms ${meta.version} "${meta.title || meta.document || ''}"`;
     case 'TERMS_ACCEPTED':
-      return `${meta.user_name} accepted "${meta.document}" ${meta.version}`;
+      return `${meta.user_name} (${meta.email || meta.user_email || '—'}) accepted Terms ${meta.version} "${meta.title || meta.document || ''}"`;
     case 'TERMS_REJECTED':
-      return `${meta.user_name} rejected Terms ${meta.version}${meta.reason ? ` — ${meta.reason}` : ''}`;
+      return `${meta.user_name} (${meta.email || meta.user_email || '—'}) rejected Terms ${meta.version} "${meta.title || meta.document || ''}"${meta.reason ? ` — ${meta.reason}` : ''}`;
     default:
       return '';
   }
