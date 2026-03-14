@@ -160,10 +160,18 @@ export function TermsAcceptanceReport({ onBack, embedded }: TermsAcceptanceRepor
           </Button>
         </div>
       )}
+      {embedded && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">Track supplier acceptance and rejection of published terms versions.</p>
+          <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
+            <RefreshCw className="w-4 h-4" /> Refresh
+          </Button>
+        </div>
+      )}
 
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle className="text-base">Filters</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4 flex-wrap">
