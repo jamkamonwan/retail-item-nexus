@@ -10,7 +10,8 @@ import { ArrowLeft, Loader2, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface TermsAcceptanceReportProps {
-  onBack: () => void;
+  onBack?: () => void;
+  embedded?: boolean;
 }
 
 interface AcceptanceRow {
