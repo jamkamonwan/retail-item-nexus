@@ -20,7 +20,7 @@ export interface PublishedTerms {
   published_at: string | null;
 }
 
-export function useTermsAcceptance(userId?: string) {
+export function useTermsAcceptance(userId?: string, userEmail?: string, userName?: string) {
   const [hasAccepted, setHasAccepted] = useState<boolean | null>(null); // null = loading
   const [publishedTerms, setPublishedTerms] = useState<PublishedTerms | null>(null);
   const [loading, setLoading] = useState(true);
