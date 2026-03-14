@@ -2,29 +2,32 @@ import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubmissions } from '@/hooks/useSubmissions';
 import { usePasswordChangeCheck } from '@/hooks/usePasswordChangeCheck';
+import { useTermsAcceptance } from '@/hooks/useTermsAcceptance';
 import { UserType } from '@/types/npd';
 import { NPDSubmission, WORKFLOW_STATUSES, WorkflowStatus } from '@/types/workflow';
 import { WorkflowDashboard } from './WorkflowDashboard';
 import { SubmissionView } from './SubmissionView';
 import { NPDForm } from './NPDForm';
 import { FieldApprovalConfigScreen } from './FieldApprovalConfigScreen';
+import { TermsAcceptancePage } from './TermsAcceptancePage';
 import { ChangePasswordDialog } from '@/components/auth';
 import { BigCHeader } from '@/components/layout/BigCHeader';
 import { SupplierDashboard, SupplierAdminDashboard, ApproverDashboard, AdminDashboard } from './dashboards';
 import { UserManagement, TierManagement, SupplierGroupManagement } from '@/components/admin';
 import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
+import { TermsManagement } from '@/components/admin/TermsManagement';
+import { TermsAcceptanceReport } from '@/components/admin/TermsAcceptanceReport';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LayoutDashboard, FileText, Settings2, ListChecks, Users, Layers, FolderTree, UserCog, ScrollText } from 'lucide-react';
+import { LayoutDashboard, FileText, Settings2, ListChecks, Users, Layers, FolderTree, UserCog, ScrollText, FileCheck, ClipboardList } from 'lucide-react';
 import { toast } from 'sonner';
 
-type View = 'dashboard' | 'form' | 'submission' | 'config' | 'all-items' | 'users' | 'tiers' | 'supplier-groups' | 'staff' | 'audit-logs';
+type View = 'dashboard' | 'form' | 'submission' | 'config' | 'all-items' | 'users' | 'tiers' | 'supplier-groups' | 'staff' | 'audit-logs' | 'terms' | 'terms-report';
 
 // Map roles to their pending status for approver dashboard
 const ROLE_PENDING_STATUS: Partial<Record<UserType, WorkflowStatus>> = {
   buyer: 'pending_buyer',
   commercial: 'pending_commercial',
   finance: 'pending_finance',
-  // scm and im could be added when their workflow stages are implemented
 };
 
 export function AuthenticatedWorkflowApp() {
@@ -35,15 +38,19 @@ export function AuthenticatedWorkflowApp() {
   const [selectedSubmission, setSelectedSubmission] = useState<NPDSubmission | null>(null);
   const [editingSubmission, setEditingSubmission] = useState<NPDSubmission | null>(null);
   
-  // Allow role switching for demo purposes - default to authenticated role or 'buyer'
   const [demoRole, setDemoRole] = useState<UserType>(role || 'buyer');
+
+  // Terms acceptance check for supplier roles
+  const isSupplierRole = demoRole === 'supplier' || demoRole === 'supplier_admin';
+  const { hasAccepted, publishedTerms, loading: termsLoading, acceptTerms, rejectTerms } = useTermsAcceptance(
+    isSupplierRole ? user?.id : undefined
+  );
 
   const handleRoleChange = (newRole: UserType) => {
     setDemoRole(newRole);
     setCurrentView(newRole === 'supplier_admin' ? 'staff' : 'dashboard');
   };
 
-  // Use demoRole for determining which dashboard to show
   const activeRole = demoRole;
 
   const handleViewSubmission = (submission: NPDSubmission) => {
@@ -65,74 +72,55 @@ export function AuthenticatedWorkflowApp() {
     setSelectedSubmission(null);
     setEditingSubmission(null);
     setCurrentView('dashboard');
-    refetch(); // Refresh after returning from form/submission
+    refetch();
   };
 
-  const handleNavigateToConfig = () => {
-    setCurrentView('config');
-  };
-
-  const handleNavigateToUsers = () => {
-    setCurrentView('users');
-  };
-
-  const handleNavigateToTiers = () => {
-    setCurrentView('tiers');
-  };
-
-  const handleNavigateToAuditLogs = () => {
-    setCurrentView('audit-logs');
-  };
+  const handleNavigateToConfig = () => setCurrentView('config');
+  const handleNavigateToUsers = () => setCurrentView('users');
+  const handleNavigateToTiers = () => setCurrentView('tiers');
+  const handleNavigateToAuditLogs = () => setCurrentView('audit-logs');
 
   const handleApprove = async (submission: NPDSubmission) => {
     const nextStatus = WORKFLOW_STATUSES[submission.status].nextStatus;
     if (nextStatus) {
-      const success = await updateStatus(
-        submission.id,
-        nextStatus,
-        'approve',
-        activeRole
-      );
+      const success = await updateStatus(submission.id, nextStatus, 'approve', activeRole);
       if (success) {
         toast.success(`${submission.productNameEn} approved!`);
-        if (selectedSubmission?.id === submission.id) {
-          handleBackToList();
-        }
+        if (selectedSubmission?.id === submission.id) handleBackToList();
       }
     }
   };
 
   const handleReject = async (submission: NPDSubmission) => {
-    const success = await updateStatus(
-      submission.id,
-      'rejected' as WorkflowStatus,
-      'reject',
-      activeRole
-    );
+    const success = await updateStatus(submission.id, 'rejected' as WorkflowStatus, 'reject', activeRole);
     if (success) {
       toast.error(`${submission.productNameEn} rejected`);
-      if (selectedSubmission?.id === submission.id) {
-        handleBackToList();
-      }
+      if (selectedSubmission?.id === submission.id) handleBackToList();
     }
   };
 
   const handleRequestRevision = async (submission: NPDSubmission) => {
-    const success = await updateStatus(
-      submission.id,
-      'revision_needed' as WorkflowStatus,
-      'request_revision',
-      activeRole
-    );
+    const success = await updateStatus(submission.id, 'revision_needed' as WorkflowStatus, 'request_revision', activeRole);
     if (success) {
       toast.info(`${submission.productNameEn} sent back for revision`);
-      if (selectedSubmission?.id === submission.id) {
-        handleBackToList();
-      }
+      if (selectedSubmission?.id === submission.id) handleBackToList();
     }
   };
 
-  // Determine which tabs to show based on role
+  // Terms gate for supplier roles
+  if (isSupplierRole && !termsLoading && hasAccepted === false && publishedTerms) {
+    return (
+      <div className="min-h-screen bg-background">
+        <BigCHeader demoRole={demoRole} onRoleChange={handleRoleChange} />
+        <TermsAcceptancePage
+          terms={publishedTerms}
+          onAccept={acceptTerms}
+          onReject={rejectTerms}
+        />
+      </div>
+    );
+  }
+
   const getNavigationTabs = () => {
     switch (activeRole) {
       case 'supplier':
@@ -180,6 +168,14 @@ export function AuthenticatedWorkflowApp() {
               <FolderTree className="w-4 h-4" />
               Supplier Partners
             </TabsTrigger>
+            <TabsTrigger value="terms" className="gap-2">
+              <FileCheck className="w-4 h-4" />
+              Terms
+            </TabsTrigger>
+            <TabsTrigger value="terms-report" className="gap-2">
+              <ClipboardList className="w-4 h-4" />
+              Acceptance
+            </TabsTrigger>
             <TabsTrigger value="config" className="gap-2">
               <Settings2 className="w-4 h-4" />
               Config
@@ -191,7 +187,6 @@ export function AuthenticatedWorkflowApp() {
           </>
         );
       default:
-        // Approver roles (buyer, commercial, finance, scm, im, dc_income)
         return (
           <>
             <TabsTrigger value="dashboard" className="gap-2">
@@ -207,20 +202,9 @@ export function AuthenticatedWorkflowApp() {
     }
   };
 
-  // Render the appropriate dashboard based on role
   const renderDashboard = () => {
     switch (activeRole) {
       case 'supplier':
-        return (
-          <SupplierDashboard
-            submissions={submissions}
-            loading={loading}
-            userId={user?.id}
-            onCreateNew={handleCreateNew}
-            onEditDraft={handleEditDraft}
-            onViewSubmission={handleViewSubmission}
-          />
-        );
       case 'supplier_admin':
         return (
           <SupplierDashboard
@@ -244,13 +228,7 @@ export function AuthenticatedWorkflowApp() {
             onNavigateToAuditLogs={handleNavigateToAuditLogs}
           />
         );
-      case 'buyer':
-      case 'commercial':
-      case 'finance':
-      case 'scm':
-      case 'im':
-      case 'dc_income':
-        // For roles without specific pending status, default to pending_finance
+      default:
         const pendingStatus = ROLE_PENDING_STATUS[activeRole] || 'pending_finance';
         return (
           <ApproverDashboard
@@ -269,16 +247,13 @@ export function AuthenticatedWorkflowApp() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Force password change dialog for admin-created users */}
       <ChangePasswordDialog 
         open={mustChangePassword && !passwordCheckLoading} 
         onPasswordChanged={clearPasswordChangeFlag} 
       />
       
-      {/* Big C Branded Header */}
       <BigCHeader demoRole={demoRole} onRoleChange={handleRoleChange} />
 
-      {/* Navigation Tabs - Below header */}
       <div className="bg-card border-b border-border sticky top-[104px] z-40">
         <div className="container max-w-7xl mx-auto px-4">
           <Tabs 
@@ -292,7 +267,6 @@ export function AuthenticatedWorkflowApp() {
         </div>
       </div>
 
-      {/* Main Content */}
       <main className="container max-w-7xl mx-auto px-4 py-6">
         {currentView === 'dashboard' && renderDashboard()}
 
@@ -319,31 +293,16 @@ export function AuthenticatedWorkflowApp() {
           />
         )}
 
-        {currentView === 'config' && (
-          <FieldApprovalConfigScreen />
-        )}
-
-        {currentView === 'users' && (
-          <UserManagement onBack={handleBackToList} />
-        )}
-
-        {currentView === 'tiers' && (
-          <TierManagement onBack={handleBackToList} />
-        )}
-
-        {currentView === 'supplier-groups' && (
-          <SupplierGroupManagement onBack={handleBackToList} />
-        )}
-
-        {currentView === 'audit-logs' && (
-          <AuditLogViewer onBack={handleBackToList} />
-        )}
+        {currentView === 'config' && <FieldApprovalConfigScreen />}
+        {currentView === 'users' && <UserManagement onBack={handleBackToList} />}
+        {currentView === 'tiers' && <TierManagement onBack={handleBackToList} />}
+        {currentView === 'supplier-groups' && <SupplierGroupManagement onBack={handleBackToList} />}
+        {currentView === 'audit-logs' && <AuditLogViewer onBack={handleBackToList} />}
+        {currentView === 'terms' && <TermsManagement onBack={handleBackToList} />}
+        {currentView === 'terms-report' && <TermsAcceptanceReport onBack={handleBackToList} />}
 
         {currentView === 'staff' && (
-          <SupplierAdminDashboard
-            userId={user?.id}
-            supplierGroupId="group-001"
-          />
+          <SupplierAdminDashboard userId={user?.id} supplierGroupId="group-001" />
         )}
 
         {currentView === 'submission' && selectedSubmission && (
