@@ -7,6 +7,7 @@ export type UserType = MockRole;
 interface MockUser {
   id: string;
   email: string;
+  fullName?: string;
 }
 
 interface AuthState {
