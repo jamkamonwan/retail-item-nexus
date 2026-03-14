@@ -165,11 +165,26 @@ export function TermsManagement({ onBack }: TermsManagementProps) {
           .update({ version: formData.version, title: formData.title, content: formData.content, attachments: attachments as any })
           .eq('id', editingVersion.id);
         if (error) { toast.error('Failed to update'); return; }
+        await logAuditEvent({
+          eventType: 'TERMS_UPDATED',
+          actorId: createdBy || undefined,
+          entityType: 'terms',
+          entityId: editingVersion.id,
+          metadata: { version: formData.version, title: formData.title, user_name: user?.fullName || '', email: user?.email || '' },
+        });
         toast.success('Draft saved');
       } else {
-        const { error } = await supabase.from('terms_versions')
-          .insert([{ version: formData.version, title: formData.title, content: formData.content, status: 'DRAFT', created_by: createdBy, attachments: attachments as any }]);
+        const { data, error } = await supabase.from('terms_versions')
+          .insert([{ version: formData.version, title: formData.title, content: formData.content, status: 'DRAFT', created_by: createdBy, attachments: attachments as any }])
+          .select().single();
         if (error) { toast.error('Failed to create: ' + error.message); return; }
+        await logAuditEvent({
+          eventType: 'TERMS_CREATED',
+          actorId: createdBy || undefined,
+          entityType: 'terms',
+          entityId: (data as any)?.id,
+          metadata: { version: formData.version, title: formData.title, user_name: user?.fullName || '', email: user?.email || '' },
+        });
         toast.success('Draft created');
       }
       await refetch();
