@@ -39,6 +39,66 @@ function getEventBadgeClass(eventType: string) {
   return EVENT_CATEGORY_COLORS[eventType] || 'bg-muted text-muted-foreground';
 }
 
+function getMetaField(log: AuditLogEntry, field: string): string {
+  const meta = log.metadata as Record<string, unknown> | null;
+  return (meta?.[field] as string) || '';
+}
+
+function getDescription(log: AuditLogEntry): string {
+  const meta = log.metadata as Record<string, unknown> | null;
+  if (!meta) return '';
+  
+  switch (log.event_type) {
+    case 'USER_CREATED':
+      return `Created ${meta.user_name} (${meta.email}) as ${meta.role}`;
+    case 'USER_ROLE_ASSIGNED':
+      if (meta.action === 'module_assigned') return `Assigned module "${meta.module_name}" to ${meta.user_name}`;
+      return `Assigned role "${meta.role}" to ${meta.user_name}`;
+    case 'USER_ROLE_REMOVED':
+      return `Removed role "${meta.role}" from ${meta.user_name}${meta.reason ? ` — ${meta.reason}` : ''}`;
+    case 'USER_INVITATION_SENT':
+      return `Invitation sent to ${meta.user_name} (${meta.email})`;
+    case 'USER_ACTIVATED':
+      return `Activated ${meta.user_name}${meta.reason ? ` — ${meta.reason}` : ''}`;
+    case 'USER_DEACTIVATED':
+      return `Deactivated ${meta.user_name}${meta.reason ? ` — ${meta.reason}` : ''}`;
+    case 'SUPPLIER_USER_ASSIGNED':
+      return `Assigned ${meta.user_name} to ${meta.supplier_name} (${meta.supplier_code})`;
+    case 'SUPPLIER_USER_REMOVED':
+      return `Removed ${meta.user_name} from ${meta.supplier_name}${meta.reason ? ` — ${meta.reason}` : ''}`;
+    case 'USER_LOGIN':
+      return `${meta.user_name} logged in`;
+    case 'FIRST_LOGIN':
+      return `First login by ${meta.user_name} (${meta.email})`;
+    case 'FAILED_LOGIN':
+      return `Failed login attempt for ${meta.email} — ${meta.reason}`;
+    case 'PASSWORD_RESET_REQUEST':
+      return `Password reset requested by ${meta.user_name}`;
+    case 'PASSWORD_RESET_SUCCESS':
+      return `Password reset completed for ${meta.user_name}`;
+    case 'TERMS_VIEWED':
+      return `${meta.user_name} viewed "${meta.document}" ${meta.version}`;
+    case 'TERMS_ACCEPTED':
+      return `${meta.user_name} accepted "${meta.document}" ${meta.version}`;
+    case 'TERMS_REJECTED':
+      return `${meta.user_name} rejected Terms ${meta.version}${meta.reason ? ` — ${meta.reason}` : ''}`;
+    case 'ITEM_CREATED':
+      return `Created item "${meta.product_name_en || meta.product_name}" by ${meta.created_by}`;
+    case 'ITEM_SUBMITTED':
+      return `Submitted "${meta.product_name}" for review`;
+    case 'ITEM_APPROVED':
+      return `"${meta.product_name}" approved by ${meta.approved_by} (${meta.approved_by_role})`;
+    case 'ITEM_REJECTED':
+      return `"${meta.product_name}" rejected by ${meta.rejected_by} — ${meta.reason}`;
+    case 'ITEM_UPDATED':
+      return `"${meta.product_name}" updated by ${meta.updated_by} — fields: ${Array.isArray(meta.fields_updated) ? (meta.fields_updated as string[]).join(', ') : ''}`;
+    case 'DOCUMENT_UPLOADED':
+      return `Uploaded "${meta.file_name}" (${meta.file_size_kb}KB) for ${meta.product_name}`;
+    default:
+      return '';
+  }
+}
+
 export function AuditLogViewer({ onBack }: AuditLogViewerProps) {
   const { logs, loading, filters, setFilters, page, setPage, pageSize, totalCount, refetch } = useAuditLogs();
   const [detailLog, setDetailLog] = useState<AuditLogEntry | null>(null);
