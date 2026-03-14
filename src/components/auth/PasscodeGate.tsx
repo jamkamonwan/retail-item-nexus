@@ -33,7 +33,7 @@ export function PasscodeGate({ onSuccess }: PasscodeGateProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-accent via-accent/90 to-success flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-primary shadow-lg mb-4">
