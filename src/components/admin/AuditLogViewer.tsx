@@ -113,10 +113,32 @@ export function AuditLogViewer({ onBack }: AuditLogViewerProps) {
             </p>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={refetch} className="gap-2">
-          <RefreshCw className="h-4 w-4" />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => {
+            const rows = logs.map(log => {
+              const meta = log.metadata as Record<string, unknown> | null;
+              return {
+                Timestamp: format(new Date(log.created_at), 'yyyy-MM-dd HH:mm:ss'),
+                Event: log.event_type,
+                Description: getDescription(log),
+                'Actor': getMetaField(log, 'created_by') || getMetaField(log, 'user_name') || '',
+                Email: (meta?.email as string) || '',
+                'Supplier Code': (meta?.supplier_codes as string) || (meta?.supplier_code as string) || '',
+                'Supplier Partner': (meta?.supplier_partner as string) || '',
+                'Entity Type': log.entity_type || '',
+                'Entity ID': log.entity_id || '',
+              };
+            });
+            exportToExcel(rows, `audit-logs-${format(new Date(), 'yyyyMMdd')}`);
+          }} className="gap-2">
+            <Download className="h-4 w-4" />
+            Export Excel
+          </Button>
+          <Button variant="outline" size="sm" onClick={refetch} className="gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
