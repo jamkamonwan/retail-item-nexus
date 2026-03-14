@@ -18,10 +18,13 @@ interface AuthState {
 }
 
 // Global state for demo role switching
-let currentMockUserId = 'user-buyer-001'; // Default to buyer
+let currentMockUserId: string | null = null;
 
 export function useAuth() {
   const [authState, setAuthState] = useState<AuthState>(() => {
+    if (!currentMockUserId) {
+      return { user: null, session: null, role: null, loading: false };
+    }
     const mockUser = mockUsers.find(u => u.id === currentMockUserId);
     return {
       user: mockUser ? { id: mockUser.id, email: mockUser.email, fullName: mockUser.fullName } : null,
