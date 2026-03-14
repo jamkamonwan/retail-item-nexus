@@ -217,6 +217,8 @@ export function AuditLogViewer({ onBack }: AuditLogViewerProps) {
                   {logs.map((log) => {
                     const meta = log.metadata as Record<string, unknown> | null;
                     const email = (meta?.email as string) || '';
+                    const supplierCode = (meta?.supplier_codes as string) || (meta?.supplier_code as string) || '';
+                    const supplierPartner = (meta?.supplier_partner as string) || '';
                     return (
                       <TableRow key={log.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setDetailLog(log)}>
                         <TableCell className="text-xs text-muted-foreground font-mono">
