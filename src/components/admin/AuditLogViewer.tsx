@@ -30,9 +30,6 @@ const EVENT_CATEGORY_COLORS: Record<string, string> = {
   SUPPLIER_USER_REMOVED: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
   TERMS_ACCEPTED: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
   TERMS_REJECTED: 'bg-destructive/10 text-destructive',
-  ITEM_CREATED: 'bg-sky-100 text-sky-800 dark:bg-sky-900 dark:text-sky-200',
-  ITEM_APPROVED: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  ITEM_REJECTED: 'bg-destructive/10 text-destructive',
 };
 
 function getEventBadgeClass(eventType: string) {

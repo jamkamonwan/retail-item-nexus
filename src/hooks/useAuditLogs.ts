@@ -31,11 +31,9 @@ export const AUDIT_EVENT_TYPES = [
   'USER_ROLE_ASSIGNED', 'USER_ROLE_REMOVED',
   'SUPPLIER_USER_ASSIGNED', 'SUPPLIER_USER_REMOVED',
   'TERMS_VIEWED', 'TERMS_ACCEPTED', 'TERMS_REJECTED',
-  'ITEM_CREATED', 'ITEM_UPDATED', 'ITEM_SUBMITTED',
-  'ITEM_APPROVED', 'ITEM_REJECTED', 'DOCUMENT_UPLOADED',
 ] as const;
 
-export const ENTITY_TYPES = ['user', 'user_role', 'supplier', 'item', 'terms', 'document'] as const;
+export const ENTITY_TYPES = ['user', 'user_role', 'supplier', 'terms'] as const;
 
 export function useAuditLogs() {
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
