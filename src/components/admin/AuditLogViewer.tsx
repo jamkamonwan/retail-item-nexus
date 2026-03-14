@@ -7,9 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ArrowLeft, Search, ChevronLeft, ChevronRight, Eye, RefreshCw, X } from 'lucide-react';
+import { ArrowLeft, Search, ChevronLeft, ChevronRight, Eye, RefreshCw, X, Download } from 'lucide-react';
 import { useAuditLogs, AuditLogEntry, AUDIT_EVENT_TYPES, ENTITY_TYPES } from '@/hooks/useAuditLogs';
 import { format } from 'date-fns';
+import { exportToExcel } from '@/utils/exportExcel';
 
 interface AuditLogViewerProps {
   onBack: () => void;
