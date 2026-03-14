@@ -1,21 +1,29 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useTermsVersions, TermsVersion } from '@/hooks/useTermsVersions';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft, Plus, Edit, Send, Eye, Loader2 } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Send, Eye, Loader2, Paperclip, X, FileText } from 'lucide-react';
 import { format } from 'date-fns';
+import { RichTextEditor } from './RichTextEditor';
+import { toast } from 'sonner';
 
 interface TermsManagementProps {
   onBack: () => void;
+}
+
+interface Attachment {
+  name: string;
+  url: string;
+  size: number;
 }
 
 const STATUS_BADGES: Record<string, string> = {
@@ -23,6 +31,25 @@ const STATUS_BADGES: Record<string, string> = {
   PUBLISHED: 'bg-green-100 text-green-800 border-green-300',
   ARCHIVED: 'bg-muted text-muted-foreground border-border',
 };
+
+function getNextVersion(versions: TermsVersion[]): string {
+  if (versions.length === 0) return 'v1.0';
+  // Find highest version number
+  let maxMajor = 0;
+  let maxMinor = 0;
+  for (const v of versions) {
+    const match = v.version.match(/v?(\d+)\.(\d+)/);
+    if (match) {
+      const major = parseInt(match[1]);
+      const minor = parseInt(match[2]);
+      if (major > maxMajor || (major === maxMajor && minor > maxMinor)) {
+        maxMajor = major;
+        maxMinor = minor;
+      }
+    }
+  }
+  return `v${maxMajor}.${maxMinor + 1}`;
+}
 
 export function TermsManagement({ onBack }: TermsManagementProps) {
   const { versions, loading, createVersion, updateVersion, publishVersion } = useTermsVersions();
@@ -33,16 +60,23 @@ export function TermsManagement({ onBack }: TermsManagementProps) {
   const [editingVersion, setEditingVersion] = useState<TermsVersion | null>(null);
   const [previewVersion, setPreviewVersion] = useState<TermsVersion | null>(null);
   const [formData, setFormData] = useState({ version: '', title: '', content: '' });
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const openCreate = () => {
     setEditingVersion(null);
-    setFormData({ version: '', title: '', content: '' });
+    const nextVer = getNextVersion(versions);
+    setFormData({ version: nextVer, title: 'Supplier Portal Terms & Conditions', content: '' });
+    setAttachments([]);
     setFormOpen(true);
   };
 
   const openEdit = (v: TermsVersion) => {
     setEditingVersion(v);
     setFormData({ version: v.version, title: v.title, content: v.content });
+    const existing = (v as any).attachments;
+    setAttachments(Array.isArray(existing) ? existing : []);
     setFormOpen(true);
   };
 
@@ -51,21 +85,92 @@ export function TermsManagement({ onBack }: TermsManagementProps) {
     setPreviewOpen(true);
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    try {
+      for (const file of Array.from(files)) {
+        const fileExt = file.name.split('.').pop();
+        const filePath = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+
+        const { error } = await supabase.storage
+          .from('terms-attachments')
+          .upload(filePath, file);
+
+        if (error) {
+          toast.error(`Failed to upload ${file.name}`);
+          continue;
+        }
+
+        const { data: urlData } = supabase.storage
+          .from('terms-attachments')
+          .getPublicUrl(filePath);
+
+        setAttachments(prev => [...prev, {
+          name: file.name,
+          url: urlData.publicUrl,
+          size: file.size,
+        }]);
+      }
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSave = async () => {
     if (!formData.version || !formData.title || !formData.content) return;
 
     if (editingVersion) {
-      await updateVersion(editingVersion.id, formData, user?.id);
+      // Update version + attachments
+      const { error } = await supabase
+        .from('terms_versions')
+        .update({ ...formData, attachments })
+        .eq('id', editingVersion.id);
+      if (error) {
+        toast.error('Failed to update');
+        return;
+      }
+      toast.success('Terms version updated');
     } else {
-      await createVersion({ ...formData, createdBy: user?.id });
+      // Create with attachments
+      const { error } = await supabase
+        .from('terms_versions')
+        .insert([{
+          version: formData.version,
+          title: formData.title,
+          content: formData.content,
+          status: 'DRAFT',
+          created_by: user?.id || null,
+          attachments,
+        }]);
+      if (error) {
+        toast.error('Failed to create');
+        return;
+      }
+      toast.success('Terms version created as draft');
     }
     setFormOpen(false);
+    // Refetch via hook
+    window.location.reload(); // Simple refresh to sync
   };
 
   const handlePublish = async () => {
     if (!publishConfirmId) return;
     await publishVersion(publishConfirmId, user?.id);
     setPublishConfirmId(null);
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
   return (
@@ -142,7 +247,7 @@ export function TermsManagement({ onBack }: TermsManagementProps) {
 
       {/* Create/Edit Dialog */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingVersion ? 'Edit Terms Version' : 'Create New Terms Version'}</DialogTitle>
           </DialogHeader>
@@ -167,12 +272,47 @@ export function TermsManagement({ onBack }: TermsManagementProps) {
             </div>
             <div className="space-y-2">
               <Label>Content</Label>
-              <Textarea
-                placeholder="Enter the full terms and conditions text..."
-                value={formData.content}
-                onChange={e => setFormData(f => ({ ...f, content: e.target.value }))}
-                className="min-h-[300px]"
+              <RichTextEditor
+                content={formData.content}
+                onChange={(html) => setFormData(f => ({ ...f, content: html }))}
               />
+            </div>
+
+            {/* Attachments */}
+            <div className="space-y-2">
+              <Label>Attachments</Label>
+              <div className="space-y-2">
+                {attachments.map((att, i) => (
+                  <div key={i} className="flex items-center gap-2 p-2 bg-muted/50 rounded-md">
+                    <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    <a href={att.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline truncate flex-1">
+                      {att.name}
+                    </a>
+                    <span className="text-xs text-muted-foreground">{formatFileSize(att.size)}</span>
+                    <Button type="button" variant="ghost" size="sm" onClick={() => removeAttachment(i)} className="h-6 w-6 p-0">
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                ))}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="gap-2"
+                >
+                  {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Paperclip className="w-4 h-4" />}
+                  {uploading ? 'Uploading...' : 'Attach File'}
+                </Button>
+              </div>
             </div>
           </div>
           <DialogFooter>
@@ -186,7 +326,7 @@ export function TermsManagement({ onBack }: TermsManagementProps) {
 
       {/* Preview Dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh]">
+        <DialogContent className="max-w-3xl max-h-[80vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {previewVersion?.title}
@@ -200,8 +340,29 @@ export function TermsManagement({ onBack }: TermsManagementProps) {
             {previewVersion?.published_at && ` • Published ${format(new Date(previewVersion.published_at), 'dd MMM yyyy')}`}
           </div>
           <ScrollArea className="max-h-[50vh]">
-            <div className="whitespace-pre-wrap text-sm">{previewVersion?.content}</div>
+            <div
+              className="prose prose-sm max-w-none"
+              dangerouslySetInnerHTML={{ __html: previewVersion?.content || '' }}
+            />
           </ScrollArea>
+          {/* Show attachments in preview */}
+          {(() => {
+            const atts = (previewVersion as any)?.attachments;
+            if (!Array.isArray(atts) || atts.length === 0) return null;
+            return (
+              <div className="border-t border-border pt-3 mt-3 space-y-1">
+                <Label className="text-xs text-muted-foreground">Attachments</Label>
+                {atts.map((att: Attachment, i: number) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <FileText className="w-3 h-3 text-muted-foreground" />
+                    <a href={att.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
+                      {att.name}
+                    </a>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
         </DialogContent>
       </Dialog>
 
