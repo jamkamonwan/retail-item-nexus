@@ -80,19 +80,19 @@ function getDescription(log: AuditLogEntry): string {
     case 'PASSWORD_RESET_SUCCESS':
       return `Password reset completed for ${meta.user_name}`;
     case 'TERMS_CREATED':
-      return `Created Terms ${meta.version} "${meta.title || meta.document}" by ${meta.user_name || '—'} (${meta.email || meta.user_email || '—'})`;
+      return `Created Terms ${meta.version || ''} "${meta.title || meta.document || ''}"`;
     case 'TERMS_UPDATED':
-      return `Updated Terms ${meta.version} "${meta.title || meta.document}" by ${meta.user_name || '—'} (${meta.email || meta.user_email || '—'})`;
+      return `Updated Terms ${meta.version || ''} "${meta.title || meta.document || ''}"`;
     case 'TERMS_PUBLISHED':
-      return `Published Terms ${meta.version} "${meta.title || meta.document}" by ${meta.user_name || '—'} (${meta.email || meta.user_email || '—'})`;
+      return `Published Terms ${meta.version || ''} "${meta.title || meta.document || ''}"`;
     case 'TERMS_ARCHIVED':
-      return `Archived Terms ${meta.version} "${meta.title || meta.document}" by ${meta.user_name || '—'} (${meta.email || meta.user_email || '—'})`;
+      return `Archived Terms ${meta.version || ''} "${meta.title || meta.document || ''}"`;
     case 'TERMS_VIEWED':
-      return `${meta.user_name} (${meta.email || meta.user_email || '—'}) viewed Terms ${meta.version} "${meta.title || meta.document || ''}"`;
+      return `Viewed Terms ${meta.version || ''} "${meta.title || meta.document || ''}"`;
     case 'TERMS_ACCEPTED':
-      return `${meta.user_name} (${meta.email || meta.user_email || '—'}) accepted Terms ${meta.version} "${meta.title || meta.document || ''}"`;
+      return `Accepted Terms ${meta.version || ''} "${meta.title || meta.document || ''}"`;
     case 'TERMS_REJECTED':
-      return `${meta.user_name} (${meta.email || meta.user_email || '—'}) rejected Terms ${meta.version} "${meta.title || meta.document || ''}"${meta.reason ? ` — ${meta.reason}` : ''}`;
+      return `Rejected Terms ${meta.version || ''} "${meta.title || meta.document || ''}"${meta.reason ? ` — ${meta.reason}` : ''}`;
     default:
       return '';
   }
@@ -272,7 +272,7 @@ export function AuditLogViewer({ onBack }: AuditLogViewerProps) {
                           {getMetaField(log, 'created_by') || getMetaField(log, 'assigned_by') || getMetaField(log, 'approved_by') || getMetaField(log, 'rejected_by') || getMetaField(log, 'removed_by') || getMetaField(log, 'deactivated_by') || getMetaField(log, 'activated_by') || getMetaField(log, 'sent_by') || getMetaField(log, 'updated_by') || getMetaField(log, 'submitted_by') || getMetaField(log, 'uploaded_by') || getMetaField(log, 'user_name') || '—'}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                          {email || '—'}
+                          {email || getMetaField(log, 'user_email') || '—'}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {supplierCode || '—'}
