@@ -24,8 +24,8 @@ export function useAuth() {
   const [authState, setAuthState] = useState<AuthState>(() => {
     const mockUser = mockUsers.find(u => u.id === currentMockUserId);
     return {
-      user: mockUser ? { id: mockUser.id, email: mockUser.email } : null,
-      session: mockUser ? { user: { id: mockUser.id, email: mockUser.email } } : null,
+      user: mockUser ? { id: mockUser.id, email: mockUser.email, fullName: mockUser.fullName } : null,
+      session: mockUser ? { user: { id: mockUser.id, email: mockUser.email, fullName: mockUser.fullName } } : null,
       role: mockUser?.role || null,
       loading: false,
     };
