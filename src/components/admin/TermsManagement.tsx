@@ -318,6 +318,13 @@ export function TermsManagement({ onBack }: TermsManagementProps) {
         </Button>
       </div>
 
+      <Tabs defaultValue="versions" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="versions">Versions</TabsTrigger>
+          <TabsTrigger value="acceptance-log">Acceptance Log</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="versions">
       <Card>
         <CardHeader><CardTitle>Version History</CardTitle></CardHeader>
         <CardContent>
