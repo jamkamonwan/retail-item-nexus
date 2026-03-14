@@ -131,7 +131,7 @@ export function TermsManagement({ onBack }: TermsManagementProps) {
       // Update version + attachments
       const { error } = await supabase
         .from('terms_versions')
-        .update({ ...formData, attachments })
+        .update({ ...formData, attachments: attachments as any })
         .eq('id', editingVersion.id);
       if (error) {
         toast.error('Failed to update');
