@@ -222,33 +222,41 @@ export function AuditLogViewer({ onBack }: AuditLogViewerProps) {
                     <TableHead className="w-[200px]">Event</TableHead>
                     <TableHead>Description</TableHead>
                     <TableHead className="w-[140px]">By</TableHead>
+                    <TableHead className="w-[200px]">Email</TableHead>
                     <TableHead className="w-[50px]" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {logs.map((log) => (
-                    <TableRow key={log.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setDetailLog(log)}>
-                      <TableCell className="text-xs text-muted-foreground font-mono">
-                        {format(new Date(log.created_at), 'yyyy-MM-dd HH:mm')}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary" className={`text-xs ${getEventBadgeClass(log.event_type)}`}>
-                          {log.event_type}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm max-w-[400px]">
-                        <span className="text-foreground">{getDescription(log)}</span>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {getMetaField(log, 'created_by') || getMetaField(log, 'assigned_by') || getMetaField(log, 'approved_by') || getMetaField(log, 'rejected_by') || getMetaField(log, 'removed_by') || getMetaField(log, 'deactivated_by') || getMetaField(log, 'activated_by') || getMetaField(log, 'sent_by') || getMetaField(log, 'updated_by') || getMetaField(log, 'submitted_by') || getMetaField(log, 'uploaded_by') || getMetaField(log, 'user_name') || '—'}
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="icon" className="h-7 w-7">
-                          <Eye className="h-3.5 w-3.5" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {logs.map((log) => {
+                    const meta = log.metadata as Record<string, unknown> | null;
+                    const email = (meta?.email as string) || '';
+                    return (
+                      <TableRow key={log.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setDetailLog(log)}>
+                        <TableCell className="text-xs text-muted-foreground font-mono">
+                          {format(new Date(log.created_at), 'yyyy-MM-dd HH:mm')}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary" className={`text-xs ${getEventBadgeClass(log.event_type)}`}>
+                            {log.event_type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm max-w-[400px]">
+                          <span className="text-foreground">{getDescription(log)}</span>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {getMetaField(log, 'created_by') || getMetaField(log, 'assigned_by') || getMetaField(log, 'approved_by') || getMetaField(log, 'rejected_by') || getMetaField(log, 'removed_by') || getMetaField(log, 'deactivated_by') || getMetaField(log, 'activated_by') || getMetaField(log, 'sent_by') || getMetaField(log, 'updated_by') || getMetaField(log, 'submitted_by') || getMetaField(log, 'uploaded_by') || getMetaField(log, 'user_name') || '—'}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {email || '—'}
+                        </TableCell>
+                        <TableCell>
+                          <Button variant="ghost" size="icon" className="h-7 w-7">
+                            <Eye className="h-3.5 w-3.5" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </ScrollArea>
