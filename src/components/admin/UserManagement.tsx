@@ -139,8 +139,8 @@ export function UserManagement({ onBack }: UserManagementProps) {
               Role: u.role,
               Status: u.status,
               Department: u.department || '',
-              'Supplier Code': u.supplierCode || '',
-              'Last Login': u.lastLogin ? new Date(u.lastLogin).toISOString() : '',
+               'Supplier': u.supplierName || '',
+               'Last Login': u.lastLoginAt ? new Date(u.lastLoginAt).toISOString() : '',
               'Created At': u.createdAt ? new Date(u.createdAt).toISOString() : '',
             }));
             exportToExcel(rows, `users-${new Date().toISOString().slice(0, 10)}`);
