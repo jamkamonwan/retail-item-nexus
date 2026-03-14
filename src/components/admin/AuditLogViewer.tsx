@@ -39,6 +39,66 @@ function getEventBadgeClass(eventType: string) {
   return EVENT_CATEGORY_COLORS[eventType] || 'bg-muted text-muted-foreground';
 }
 
+function getMetaField(log: AuditLogEntry, field: string): string {
+  const meta = log.metadata as Record<string, unknown> | null;
+  return (meta?.[field] as string) || '';
+}
+
+function getDescription(log: AuditLogEntry): string {
+  const meta = log.metadata as Record<string, unknown> | null;
+  if (!meta) return '';
+  
+  switch (log.event_type) {
+    case 'USER_CREATED':
+      return `Created ${meta.user_name} (${meta.email}) as ${meta.role}`;
+    case 'USER_ROLE_ASSIGNED':
+      if (meta.action === 'module_assigned') return `Assigned module "${meta.module_name}" to ${meta.user_name}`;
+      return `Assigned role "${meta.role}" to ${meta.user_name}`;
+    case 'USER_ROLE_REMOVED':
+      return `Removed role "${meta.role}" from ${meta.user_name}${meta.reason ? ` — ${meta.reason}` : ''}`;
+    case 'USER_INVITATION_SENT':
+      return `Invitation sent to ${meta.user_name} (${meta.email})`;
+    case 'USER_ACTIVATED':
+      return `Activated ${meta.user_name}${meta.reason ? ` — ${meta.reason}` : ''}`;
+    case 'USER_DEACTIVATED':
+      return `Deactivated ${meta.user_name}${meta.reason ? ` — ${meta.reason}` : ''}`;
+    case 'SUPPLIER_USER_ASSIGNED':
+      return `Assigned ${meta.user_name} to ${meta.supplier_name} (${meta.supplier_code})`;
+    case 'SUPPLIER_USER_REMOVED':
+      return `Removed ${meta.user_name} from ${meta.supplier_name}${meta.reason ? ` — ${meta.reason}` : ''}`;
+    case 'USER_LOGIN':
+      return `${meta.user_name} logged in`;
+    case 'FIRST_LOGIN':
+      return `First login by ${meta.user_name} (${meta.email})`;
+    case 'FAILED_LOGIN':
+      return `Failed login attempt for ${meta.email} — ${meta.reason}`;
+    case 'PASSWORD_RESET_REQUEST':
+      return `Password reset requested by ${meta.user_name}`;
+    case 'PASSWORD_RESET_SUCCESS':
+      return `Password reset completed for ${meta.user_name}`;
+    case 'TERMS_VIEWED':
+      return `${meta.user_name} viewed "${meta.document}" ${meta.version}`;
+    case 'TERMS_ACCEPTED':
+      return `${meta.user_name} accepted "${meta.document}" ${meta.version}`;
+    case 'TERMS_REJECTED':
+      return `${meta.user_name} rejected Terms ${meta.version}${meta.reason ? ` — ${meta.reason}` : ''}`;
+    case 'ITEM_CREATED':
+      return `Created item "${meta.product_name_en || meta.product_name}" by ${meta.created_by}`;
+    case 'ITEM_SUBMITTED':
+      return `Submitted "${meta.product_name}" for review`;
+    case 'ITEM_APPROVED':
+      return `"${meta.product_name}" approved by ${meta.approved_by} (${meta.approved_by_role})`;
+    case 'ITEM_REJECTED':
+      return `"${meta.product_name}" rejected by ${meta.rejected_by} — ${meta.reason}`;
+    case 'ITEM_UPDATED':
+      return `"${meta.product_name}" updated by ${meta.updated_by} — fields: ${Array.isArray(meta.fields_updated) ? (meta.fields_updated as string[]).join(', ') : ''}`;
+    case 'DOCUMENT_UPLOADED':
+      return `Uploaded "${meta.file_name}" (${meta.file_size_kb}KB) for ${meta.product_name}`;
+    default:
+      return '';
+  }
+}
+
 export function AuditLogViewer({ onBack }: AuditLogViewerProps) {
   const { logs, loading, filters, setFilters, page, setPage, pageSize, totalCount, refetch } = useAuditLogs();
   const [detailLog, setDetailLog] = useState<AuditLogEntry | null>(null);
@@ -158,38 +218,29 @@ export function AuditLogViewer({ onBack }: AuditLogViewerProps) {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[180px]">Timestamp</TableHead>
-                    <TableHead className="w-[220px]">Event</TableHead>
-                    <TableHead>Entity</TableHead>
-                    <TableHead>Actor</TableHead>
-                    <TableHead>Target</TableHead>
-                    <TableHead className="w-[60px]" />
+                    <TableHead className="w-[170px]">Timestamp</TableHead>
+                    <TableHead className="w-[200px]">Event</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead className="w-[140px]">By</TableHead>
+                    <TableHead className="w-[50px]" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {logs.map((log) => (
                     <TableRow key={log.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setDetailLog(log)}>
                       <TableCell className="text-xs text-muted-foreground font-mono">
-                        {format(new Date(log.created_at), 'yyyy-MM-dd HH:mm:ss')}
+                        {format(new Date(log.created_at), 'yyyy-MM-dd HH:mm')}
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary" className={`text-xs ${getEventBadgeClass(log.event_type)}`}>
                           {log.event_type}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-sm">
-                        {log.entity_type && (
-                          <span className="text-muted-foreground">
-                            {log.entity_type}
-                            {log.entity_id && <span className="font-mono ml-1">#{log.entity_id.substring(0, 8)}</span>}
-                          </span>
-                        )}
+                      <TableCell className="text-sm max-w-[400px]">
+                        <span className="text-foreground">{getDescription(log)}</span>
                       </TableCell>
-                      <TableCell className="text-xs font-mono text-muted-foreground">
-                        {log.actor_id ? log.actor_id.substring(0, 8) + '...' : '—'}
-                      </TableCell>
-                      <TableCell className="text-xs font-mono text-muted-foreground">
-                        {log.target_user_id ? log.target_user_id.substring(0, 8) + '...' : '—'}
+                      <TableCell className="text-sm text-muted-foreground">
+                        {getMetaField(log, 'created_by') || getMetaField(log, 'assigned_by') || getMetaField(log, 'approved_by') || getMetaField(log, 'rejected_by') || getMetaField(log, 'removed_by') || getMetaField(log, 'deactivated_by') || getMetaField(log, 'activated_by') || getMetaField(log, 'sent_by') || getMetaField(log, 'updated_by') || getMetaField(log, 'submitted_by') || getMetaField(log, 'uploaded_by') || getMetaField(log, 'user_name') || '—'}
                       </TableCell>
                       <TableCell>
                         <Button variant="ghost" size="icon" className="h-7 w-7">
