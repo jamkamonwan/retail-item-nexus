@@ -29,6 +29,11 @@ const EVENT_CATEGORY_COLORS: Record<string, string> = {
   USER_ROLE_REMOVED: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
   SUPPLIER_USER_ASSIGNED: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
   SUPPLIER_USER_REMOVED: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+  TERMS_CREATED: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200',
+  TERMS_UPDATED: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200',
+  TERMS_PUBLISHED: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  TERMS_ARCHIVED: 'bg-muted text-muted-foreground',
+  TERMS_VIEWED: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
   TERMS_ACCEPTED: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
   TERMS_REJECTED: 'bg-destructive/10 text-destructive',
 };
