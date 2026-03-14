@@ -305,6 +305,12 @@ export function AuditLogViewer({ onBack }: AuditLogViewerProps) {
                 <span className="text-muted-foreground font-medium">Entity ID:</span>
                 <span className="font-mono text-xs">{detailLog.entity_id || '—'}</span>
 
+                <span className="text-muted-foreground font-medium">Supplier Code:</span>
+                <span>{(detailLog.metadata as Record<string, unknown>)?.supplier_codes as string || (detailLog.metadata as Record<string, unknown>)?.supplier_code as string || '—'}</span>
+
+                <span className="text-muted-foreground font-medium">Supplier Partner:</span>
+                <span>{(detailLog.metadata as Record<string, unknown>)?.supplier_partner as string || '—'}</span>
+
                 <span className="text-muted-foreground font-medium">IP Address:</span>
                 <span className="font-mono text-xs">{detailLog.ip_address || '—'}</span>
 
