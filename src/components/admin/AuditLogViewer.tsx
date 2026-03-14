@@ -301,10 +301,10 @@ export function AuditLogViewer({ onBack }: AuditLogViewerProps) {
                           <span className="text-foreground">{getDescription(log)}</span>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                          {getMetaField(log, 'created_by') || getMetaField(log, 'assigned_by') || getMetaField(log, 'approved_by') || getMetaField(log, 'rejected_by') || getMetaField(log, 'removed_by') || getMetaField(log, 'deactivated_by') || getMetaField(log, 'activated_by') || getMetaField(log, 'sent_by') || getMetaField(log, 'updated_by') || getMetaField(log, 'submitted_by') || getMetaField(log, 'uploaded_by') || getMetaField(log, 'user_name') || '—'}
+                          {getActorDisplay(log)}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                          {email || getMetaField(log, 'user_email') || '—'}
+                          {getEmailDisplay(log)}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {supplierCode || '—'}
